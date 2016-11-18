@@ -53,7 +53,7 @@ public class AuthenticationClient {
    *
    * <p>User and password for the authentication are taken from the application's config.
    * 
-   * @return the authentication token 
+   * @return the authentication token
    * @throws IOException for network or other IO issues occur..
    * @throws CallErrorException for server and semantics errors.
    */

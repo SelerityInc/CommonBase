@@ -25,6 +25,7 @@ import com.seleritycorp.common.base.config.Config;
 import com.seleritycorp.common.base.config.ConfigUtils;
 import com.seleritycorp.common.base.logging.Log;
 import com.seleritycorp.common.base.logging.LogFactory;
+import com.seleritycorp.common.base.meta.MetaDataFormatter;
 import com.seleritycorp.common.base.uuid.UuidGenerator;
 import org.apache.commons.io.IOUtils;
 
@@ -55,11 +56,12 @@ public class RawCoreServiceClient {
    * 
    * @param appConfig The application config to use.
    * @param uuidGenerator Used for request ids.
+   * @param metaDataFormatter Formatter for the used user agent.
    * @throws MalformedURLException if the CoreServices URL is malformed
    */
   @Inject
-  public RawCoreServiceClient(@ApplicationConfig Config appConfig, UuidGenerator uuidGenerator)
-      throws MalformedURLException {
+  public RawCoreServiceClient(@ApplicationConfig Config appConfig, UuidGenerator uuidGenerator,
+      MetaDataFormatter metaDataFormatter) throws MalformedURLException {
     this.uuidGenerator = uuidGenerator;
     Config config = ConfigUtils.subconfig(appConfig, "CoreServices");
     apiUrl = new URL(config.get("url"));
@@ -69,7 +71,7 @@ public class RawCoreServiceClient {
     TimeUnit timeoutUnit = TimeUnit.valueOf(config.get("timeoutUnit", "SECONDS"));
     this.timeoutMillis = (int) timeoutUnit.toMillis(timeout);
 
-    this.client = "RdsDataDownloader";
+    this.client = metaDataFormatter.getUserAgent();
   }
 
   private String getRawResponse(String rawRequest, int timeoutMillis) throws IOException {
@@ -108,9 +110,7 @@ public class RawCoreServiceClient {
     if (token != null) {
       header.addProperty("token", token);
     }
-    if (client != null) {
-      header.addProperty("client", client);
-    }
+    header.addProperty("client", client);
 
     JsonObject request = new JsonObject();
     request.addProperty("id", uuidGenerator.generate().toString());
