@@ -76,6 +76,7 @@ public class RawCoreServiceClient {
     URLConnection connection = apiUrl.openConnection();
     connection.setRequestProperty("Accept", "text/plain");
     connection.setRequestProperty("Content-type", "application/json");
+    connection.setRequestProperty("User-Agent", client);
     connection.setDoOutput(true);
     connection.setReadTimeout(timeoutMillis);
 
