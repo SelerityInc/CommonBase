@@ -24,7 +24,6 @@ import com.seleritycorp.common.base.config.ConfigUtils;
 import com.seleritycorp.common.base.time.Clock;
 
 import java.io.IOException;
-import java.util.concurrent.TimeUnit;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
@@ -53,9 +52,7 @@ public class RawAuthenticatedCoreServiceClient {
     this.clock = clock;
 
     Config config = ConfigUtils.subconfig(appConfig, "CoreServices");
-    int tokenTimeoutPeriod = config.getInt("tokenTimeout", 180);
-    TimeUnit tokenTimeoutPeriodUnit = TimeUnit.valueOf(config.get("tokenTimeoutUnit", "SECONDS"));
-    this.tokenTimeoutPeriodSeconds = tokenTimeoutPeriodUnit.toSeconds(tokenTimeoutPeriod);
+    this.tokenTimeoutPeriodSeconds = config.getDurationSeconds("tokenTimeout", 180);
 
     this.token = null;
     this.tokenTimeoutTimestamp = 0;

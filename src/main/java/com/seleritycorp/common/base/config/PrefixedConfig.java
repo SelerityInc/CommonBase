@@ -16,6 +16,8 @@
 
 package com.seleritycorp.common.base.config;
 
+import java.util.concurrent.TimeUnit;
+
 /**
  * View on a Config at a given prefix.
  */
@@ -93,4 +95,45 @@ public class PrefixedConfig implements Config {
   public boolean getBoolean(String key, boolean defaultValue) {
     return config.getBoolean(prefix + key, defaultValue);
   }
+
+  @Override
+  public <T extends Enum<T>> T getEnum(Class<T> clazz, String key) {
+    return config.getEnum(clazz, prefix + key);
+  }
+
+  @Override
+  public <T extends Enum<T>> T getEnum(Class<T> clazz, String key, T defaultValue) {
+    return config.getEnum(clazz, prefix + key, defaultValue);
+  }
+
+  @Override
+  public long getDurationMillis(String key) {
+    return config.getDurationMillis(prefix + key);
+  }
+
+  @Override
+  public long getDurationMillis(String key, long defaultDuration) {
+    return config.getDurationMillis(prefix + key, defaultDuration);
+  }
+
+  @Override
+  public long getDurationMillis(String key, long defaultDuration, TimeUnit defaultUnit) {
+    return config.getDurationMillis(prefix + key, defaultDuration, defaultUnit);
+  }
+
+  @Override
+  public long getDurationSeconds(String key) {
+    return config.getDurationSeconds(prefix + key);
+  }
+
+  @Override
+  public long getDurationSeconds(String key, long defaultDuration) {
+    return config.getDurationSeconds(prefix + key, defaultDuration);
+  }
+
+  @Override
+  public long getDurationSeconds(String key, long defaultDuration, TimeUnit defaultUnit) {
+    return config.getDurationSeconds(prefix + key, defaultDuration, defaultUnit);
+  }
+
 }

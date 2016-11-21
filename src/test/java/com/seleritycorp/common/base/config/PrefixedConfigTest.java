@@ -22,6 +22,8 @@ import static org.easymock.EasyMock.expect;
 import org.easymock.EasyMockSupport;
 import org.junit.Test;
 
+import java.util.concurrent.TimeUnit;
+
 public class PrefixedConfigTest extends EasyMockSupport {
   @Test
   public void testGet() {
@@ -213,5 +215,133 @@ public class PrefixedConfigTest extends EasyMockSupport {
     verifyAll();
 
     assertThat(actual).isFalse();
+  }
+
+  @Test
+  public void testGetEnum() {
+    Config config = createMock(Config.class);
+    Config subconfig = new PrefixedConfig(config, "foo");
+
+    expect(config.getEnum(TimeUnit.class, "foo.bar")).andReturn(TimeUnit.HOURS).once();
+
+    replayAll();
+
+    TimeUnit actual = subconfig.getEnum(TimeUnit.class, "bar");
+
+    verifyAll();
+
+    assertThat(actual).isSameAs(TimeUnit.HOURS);
+  }
+
+  @Test
+  public void testGetEnumDefault() {
+    Config config = createMock(Config.class);
+    Config subconfig = new PrefixedConfig(config, "foo");
+
+    expect(config.getEnum(TimeUnit.class, "foo.bar", TimeUnit.DAYS)).andReturn(TimeUnit.HOURS);
+
+    replayAll();
+
+    TimeUnit actual = subconfig.getEnum(TimeUnit.class, "bar", TimeUnit.DAYS);
+
+    verifyAll();
+
+    assertThat(actual).isSameAs(TimeUnit.HOURS);
+  }
+
+  @Test
+  public void testGetDurationSeconds() {
+    Config config = createMock(Config.class);
+    Config subconfig = new PrefixedConfig(config, "foo");
+
+    expect(config.getDurationSeconds("foo.bar")).andReturn(42L).once();
+
+    replayAll();
+
+    long actual = subconfig.getDurationSeconds("bar");
+
+    verifyAll();
+
+    assertThat(actual).isEqualTo(42L);
+  }
+
+  @Test
+  public void testGetDurationSecondsDefaultDuration() {
+    Config config = createMock(Config.class);
+    Config subconfig = new PrefixedConfig(config, "foo");
+
+    expect(config.getDurationSeconds("foo.bar", 2)).andReturn(42L).once();
+
+    replayAll();
+
+    long actual = subconfig.getDurationSeconds("bar", 2);
+
+    verifyAll();
+
+    assertThat(actual).isEqualTo(42L);
+  }
+
+  @Test
+  public void testGetDurationSecondsDefaultDurationAndUnit() {
+    Config config = createMock(Config.class);
+    Config subconfig = new PrefixedConfig(config, "foo");
+
+    expect(config.getDurationSeconds("foo.bar", 2, TimeUnit.DAYS)).andReturn(42L).once();
+
+    replayAll();
+
+    long actual = subconfig.getDurationSeconds("bar", 2, TimeUnit.DAYS);
+
+    verifyAll();
+
+    assertThat(actual).isEqualTo(42L);
+  }
+
+  @Test
+  public void testGetDurationMillis() {
+    Config config = createMock(Config.class);
+    Config subconfig = new PrefixedConfig(config, "foo");
+
+    expect(config.getDurationMillis("foo.bar")).andReturn(42L).once();
+
+    replayAll();
+
+    long actual = subconfig.getDurationMillis("bar");
+
+    verifyAll();
+
+    assertThat(actual).isEqualTo(42L);
+  }
+
+  @Test
+  public void testGetDurationMillisDefaultDuration() {
+    Config config = createMock(Config.class);
+    Config subconfig = new PrefixedConfig(config, "foo");
+
+    expect(config.getDurationMillis("foo.bar", 2)).andReturn(42L).once();
+
+    replayAll();
+
+    long actual = subconfig.getDurationMillis("bar", 2);
+
+    verifyAll();
+
+    assertThat(actual).isEqualTo(42L);
+  }
+
+  @Test
+  public void testGetDurationMillisDefaultDurationAndUnit() {
+    Config config = createMock(Config.class);
+    Config subconfig = new PrefixedConfig(config, "foo");
+
+    expect(config.getDurationMillis("foo.bar", 2, TimeUnit.DAYS)).andReturn(42L).once();
+
+    replayAll();
+
+    long actual = subconfig.getDurationMillis("bar", 2, TimeUnit.DAYS);
+
+    verifyAll();
+
+    assertThat(actual).isEqualTo(42L);
   }
 }

@@ -67,9 +67,7 @@ public class RawCoreServiceClient {
     apiUrl = new URL(config.get("url"));
     this.user = config.get("user");
 
-    int timeout = config.getInt("timeout", 300);
-    TimeUnit timeoutUnit = TimeUnit.valueOf(config.get("timeoutUnit", "SECONDS"));
-    this.timeoutMillis = (int) timeoutUnit.toMillis(timeout);
+    this.timeoutMillis = (int) config.getDurationMillis("timeout", 300, TimeUnit.SECONDS);
 
     this.client = metaDataFormatter.getUserAgent();
   }

@@ -21,6 +21,8 @@ import com.seleritycorp.common.base.logging.LogFactory;
 
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.TimeUnit;
+
 import javax.annotation.Nullable;
 
 /**
@@ -198,6 +200,74 @@ public class ConfigImpl implements Config {
           ret = (doubleValue != 0);
         }
       }
+    }
+    return ret;
+  }
+
+  @Override
+  public <T extends Enum<T>> T getEnum(Class<T> clazz, String key) {
+    return getEnum(clazz, key, null);
+  }
+
+  @Override
+  public <T extends Enum<T>> T getEnum(Class<T> clazz, String key, T defaultValue) {
+    T ret = null;
+    String value = get(key);
+    if (value == null) {
+      ret = defaultValue;
+    } else {
+      try {
+        ret = Enum.valueOf(clazz, value);
+      } catch (IllegalArgumentException e) {
+        log.error("Value at \"" + key + "\" does not parse to a " + clazz + ".", e);
+        ret = defaultValue;
+      }
+    }
+    return ret;
+  }
+
+  @Override
+  public long getDurationMillis(String key) {
+    return getDurationMillis(key, 0L);
+  }
+
+  @Override
+  public long getDurationMillis(String key, long defaultDuration) {
+    return getDurationMillis(key, defaultDuration, TimeUnit.MILLISECONDS);
+  }
+
+  @Override
+  public long getDurationMillis(String key, long defaultDuration, TimeUnit defaultUnit) {
+    long ret = 0;
+    long duration = getLong(key, defaultDuration);
+    TimeUnit unit = getEnum(TimeUnit.class, key + "Unit", defaultUnit);
+    if (unit == null) {
+      ret = 0;
+    } else {
+      ret = unit.toMillis(duration);
+    }
+    return ret;
+  }
+
+  @Override
+  public long getDurationSeconds(String key) {
+    return getDurationSeconds(key, 0L);
+  }
+
+  @Override
+  public long getDurationSeconds(String key, long defaultDuration) {
+    return getDurationSeconds(key, defaultDuration, TimeUnit.SECONDS);
+  }
+
+  @Override
+  public long getDurationSeconds(String key, long defaultDuration, TimeUnit defaultUnit) {
+    long ret = 0;
+    long duration = getLong(key, defaultDuration);
+    TimeUnit unit = getEnum(TimeUnit.class, key + "Unit", defaultUnit);
+    if (unit == null) {
+      ret = 0;
+    } else {
+      ret = unit.toSeconds(duration);
     }
     return ret;
   }

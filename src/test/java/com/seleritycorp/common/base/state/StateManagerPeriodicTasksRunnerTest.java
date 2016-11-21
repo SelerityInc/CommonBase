@@ -42,7 +42,7 @@ public class StateManagerPeriodicTasksRunnerTest extends InjectingTestCase {
     appStateManager = createMock(AppStateManager.class);
     haStateManager = createMock(HaStateManager.class);
     config = new SettableConfig();
-    config.setInt("StateManagerPeriodicTasksRunner.pauseMillis", 100);
+    config.setInt("StateManagerPeriodicTasksRunner.pause", 100);
 
     Injector injector = InjectorFactory.getInjector();
     timeUtils = injector.getInstance(TimeUtilsSettableClock.class);

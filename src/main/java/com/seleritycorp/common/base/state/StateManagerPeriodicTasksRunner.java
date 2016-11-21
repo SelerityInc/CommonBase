@@ -71,7 +71,7 @@ public class StateManagerPeriodicTasksRunner implements Runnable {
     this.appStateManager = appStateManager;
     this.haStateManager = haStateManager;
     this.timeUtils = timeUtils;
-    this.pauseMillis = config.getInt("StateManagerPeriodicTasksRunner.pauseMillis", 2000);
+    this.pauseMillis = config.getDurationMillis("StateManagerPeriodicTasksRunner.pause", 2000);
     stop();
   }
 

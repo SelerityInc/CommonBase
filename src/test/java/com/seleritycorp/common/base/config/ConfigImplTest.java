@@ -20,6 +20,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import org.junit.Test;
 
+import java.util.concurrent.TimeUnit;
+
 public class ConfigImplTest {
   @Test
   public void testGetNotExisting() {
@@ -717,5 +719,285 @@ public class ConfigImplTest {
     String actual = config.get("foo", "quux");
 
     assertThat(actual).isEqualTo("quux");
+  }
+
+  @Test
+  public void testGetEnumOkNoDefault() {
+    ConfigImpl config = new ConfigImpl();
+
+    config.set("foo", "MINUTES");
+
+    TimeUnit actual = config.getEnum(TimeUnit.class, "foo");
+
+    assertThat(actual).isSameAs(TimeUnit.MINUTES);
+  }
+
+  @Test
+  public void testGetEnumNullNoDefault() {
+    ConfigImpl config = new ConfigImpl();
+
+    TimeUnit actual = config.getEnum(TimeUnit.class, "foo");
+
+    assertThat(actual).isNull();
+  }
+
+  @Test
+  public void testGetEnumUnparsableNoDefault() {
+    ConfigImpl config = new ConfigImpl();
+
+    config.set("foo", "bar");
+
+    TimeUnit actual = config.getEnum(TimeUnit.class, "foo");
+
+    assertThat(actual).isNull();
+  }
+
+  @Test
+  public void testGetEnumOkWDefault() {
+    ConfigImpl config = new ConfigImpl();
+
+    config.set("foo", "MINUTES");
+
+    TimeUnit actual = config.getEnum(TimeUnit.class, "foo", TimeUnit.HOURS);
+
+    assertThat(actual).isSameAs(TimeUnit.MINUTES);
+  }
+
+  @Test
+  public void testGetEnumNullWDefault() {
+    ConfigImpl config = new ConfigImpl();
+
+    TimeUnit actual = config.getEnum(TimeUnit.class, "foo", TimeUnit.HOURS);
+
+    assertThat(actual).isSameAs(TimeUnit.HOURS);
+  }
+
+  @Test
+  public void testGetEnumUnparsableWDefault() {
+    ConfigImpl config = new ConfigImpl();
+
+    config.set("foo", "bar");
+
+    TimeUnit actual = config.getEnum(TimeUnit.class, "foo", TimeUnit.HOURS);
+
+    assertThat(actual).isSameAs(TimeUnit.HOURS);
+  }
+
+  @Test
+  public void testGetDurationSecondsOkWOUnit() {
+    ConfigImpl config = new ConfigImpl();
+
+    config.set("foo", "42");
+
+    long actual = config.getDurationSeconds("foo");
+
+    assertThat(actual).isEqualTo(42);
+  }
+
+  @Test
+  public void testGetDurationSecondsOkWUnit() {
+    ConfigImpl config = new ConfigImpl();
+
+    config.set("foo", "1");
+    config.set("fooUnit", "HOURS");
+
+    long actual = config.getDurationSeconds("foo");
+
+    assertThat(actual).isEqualTo(3600);
+  }
+
+  @Test
+  public void testGetDurationSecondsDefaultDurationOkUnusedDefaultWOUnit() {
+    ConfigImpl config = new ConfigImpl();
+
+    config.set("foo", "42");
+
+    long actual = config.getDurationSeconds("foo", 12);
+
+    assertThat(actual).isEqualTo(42);
+  }
+
+  @Test
+  public void testGetDurationSecondsDefaultDurationOkUnusedDefaultWUnit() {
+    ConfigImpl config = new ConfigImpl();
+
+    config.set("foo", "1");
+    config.set("fooUnit", "HOURS");
+
+    long actual = config.getDurationSeconds("foo", 12);
+
+    assertThat(actual).isEqualTo(3600);
+  }
+
+  @Test
+  public void testGetDurationSecondsDefaultDurationOkUsedDefaultWUnit() {
+    ConfigImpl config = new ConfigImpl();
+
+    config.set("fooUnit", "HOURS");
+
+    long actual = config.getDurationSeconds("foo", 2);
+
+    assertThat(actual).isEqualTo(7200);
+  }
+
+  @Test
+  public void testGetDurationSeconds2DefaultsOkUnusedDefaults() {
+    ConfigImpl config = new ConfigImpl();
+
+    config.set("foo", "1");
+    config.set("fooUnit", "HOURS");
+
+    long actual = config.getDurationSeconds("foo", 2, TimeUnit.DAYS);
+
+    assertThat(actual).isEqualTo(3600);
+  }
+
+  @Test
+  public void testGetDurationSeconds2DefaultsOkDefaultDuration() {
+    ConfigImpl config = new ConfigImpl();
+
+    config.set("fooUnit", "HOURS");
+
+    long actual = config.getDurationSeconds("foo", 2, TimeUnit.DAYS);
+
+    assertThat(actual).isEqualTo(7200);
+  }
+
+  @Test
+  public void testGetDurationSeconds2DefaultsOkDefaultUnit() {
+    ConfigImpl config = new ConfigImpl();
+
+    config.set("foo", "1");
+
+    long actual = config.getDurationSeconds("foo", 2, TimeUnit.HOURS);
+
+    assertThat(actual).isEqualTo(3600);
+  }
+
+  @Test
+  public void testGetDurationSeconds2DefaultsOkBothDefaults() {
+    ConfigImpl config = new ConfigImpl();
+
+    long actual = config.getDurationSeconds("foo", 2, TimeUnit.HOURS);
+
+    assertThat(actual).isEqualTo(7200);
+  }
+
+  @Test
+  public void testGetDurationSeconds2DefaultsOkNullDefaultUnit() {
+    ConfigImpl config = new ConfigImpl();
+
+    long actual = config.getDurationSeconds("foo", 2, null);
+
+    assertThat(actual).isEqualTo(0);
+  }
+
+  @Test
+  public void testGetDurationMillisOkWOUnit() {
+    ConfigImpl config = new ConfigImpl();
+
+    config.set("foo", "42");
+
+    long actual = config.getDurationMillis("foo");
+
+    assertThat(actual).isEqualTo(42);
+  }
+
+  @Test
+  public void testGetDurationMillisOkWUnit() {
+    ConfigImpl config = new ConfigImpl();
+
+    config.set("foo", "1");
+    config.set("fooUnit", "SECONDS");
+
+    long actual = config.getDurationMillis("foo");
+
+    assertThat(actual).isEqualTo(1000);
+  }
+
+  @Test
+  public void testGetDurationMillisDefaultDurationOkUnusedDefaultWOUnit() {
+    ConfigImpl config = new ConfigImpl();
+
+    config.set("foo", "42");
+
+    long actual = config.getDurationMillis("foo", 12);
+
+    assertThat(actual).isEqualTo(42);
+  }
+
+  @Test
+  public void testGetDurationMillisDefaultDurationOkUnusedDefaultWUnit() {
+    ConfigImpl config = new ConfigImpl();
+
+    config.set("foo", "1");
+    config.set("fooUnit", "SECONDS");
+
+    long actual = config.getDurationMillis("foo", 12);
+
+    assertThat(actual).isEqualTo(1000);
+  }
+
+  @Test
+  public void testGetDurationMillisDefaultDurationOkUsedDefaultWUnit() {
+    ConfigImpl config = new ConfigImpl();
+
+    config.set("fooUnit", "SECONDS");
+
+    long actual = config.getDurationMillis("foo", 2);
+
+    assertThat(actual).isEqualTo(2000);
+  }
+
+  @Test
+  public void testGetDurationMillis2DefaultsOkUnusedDefaults() {
+    ConfigImpl config = new ConfigImpl();
+
+    config.set("foo", "1");
+    config.set("fooUnit", "SECONDS");
+
+    long actual = config.getDurationMillis("foo", 2, TimeUnit.DAYS);
+
+    assertThat(actual).isEqualTo(1000);
+  }
+
+  @Test
+  public void testGetDurationMillis2DefaultsOkDefaultDuration() {
+    ConfigImpl config = new ConfigImpl();
+
+    config.set("fooUnit", "SECONDS");
+
+    long actual = config.getDurationMillis("foo", 2, TimeUnit.DAYS);
+
+    assertThat(actual).isEqualTo(2000);
+  }
+
+  @Test
+  public void testGetDurationMillis2DefaultsOkDefaultUnit() {
+    ConfigImpl config = new ConfigImpl();
+
+    config.set("foo", "1");
+
+    long actual = config.getDurationMillis("foo", 2, TimeUnit.SECONDS);
+
+    assertThat(actual).isEqualTo(1000);
+  }
+
+  @Test
+  public void testGetDurationMillis2DefaultsOkBothDefaults() {
+    ConfigImpl config = new ConfigImpl();
+
+    long actual = config.getDurationMillis("foo", 2, TimeUnit.SECONDS);
+
+    assertThat(actual).isEqualTo(2000);
+  }
+
+  @Test
+  public void testGetDurationMillis2DefaultsOkNullDefaultUnit() {
+    ConfigImpl config = new ConfigImpl();
+
+    long actual = config.getDurationMillis("foo", 2, null);
+
+    assertThat(actual).isEqualTo(0);
   }
 }

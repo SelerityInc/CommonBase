@@ -16,6 +16,8 @@
 
 package com.seleritycorp.common.base.config;
 
+import java.util.concurrent.TimeUnit;
+
 /**
  * Accessor for Configuration data.
  */
@@ -127,4 +129,108 @@ public interface Config {
    *         returned.
    */
   public boolean getBoolean(String key, boolean defaultValue);
+
+  /**
+   * Gets the value ot the given key as enum.
+   * 
+   * @param <T> enum to parse.
+   * @param clazz class of the enum to parse.
+   * @param key key to get the value for
+   * @return the value at the given key as clazz. If there is no value for the given key, null is
+   *         returned.
+   */
+  public <T extends Enum<T>> T getEnum(Class<T> clazz, String key);
+
+  /**
+   * Gets the value ot the given key as enum with default.
+   * 
+   * @param <T> enum to parse.
+   * @param clazz class of the enum to parse.
+   * @param key key to get the value for
+   * @param defaultValue default value to use if there is no value at key
+   * @return the value at the given key as clazz. If there is no value for the given key,
+   *         defaultValue is
+   *         returned.
+   */
+  public <T extends Enum<T>> T getEnum(Class<T> clazz, String key, T defaultValue);
+
+  /**
+   * Gets the a duration as milliseconds.
+   * 
+   * <p>If there is no value at key, it is assumed to be 0.
+   *
+   * <p>If there is a value at (key + "Unit), it automatically will get picked up and interpreted
+   * as time unit for the value at key. If there is no value at (key + "Unit"), it is assumed to
+   * be MILLISECONDS.
+   * 
+   * @param key key to get the value for
+   * @return the duration converted to milliseconds
+   */
+  long getDurationMillis(String key);
+
+  /**
+   * Gets the a duration as milliseconds.
+   * 
+   * <p>If there is a value at (key + "Unit), it automatically will get picked up and interpreted
+   * as time unit for the value at key. If there is no value at (key + "Unit"), it is assumed to
+   * be MILLISECONDS.
+   * 
+   * @param key key to get the value for
+   * @param defaultDuration default value to use if there is no value at key.
+   * @return the duration converted to milliseconds
+   */
+  long getDurationMillis(String key, long defaultDuration);
+
+  /**
+   * Gets the a duration as milliseconds.
+   * 
+   * <p>If there is a value at (key + "Unit), it automatically will get picked up and interpreted
+   * as time unit for the value at key.
+   * 
+   * @param key key to get the value for
+   * @param defaultDuration default value to use if there is no value at key.
+   * @param defaultUnit Default time unit to interpret the value at key (or defaultDuration) as.
+   * @return the duration converted to milliseconds
+   */
+  long getDurationMillis(String key, long defaultDuration, TimeUnit defaultUnit);
+
+  /**
+   * Gets the a duration as seconds.
+   * 
+   * <p>If there is no value at key, it is assumed to be 0.
+   *
+   * <p>If there is a value at (key + "Unit), it automatically will get picked up and interpreted
+   * as time unit for the value at key. If there is no value at (key + "Unit"), it is assumed to
+   * be SECONDS.
+   * 
+   * @param key key to get the value for
+   * @return the duration converted to seconds
+   */
+  long getDurationSeconds(String key);
+
+  /**
+   * Gets the a duration as seconds.
+   * 
+   * <p>If there is a value at (key + "Unit), it automatically will get picked up and interpreted
+   * as time unit for the value at key. If there is no value at (key + "Unit"), it is assumed to
+   * be SECONDS.
+   * 
+   * @param key key to get the value for
+   * @param defaultDuration default value to use if there is no value at key.
+   * @return the duration converted to seconds
+   */
+  long getDurationSeconds(String key, long defaultDuration);
+
+  /**
+   * Gets the a duration as seconds.
+   * 
+   * <p>If there is a value at (key + "Unit), it automatically will get picked up and interpreted
+   * as time unit for the value at key.
+   * 
+   * @param key key to get the value for
+   * @param defaultDuration default value to use if there is no value at key.
+   * @param defaultUnit Default time unit to interpret the value at key (or defaultDuration) as.
+   * @return the duration converted to seconds
+   */
+  long getDurationSeconds(String key, long defaultDuration, TimeUnit defaultUnit);
 }
