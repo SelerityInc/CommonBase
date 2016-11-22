@@ -117,7 +117,7 @@ public class BuildProperties {
   }
 
   public String getGitDescription() {
-    return getProperty("git.hash.abbreviated");
+    return getProperty("git.description");
   }
 
   public String getBuildTime() {
