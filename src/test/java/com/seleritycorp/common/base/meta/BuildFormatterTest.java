@@ -46,7 +46,7 @@ public class BuildFormatterTest {
   public void testGetGitDescription() {
     BuildProperties props = createBuildProperties();
 
-    assertThat(props.getGitDescription()).matches(".*-g[0-9a-f]{7}(-dirty)?");
+    assertThat(props.getGitDescription()).matches("(.*-g)?[0-9a-f]{7}(-dirty)?");
   }
 
   @Test
