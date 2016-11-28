@@ -5,6 +5,8 @@ Common base functionality for Selerity java software packages.
 * [JavaDoc](#javadoc)
 * [Questions/Support](#questionssupport)
 
+[![Build Status](https://travis-ci.org/SelerityInc/CommonBase.svg?branch=master)](https://travis-ci.org/SelerityInc/CommonBase)
+
 ## JavaDoc
 
 JavaDoc for this package is available at https://doc.seleritycorp.com/javadoc/com.seleritycorp.common.base/CommonBase/master/
