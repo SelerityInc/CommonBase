@@ -18,12 +18,15 @@ package com.seleritycorp.common.base.time;
 
 import static com.google.inject.Scopes.SINGLETON;
 
+import com.google.common.base.Ticker;
+
 import com.seleritycorp.common.base.inject.FactoryModule;
 
 public class TimeModule extends FactoryModule {
   @Override
   protected void configure() {
-    bind(Clock.class).to(ClockImpl.class).in(SINGLETON);
+    bind(Clock.class).to(ClockImpl.class);
+    bind(Ticker.class).to(ClockImpl.class);
     bind(TimeUtils.class).to(TimeUtilsImpl.class).in(SINGLETON);
   }
 }

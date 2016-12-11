@@ -16,7 +16,12 @@
 
 package com.seleritycorp.common.base.time;
 
-public class ClockImpl implements Clock {
+import com.google.common.base.Ticker;
+
+import javax.inject.Singleton;
+
+@Singleton
+public class ClockImpl extends Ticker implements Clock {
   long nanoOffsetEpoch;
 
   public ClockImpl() {
@@ -36,5 +41,10 @@ public class ClockImpl implements Clock {
   @Override
   public long getNanosEpoch() {
     return nanoOffsetEpoch + System.nanoTime();
+  }
+
+  @Override
+  public long read() {
+    return getNanosEpoch();
   }
 }

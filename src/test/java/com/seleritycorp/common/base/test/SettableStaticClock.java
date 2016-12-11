@@ -16,9 +16,10 @@
 
 package com.seleritycorp.common.base.test;
 
+import com.google.common.base.Ticker;
 import com.seleritycorp.common.base.time.Clock;
 
-public class SettableStaticClock implements Clock {
+public class SettableStaticClock extends Ticker implements Clock {
   long nanos;
 
   public SettableStaticClock() {
@@ -38,6 +39,11 @@ public class SettableStaticClock implements Clock {
   @Override
   public long getNanosEpoch() {
     return nanos;
+  }
+
+  @Override
+  public long read() {
+    return getNanosEpoch();
   }
 
   /**

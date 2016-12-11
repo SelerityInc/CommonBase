@@ -79,4 +79,16 @@ public class ClockImplTest {
 
     assertThat(ts1).isLessThan(ts2);
   }
+
+  @Test
+  public void testReadRange() {
+    ClockImpl clock = new ClockImpl();
+
+    long lowMark = System.currentTimeMillis();
+    long actual = clock.read();
+    long highMark = System.currentTimeMillis();
+
+    assertThat(actual / 1000000L).isBetween(lowMark, highMark);
+  }
+
 }

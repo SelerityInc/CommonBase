@@ -18,6 +18,7 @@ package com.seleritycorp.common.base.test;
 
 import java.nio.file.Path;
 
+import com.google.common.base.Ticker;
 import com.seleritycorp.common.base.config.AbstractBaseModule;
 import com.seleritycorp.common.base.config.ApplicationPath;
 import com.seleritycorp.common.base.time.Clock;
@@ -44,6 +45,7 @@ public class TestModule extends AbstractBaseModule {
     bind(Path.class).annotatedWith(ApplicationPath.class).toInstance(applicationPath);
     bind(Clock.class).toInstance(clock);
     bind(SettableStaticClock.class).toInstance(clock);
+    bind(Ticker.class).toInstance(clock);
     bind(TimeUtils.class).to(TimeUtilsSettableClock.class);
     bind(UuidGenerator.class).toInstance(uuidGenerator);
   }
