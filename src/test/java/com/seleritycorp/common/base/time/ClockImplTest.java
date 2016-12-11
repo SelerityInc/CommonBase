@@ -18,32 +18,28 @@ package com.seleritycorp.common.base.time;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import org.junit.Before;
 import org.junit.Test;
 
 public class ClockImplTest {
-  private long delta;
-
-  @Before
-  public void setUp() {
-    delta = 2000; // 2 seconds
-  }
-
   @Test
   public void testGetMillisEpochRange() {
+    long deltaMillis = 2000;
     ClockImpl clock = new ClockImpl();
 
-    long expected = System.currentTimeMillis();
-    long actual = clock.getMillisEpoch();
+    long expectedMillis = System.currentTimeMillis();
+    long actualMillis = clock.getMillisEpoch();
 
-    assertThat(actual).isBetween(expected - delta, expected + delta);
+    long lowMillis = expectedMillis - deltaMillis;
+    long highMillis = expectedMillis + deltaMillis;
+    assertThat(actualMillis).isBetween(lowMillis, highMillis);
   }
 
   @Test
   public void testGetMillisEpochIncreasing() throws InterruptedException {
+    long deltaMillis = 2000;
     ClockImpl clock = new ClockImpl();
 
-    long ts1 = clock.getMillisEpoch();
+    long millisBefore = clock.getMillisEpoch();
 
     long end = System.currentTimeMillis() + 100;
     while (System.currentTimeMillis() < end) {
@@ -54,20 +50,21 @@ public class ClockImplTest {
       }
     }
 
-    long ts2 = clock.getMillisEpoch();
+    long millisAfter = clock.getMillisEpoch();
 
-    assertThat(ts2 - ts1).isBetween(100L, 100L + delta);
+    assertThat(millisAfter - millisBefore).isBetween(100L, 100L + deltaMillis);
   }
 
   @Test
   public void testGetNanosEpochRange() {
+    long deltaMillis = 10;
     ClockImpl clock = new ClockImpl();
 
-    long lowMark = System.currentTimeMillis();
-    long actual = clock.getNanosEpoch();
-    long highMark = System.currentTimeMillis();
+    long lowMillis = System.currentTimeMillis() - deltaMillis;
+    long actualNanos = clock.getNanosEpoch();
+    long highMillis = System.currentTimeMillis() + deltaMillis;
 
-    assertThat(actual / 1000000L).isBetween(lowMark, highMark);
+    assertThat(actualNanos / 1000000L).isBetween(lowMillis, highMillis);
   }
 
   @Test
@@ -82,13 +79,14 @@ public class ClockImplTest {
 
   @Test
   public void testReadRange() {
+    long deltaMillis = 10;
     ClockImpl clock = new ClockImpl();
 
-    long lowMark = System.currentTimeMillis();
-    long actual = clock.read();
-    long highMark = System.currentTimeMillis();
+    long lowMillis = System.currentTimeMillis() - deltaMillis;
+    long actualNanos = clock.read();
+    long highMillis = System.currentTimeMillis() + deltaMillis;
 
-    assertThat(actual / 1000000L).isBetween(lowMark, highMark);
+    assertThat(actualNanos / 1000000L).isBetween(lowMillis, highMillis);
   }
 
 }
