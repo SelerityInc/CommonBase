@@ -16,16 +16,21 @@
 
 package com.seleritycorp.common.base.config;
 
-import static com.google.inject.Scopes.SINGLETON;
+import static java.lang.annotation.ElementType.FIELD;
+import static java.lang.annotation.ElementType.METHOD;
+import static java.lang.annotation.ElementType.PARAMETER;
+import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
-import com.google.inject.AbstractModule;
+import com.google.inject.BindingAnnotation;
 
-public class ConfigModule extends AbstractModule {
-  @Override
-  protected void configure() {
-    bind(Config.class).annotatedWith(ApplicationConfig.class)
-        .toProvider(ApplicationConfigProvider.class).in(SINGLETON);
-    bind(Config.class).annotatedWith(EnvironmentConfig.class)
-        .toProvider(EnvironmentConfigProvider.class).in(SINGLETON);
-  }
+import java.lang.annotation.Retention;
+import java.lang.annotation.Target;
+
+/**
+ * Marks a {@code Config} instance as wrapper for environment variables.
+ */
+@BindingAnnotation
+@Target({FIELD, PARAMETER, METHOD})
+@Retention(RUNTIME)
+public @interface EnvironmentConfig {
 }

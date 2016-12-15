@@ -16,16 +16,12 @@
 
 package com.seleritycorp.common.base.config;
 
-import static com.google.inject.Scopes.SINGLETON;
-
-import com.google.inject.AbstractModule;
-
-public class ConfigModule extends AbstractModule {
+/**
+ * Exposes environment variables as ConfigBase.
+ */
+public class EnvironmentConfigBase implements ConfigBase {
   @Override
-  protected void configure() {
-    bind(Config.class).annotatedWith(ApplicationConfig.class)
-        .toProvider(ApplicationConfigProvider.class).in(SINGLETON);
-    bind(Config.class).annotatedWith(EnvironmentConfig.class)
-        .toProvider(EnvironmentConfigProvider.class).in(SINGLETON);
+  public String get(String key) {
+    return System.getenv().get(key);
   }
 }

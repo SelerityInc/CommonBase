@@ -16,16 +16,17 @@
 
 package com.seleritycorp.common.base.config;
 
-import static com.google.inject.Scopes.SINGLETON;
+import javax.inject.Provider;
 
-import com.google.inject.AbstractModule;
-
-public class ConfigModule extends AbstractModule {
+/**
+ * Provider for a Config instance that wraps the OS' environment variables.
+ */
+public class EnvironmentConfigProvider implements Provider<Config> {
   @Override
-  protected void configure() {
-    bind(Config.class).annotatedWith(ApplicationConfig.class)
-        .toProvider(ApplicationConfigProvider.class).in(SINGLETON);
-    bind(Config.class).annotatedWith(EnvironmentConfig.class)
-        .toProvider(EnvironmentConfigProvider.class).in(SINGLETON);
+  public Config get() {
+    ConfigBase base = new EnvironmentConfigBase();
+    ConfigImpl config = new ConfigImpl();
+    config.setParent(base);
+    return config;
   }
 }

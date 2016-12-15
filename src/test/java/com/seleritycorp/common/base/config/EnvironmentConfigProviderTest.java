@@ -16,16 +16,24 @@
 
 package com.seleritycorp.common.base.config;
 
-import static com.google.inject.Scopes.SINGLETON;
+import static org.assertj.core.api.Assertions.assertThat;
 
-import com.google.inject.AbstractModule;
+import org.junit.Test;
 
-public class ConfigModule extends AbstractModule {
-  @Override
-  protected void configure() {
-    bind(Config.class).annotatedWith(ApplicationConfig.class)
-        .toProvider(ApplicationConfigProvider.class).in(SINGLETON);
-    bind(Config.class).annotatedWith(EnvironmentConfig.class)
-        .toProvider(EnvironmentConfigProvider.class).in(SINGLETON);
+public class EnvironmentConfigProviderTest {
+  @Test
+  public void testGetExisting() {
+    EnvironmentConfigProvider provider = new EnvironmentConfigProvider();
+    Config config = provider.get();
+
+    assertThat(config.get("PATH")).isNotEmpty();
+  }
+
+  @Test
+  public void testGetNonExisting() {
+    EnvironmentConfigProvider provider = new EnvironmentConfigProvider();
+    Config config = provider.get();
+
+    assertThat(config.get("LUDICROUS_AND_NON_EXISTING_NAME")).isNull();
   }
 }
