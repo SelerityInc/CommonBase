@@ -32,7 +32,7 @@ public class ConfigImpl implements Config {
   private static final Log log = LogFactory.getLog(ConfigImpl.class);
 
   ConcurrentMap<String, String> values;
-  Config parent;
+  ConfigBase parent;
 
   public ConfigImpl() {
     values = new ConcurrentHashMap<>();
@@ -65,7 +65,7 @@ public class ConfigImpl implements Config {
    * 
    * @param parent The parent instance to set
    */
-  public void setParent(Config parent) {
+  public void setParent(ConfigBase parent) {
     this.parent = parent;
   }
 

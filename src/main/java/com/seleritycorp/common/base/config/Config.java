@@ -21,15 +21,7 @@ import java.util.concurrent.TimeUnit;
 /**
  * Accessor for Configuration data.
  */
-public interface Config {
-  /**
-   * Gets the value ot the given key as String
-   * 
-   * @param key key to get value for
-   * @return the value at the given key. If there is no value for the given key, null is returned.
-   */
-  public String get(String key);
-
+public interface Config extends ConfigBase {
   /**
    * Gets the value ot the given key as String with default
    * 
