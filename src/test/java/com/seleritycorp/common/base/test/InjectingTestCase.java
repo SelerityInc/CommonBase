@@ -22,6 +22,7 @@ import java.nio.file.Path;
 import java.nio.file.attribute.FileTime;
 
 import org.junit.Before;
+import org.junit.internal.AssumptionViolatedException;
 
 import com.google.inject.Guice;
 import com.google.inject.Injector;
@@ -74,5 +75,55 @@ public class InjectingTestCase extends FileTestCase {
     Injector injector = InjectorFactory.getInjector();
     Key<Config> key = Key.get(Config.class, EnvironmentConfig.class);
     return injector.getInstance(key);
+  }
+
+  /**
+   * Checks whether or not the test is running in an CI environment.
+   * 
+   * <p>You can use this predicate in an {@link Assume} block to allow skipping tests in
+   * local/dev environments, but enforce them on CI servers. 
+   * 
+   * @return false, if the test is running in an CI environment. Otherwise, true.
+   */
+  protected boolean isRunningOutsideCi() {
+    Config environment = getEnvironment();
+    return environment.get("JENKINS_URL", "").isEmpty();
+  }
+  
+  /**
+   * Checks whether or not the test is running in an CI environment.
+   * 
+   * <p>You can use this predicate in an {@link Assume} block to allow skipping tests in
+   * local/dev environments, but enforce them on CI servers. 
+   * 
+   * @return true, if the test is running in an CI environment. Otherwise, false.
+   */
+  protected boolean isRunningInsideCi() {
+    return !isRunningOutsideCi();
+  }
+  
+  /**
+   * Fail the test inside CI environments, skip the test otherwise.
+   * 
+   * <p>This method helps to to abort tests that have unmet external dependencies
+   * (e.g.: Databases, network connection, ...). As not all developers can be bothered to setup
+   * all dependencies, the test is skipped for developers. But in CI environments, where we expect
+   * that all external dependencies are met, the test will fail hard.
+   * 
+   * @param reason The reason for the skip/failure.
+   * @throws Throwable always. Thereby the test is skipped/fails.
+   */
+  protected void failInCiSkipOtherwise(String reason) throws Throwable {
+    final Throwable t;
+    if (isRunningInsideCi()) {
+      if (reason != null) {
+        t = new AssertionError(reason);
+      } else { 
+        t = new AssertionError();
+      }
+    } else {
+      t = new AssumptionViolatedException((reason != null) ? reason : "<no reason given>");
+    }
+    throw t;
   }
 }
