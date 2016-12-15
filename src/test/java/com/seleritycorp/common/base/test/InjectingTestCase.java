@@ -24,6 +24,10 @@ import java.nio.file.attribute.FileTime;
 import org.junit.Before;
 
 import com.google.inject.Guice;
+import com.google.inject.Injector;
+import com.google.inject.Key;
+import com.seleritycorp.common.base.config.Config;
+import com.seleritycorp.common.base.config.EnvironmentConfig;
 import com.seleritycorp.common.base.inject.InjectorFactory;
 
 public class InjectingTestCase extends FileTestCase {
@@ -58,5 +62,17 @@ public class InjectingTestCase extends FileTestCase {
     super.writeFile(path, contents);
     FileTime fileTime = FileTime.fromMillis(clock.getMillisEpoch());
     Files.setLastModifiedTime(path, fileTime);
+  }
+  
+
+  /**
+   * Gets a Config object that wraps the OS' environment variables.
+   * 
+   * @return the config object that wraps the OS' environment variables
+   */
+  protected Config getEnvironment() {
+    Injector injector = InjectorFactory.getInjector();
+    Key<Config> key = Key.get(Config.class, EnvironmentConfig.class);
+    return injector.getInstance(key);
   }
 }

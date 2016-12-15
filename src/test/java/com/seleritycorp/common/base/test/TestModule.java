@@ -16,11 +16,16 @@
 
 package com.seleritycorp.common.base.test;
 
+import static com.google.inject.Scopes.SINGLETON;
+
 import java.nio.file.Path;
 
 import com.google.common.base.Ticker;
 import com.seleritycorp.common.base.config.AbstractBaseModule;
 import com.seleritycorp.common.base.config.ApplicationPath;
+import com.seleritycorp.common.base.config.Config;
+import com.seleritycorp.common.base.config.EnvironmentConfig;
+import com.seleritycorp.common.base.config.EnvironmentConfigProvider;
 import com.seleritycorp.common.base.time.Clock;
 import com.seleritycorp.common.base.time.TimeUtils;
 import com.seleritycorp.common.base.uuid.UuidGenerator;
@@ -48,5 +53,7 @@ public class TestModule extends AbstractBaseModule {
     bind(Ticker.class).toInstance(clock);
     bind(TimeUtils.class).to(TimeUtilsSettableClock.class);
     bind(UuidGenerator.class).toInstance(uuidGenerator);
+    bind(Config.class).annotatedWith(EnvironmentConfig.class)
+      .toProvider(EnvironmentConfigProvider.class).in(SINGLETON);
   }
 }
