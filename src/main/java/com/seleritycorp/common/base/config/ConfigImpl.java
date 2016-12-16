@@ -174,7 +174,7 @@ public class ConfigImpl implements Config {
       try {
         ret = Double.parseDouble(value);
       } catch (NumberFormatException e) {
-        if (!doLog) {
+        if (doLog) {
           log.error("Value at \"" + key + "\" is not null, but " + " does not parse to a double",
               e);
         }
