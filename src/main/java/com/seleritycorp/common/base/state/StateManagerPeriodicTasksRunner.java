@@ -86,6 +86,7 @@ public class StateManagerPeriodicTasksRunner implements Runnable {
    */
   public void start() {
     Thread newRunner = new Thread(this);
+    newRunner.setDaemon(true);
     runner = newRunner;
     newRunner.start();
   }
