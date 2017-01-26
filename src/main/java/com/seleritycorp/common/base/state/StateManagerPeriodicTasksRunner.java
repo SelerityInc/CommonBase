@@ -78,8 +78,8 @@ public class StateManagerPeriodicTasksRunner implements Runnable {
   /**
    * Starts the thread for periodic state synchronization
    *
-   * <p>It is safe to call this method multiple times. If the thread is running
-   * already, the call is silently ignored.
+   * <p>It is safe to call this method multiple times on an instance. If more than one thread are
+   * running for an instance, all but one will stop on their own.
    *
    * <p>If the thread got stopped before, calling this method will start a
    * fresh thread.
