@@ -19,6 +19,7 @@ package com.seleritycorp.common.base.logging;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.easymock.EasyMock.expect;
 
+import org.apache.log4j.Logger;
 import org.easymock.EasyMockSupport;
 import org.junit.Before;
 import org.junit.Test;
@@ -30,13 +31,16 @@ import com.seleritycorp.common.base.logging.Log;
 public class CommonsLogTest extends EasyMockSupport {
   private Log wrappedLog;
   private Formatter formatter;
-  private Log log;
+  private Throwable addedThrowable;
 
   @Before
   public void setUp() {
     wrappedLog = createMock(Log.class);
+    expect(wrappedLog.getLog4jLogger()).andReturn(null);
+    
     formatter = createMock(Formatter.class);
-    log = new CommonsLog(wrappedLog, formatter);
+    
+    addedThrowable = createMock(Throwable.class);
   }
 
   @Test
@@ -45,6 +49,7 @@ public class CommonsLogTest extends EasyMockSupport {
 
     replayAll();
 
+    Log log = new CommonsLog(wrappedLog, formatter);
     boolean actual = log.isFatalEnabled();
 
     verifyAll();
@@ -58,6 +63,7 @@ public class CommonsLogTest extends EasyMockSupport {
 
     replayAll();
 
+    Log log = new CommonsLog(wrappedLog, formatter);
     boolean actual = log.isFatalEnabled();
 
     verifyAll();
@@ -71,6 +77,31 @@ public class CommonsLogTest extends EasyMockSupport {
 
     replayAll();
 
+    Log log = new CommonsLog(wrappedLog, formatter);
+    log.fatal("foo, bar");
+
+    verifyAll();
+  }
+
+  @Test
+  public void testFatal1ParamAddedThrowable() {
+    wrappedLog.fatal("fooAdder", addedThrowable);
+
+    replayAll();
+
+    Log log = new CommonsLogThrowableAdder(wrappedLog, formatter);
+    log.fatal("foo, bar");
+
+    verifyAll();
+  }
+
+  @Test
+  public void testFatal1ParamRemovedThrowable() {
+    wrappedLog.fatal("fooRemover");
+
+    replayAll();
+
+    Log log = new CommonsLogThrowableRemover(wrappedLog, formatter);
     log.fatal("foo, bar");
 
     verifyAll();
@@ -83,6 +114,33 @@ public class CommonsLogTest extends EasyMockSupport {
 
     replayAll();
 
+    Log log = new CommonsLog(wrappedLog, formatter);
+    log.fatal("foo, bar", t);
+
+    verifyAll();
+  }
+
+  @Test
+  public void testFatal2ParamAddedThrowable() {
+    Throwable t = createMock(Throwable.class);
+    wrappedLog.fatal("fooAdder", addedThrowable);
+
+    replayAll();
+
+    Log log = new CommonsLogThrowableAdder(wrappedLog, formatter);
+    log.fatal("foo, bar", t);
+
+    verifyAll();
+  }
+
+  @Test
+  public void testFatal2ParamRemovedThrowable() {
+    Throwable t = createMock(Throwable.class);
+    wrappedLog.fatal("fooRemover");
+
+    replayAll();
+
+    Log log = new CommonsLogThrowableRemover(wrappedLog, formatter);
     log.fatal("foo, bar", t);
 
     verifyAll();
@@ -94,6 +152,7 @@ public class CommonsLogTest extends EasyMockSupport {
 
     replayAll();
 
+    Log log = new CommonsLog(wrappedLog, formatter);
     boolean actual = log.isErrorEnabled();
 
     verifyAll();
@@ -107,6 +166,7 @@ public class CommonsLogTest extends EasyMockSupport {
 
     replayAll();
 
+    Log log = new CommonsLog(wrappedLog, formatter);
     boolean actual = log.isErrorEnabled();
 
     verifyAll();
@@ -120,6 +180,31 @@ public class CommonsLogTest extends EasyMockSupport {
 
     replayAll();
 
+    Log log = new CommonsLog(wrappedLog, formatter);
+    log.error("foo, bar");
+
+    verifyAll();
+  }
+
+  @Test
+  public void testError1ParamAddedThrowable() {
+    wrappedLog.error("fooAdder", addedThrowable);
+
+    replayAll();
+
+    Log log = new CommonsLogThrowableAdder(wrappedLog, formatter);
+    log.error("foo, bar");
+
+    verifyAll();
+  }
+
+  @Test
+  public void testError1ParamRemovedThrowable() {
+    wrappedLog.error("fooRemover");
+
+    replayAll();
+
+    Log log = new CommonsLogThrowableRemover(wrappedLog, formatter);
     log.error("foo, bar");
 
     verifyAll();
@@ -132,6 +217,33 @@ public class CommonsLogTest extends EasyMockSupport {
 
     replayAll();
 
+    Log log = new CommonsLog(wrappedLog, formatter);
+    log.error("foo, bar", t);
+
+    verifyAll();
+  }
+
+  @Test
+  public void testError2ParamAddedThrowable() {
+    Throwable t = createMock(Throwable.class);
+    wrappedLog.error("fooAdder", addedThrowable);
+
+    replayAll();
+
+    Log log = new CommonsLogThrowableAdder(wrappedLog, formatter);
+    log.error("foo, bar", t);
+
+    verifyAll();
+  }
+
+  @Test
+  public void testError2ParamRemovedThrowable() {
+    Throwable t = createMock(Throwable.class);
+    wrappedLog.error("fooRemover");
+
+    replayAll();
+
+    Log log = new CommonsLogThrowableRemover(wrappedLog, formatter);
     log.error("foo, bar", t);
 
     verifyAll();
@@ -143,6 +255,7 @@ public class CommonsLogTest extends EasyMockSupport {
 
     replayAll();
 
+    Log log = new CommonsLog(wrappedLog, formatter);
     boolean actual = log.isWarnEnabled();
 
     verifyAll();
@@ -156,6 +269,7 @@ public class CommonsLogTest extends EasyMockSupport {
 
     replayAll();
 
+    Log log = new CommonsLog(wrappedLog, formatter);
     boolean actual = log.isWarnEnabled();
 
     verifyAll();
@@ -169,6 +283,31 @@ public class CommonsLogTest extends EasyMockSupport {
 
     replayAll();
 
+    Log log = new CommonsLog(wrappedLog, formatter);
+    log.warn("foo, bar");
+
+    verifyAll();
+  }
+
+  @Test
+  public void testWarn1ParamAddedThrowable() {
+    wrappedLog.warn("fooAdder", addedThrowable);
+
+    replayAll();
+
+    Log log = new CommonsLogThrowableAdder(wrappedLog, formatter);
+    log.warn("foo, bar");
+
+    verifyAll();
+  }
+
+  @Test
+  public void testWarn1ParamRemovedThrowable() {
+    wrappedLog.warn("fooRemover");
+
+    replayAll();
+
+    Log log = new CommonsLogThrowableRemover(wrappedLog, formatter);
     log.warn("foo, bar");
 
     verifyAll();
@@ -181,6 +320,33 @@ public class CommonsLogTest extends EasyMockSupport {
 
     replayAll();
 
+    Log log = new CommonsLog(wrappedLog, formatter);
+    log.warn("foo, bar", t);
+
+    verifyAll();
+  }
+
+  @Test
+  public void testWarn2ParamAddedThrowable() {
+    Throwable t = createMock(Throwable.class);
+    wrappedLog.warn("fooAdder", addedThrowable);
+
+    replayAll();
+
+    Log log = new CommonsLogThrowableAdder(wrappedLog, formatter);
+    log.warn("foo, bar", t);
+
+    verifyAll();
+  }
+
+  @Test
+  public void testWarn2ParamRemovedThrowable() {
+    Throwable t = createMock(Throwable.class);
+    wrappedLog.warn("fooRemover");
+
+    replayAll();
+
+    Log log = new CommonsLogThrowableRemover(wrappedLog, formatter);
     log.warn("foo, bar", t);
 
     verifyAll();
@@ -192,6 +358,7 @@ public class CommonsLogTest extends EasyMockSupport {
 
     replayAll();
 
+    Log log = new CommonsLog(wrappedLog, formatter);
     boolean actual = log.isInfoEnabled();
 
     verifyAll();
@@ -205,6 +372,7 @@ public class CommonsLogTest extends EasyMockSupport {
 
     replayAll();
 
+    Log log = new CommonsLog(wrappedLog, formatter);
     boolean actual = log.isInfoEnabled();
 
     verifyAll();
@@ -218,6 +386,31 @@ public class CommonsLogTest extends EasyMockSupport {
 
     replayAll();
 
+    Log log = new CommonsLog(wrappedLog, formatter);
+    log.info("foo, bar");
+
+    verifyAll();
+  }
+
+  @Test
+  public void testInfo1ParamAddedThrowable() {
+    wrappedLog.info("fooAdder", addedThrowable);
+
+    replayAll();
+
+    Log log = new CommonsLogThrowableAdder(wrappedLog, formatter);
+    log.info("foo, bar");
+
+    verifyAll();
+  }
+
+  @Test
+  public void testInfo1ParamRemovedThrowable() {
+    wrappedLog.info("fooRemover");
+
+    replayAll();
+
+    Log log = new CommonsLogThrowableRemover(wrappedLog, formatter);
     log.info("foo, bar");
 
     verifyAll();
@@ -230,6 +423,33 @@ public class CommonsLogTest extends EasyMockSupport {
 
     replayAll();
 
+    Log log = new CommonsLog(wrappedLog, formatter);
+    log.info("foo, bar", t);
+
+    verifyAll();
+  }
+
+  @Test
+  public void testInfo2ParamAddedThrowable() {
+    Throwable t = createMock(Throwable.class);
+    wrappedLog.info("fooAdder", addedThrowable);
+
+    replayAll();
+
+    Log log = new CommonsLogThrowableAdder(wrappedLog, formatter);
+    log.info("foo, bar", t);
+
+    verifyAll();
+  }
+
+  @Test
+  public void testInfo2ParamRemovedThrowable() {
+    Throwable t = createMock(Throwable.class);
+    wrappedLog.info("fooRemover");
+
+    replayAll();
+
+    Log log = new CommonsLogThrowableRemover(wrappedLog, formatter);
     log.info("foo, bar", t);
 
     verifyAll();
@@ -241,6 +461,7 @@ public class CommonsLogTest extends EasyMockSupport {
 
     replayAll();
 
+    Log log = new CommonsLog(wrappedLog, formatter);
     boolean actual = log.isDebugEnabled();
 
     verifyAll();
@@ -254,6 +475,7 @@ public class CommonsLogTest extends EasyMockSupport {
 
     replayAll();
 
+    Log log = new CommonsLog(wrappedLog, formatter);
     boolean actual = log.isDebugEnabled();
 
     verifyAll();
@@ -267,6 +489,31 @@ public class CommonsLogTest extends EasyMockSupport {
 
     replayAll();
 
+    Log log = new CommonsLog(wrappedLog, formatter);
+    log.debug("foo, bar");
+
+    verifyAll();
+  }
+
+  @Test
+  public void testDebug1ParamAddedThrowable() {
+    wrappedLog.debug("fooAdder", addedThrowable);
+
+    replayAll();
+
+    Log log = new CommonsLogThrowableAdder(wrappedLog, formatter);
+    log.debug("foo, bar");
+
+    verifyAll();
+  }
+
+  @Test
+  public void testDebug1ParamRemovedThrowable() {
+    wrappedLog.debug("fooRemover");
+
+    replayAll();
+
+    Log log = new CommonsLogThrowableRemover(wrappedLog, formatter);
     log.debug("foo, bar");
 
     verifyAll();
@@ -279,6 +526,33 @@ public class CommonsLogTest extends EasyMockSupport {
 
     replayAll();
 
+    Log log = new CommonsLog(wrappedLog, formatter);
+    log.debug("foo, bar", t);
+
+    verifyAll();
+  }
+
+  @Test
+  public void testDebug2ParamAddedThrowable() {
+    Throwable t = createMock(Throwable.class);
+    wrappedLog.debug("fooAdder", addedThrowable);
+
+    replayAll();
+
+    Log log = new CommonsLogThrowableAdder(wrappedLog, formatter);
+    log.debug("foo, bar", t);
+
+    verifyAll();
+  }
+
+  @Test
+  public void testDebug2ParamRemovedThrowable() {
+    Throwable t = createMock(Throwable.class);
+    wrappedLog.debug("fooRemover");
+
+    replayAll();
+
+    Log log = new CommonsLogThrowableRemover(wrappedLog, formatter);
     log.debug("foo, bar", t);
 
     verifyAll();
@@ -290,6 +564,7 @@ public class CommonsLogTest extends EasyMockSupport {
 
     replayAll();
 
+    Log log = new CommonsLog(wrappedLog, formatter);
     boolean actual = log.isTraceEnabled();
 
     verifyAll();
@@ -303,6 +578,7 @@ public class CommonsLogTest extends EasyMockSupport {
 
     replayAll();
 
+    Log log = new CommonsLog(wrappedLog, formatter);
     boolean actual = log.isTraceEnabled();
 
     verifyAll();
@@ -311,11 +587,48 @@ public class CommonsLogTest extends EasyMockSupport {
   }
 
   @Test
+  public void testTraceNull() {
+    wrappedLog.trace(null);
+
+    replayAll();
+
+    Log log = new CommonsLog(wrappedLog, formatter);
+    log.trace(null);
+
+    verifyAll();
+  }
+
+  @Test
   public void testTrace1Param() {
     wrappedLog.trace("foo, bar");
 
     replayAll();
 
+    Log log = new CommonsLog(wrappedLog, formatter);
+    log.trace("foo, bar");
+
+    verifyAll();
+  }
+
+  @Test
+  public void testTrace1ParamAddedThrowable() {
+    wrappedLog.trace("fooAdder", addedThrowable);
+
+    replayAll();
+
+    Log log = new CommonsLogThrowableAdder(wrappedLog, formatter);
+    log.trace("foo, bar");
+
+    verifyAll();
+  }
+
+  @Test
+  public void testTrace1ParamRemovedThrowable() {
+    wrappedLog.trace("fooRemover");
+
+    replayAll();
+
+    Log log = new CommonsLogThrowableRemover(wrappedLog, formatter);
     log.trace("foo, bar");
 
     verifyAll();
@@ -328,6 +641,33 @@ public class CommonsLogTest extends EasyMockSupport {
 
     replayAll();
 
+    Log log = new CommonsLog(wrappedLog, formatter);
+    log.trace("foo, bar", t);
+
+    verifyAll();
+  }
+
+  @Test
+  public void testTrace2ParamAddedThrowable() {
+    Throwable t = createMock(Throwable.class);
+    wrappedLog.trace("fooAdder", addedThrowable);
+
+    replayAll();
+
+    Log log = new CommonsLogThrowableAdder(wrappedLog, formatter);
+    log.trace("foo, bar", t);
+
+    verifyAll();
+  }
+
+  @Test
+  public void testTrace2ParamRemovedThrowable() {
+    Throwable t = createMock(Throwable.class);
+    wrappedLog.trace("fooRemover");
+
+    replayAll();
+
+    Log log = new CommonsLogThrowableRemover(wrappedLog, formatter);
     log.trace("foo, bar", t);
 
     verifyAll();
@@ -340,8 +680,98 @@ public class CommonsLogTest extends EasyMockSupport {
 
     replayAll();
 
+    Log log = new CommonsLog(wrappedLog, formatter);
     log.structuredInfo("foo", 42, "bar");
 
     verifyAll();
+  }
+
+  @Test
+  public void testStructuredInfoChanger() {
+    wrappedLog.info("baz");
+
+    replayAll();
+
+    Log log = new CommonsLogStructuredChanger(wrappedLog, formatter);
+    log.structuredInfo("foo", 42, "bar");
+
+    verifyAll();
+  }
+
+  @Test
+  public void testGetLog4jLoggerWrappedNull() {
+    replayAll();
+
+    Log log = new CommonsLog(wrappedLog, formatter);
+    assertThat(log.getLog4jLogger()).isNull();
+
+    verifyAll();
+  }
+
+  @Test
+  public void testGetLog4jLoggerCommons() {
+    resetAll();
+
+    org.apache.commons.logging.Log commonsLog = createMock(org.apache.commons.logging.Log.class);
+
+    replayAll();
+
+    Log log = new CommonsLog(commonsLog, formatter);
+    assertThat(log.getLog4jLogger()).isNull();
+
+    verifyAll();
+  }
+
+  @Test
+  public void testGetLog4jLoggerWrappedNonNull() {
+    Logger logger = createMock(Logger.class);
+
+    resetAll();
+    
+    expect(wrappedLog.getLog4jLogger()).andReturn(logger);
+
+    replayAll();
+
+    Log log = new CommonsLog(wrappedLog, formatter);
+    assertThat(log.getLog4jLogger()).isSameAs(logger);
+
+    verifyAll();
+  }
+  
+  class CommonsLogThrowableRemover extends CommonsLog {
+    CommonsLogThrowableRemover(org.apache.commons.logging.Log wrappedLog, Formatter formatter) {
+      super(wrappedLog, formatter);
+    }
+    
+    @Override
+    public Event processEvent(Event event) {
+      event.setMessage("fooRemover");
+      event.unsetThrowable();
+      return event;
+    }
+  }
+
+  class CommonsLogThrowableAdder extends CommonsLog {
+    CommonsLogThrowableAdder(org.apache.commons.logging.Log wrappedLog, Formatter formatter) {
+      super(wrappedLog, formatter);
+    }
+    
+    @Override
+    public Event processEvent(Event event) {
+      event.setMessage("fooAdder");
+      event.setThrowable(addedThrowable);
+      return event;
+    }
+  }
+
+  class CommonsLogStructuredChanger extends CommonsLog {
+    CommonsLogStructuredChanger(org.apache.commons.logging.Log wrappedLog, Formatter formatter) {
+      super(wrappedLog, formatter);
+    }
+    
+    @Override
+    protected String processStructuredData(String tag, int version, Object... objs) {
+      return "baz"; 
+    }
   }
 }

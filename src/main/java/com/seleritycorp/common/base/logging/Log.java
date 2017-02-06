@@ -18,12 +18,25 @@ package com.seleritycorp.common.base.logging;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 
+import org.apache.log4j.Logger;
+
 /**
  * Selerity specific Log extension.
  */
 @SuppressFBWarnings(value = "NM_SAME_SIMPLE_NAME_AS_INTERFACE",
     justification = "This Log should act as drop-in replacement for commons' Log")
 public interface Log extends org.apache.commons.logging.Log {
+  /**
+   * Gets the raw Log4j logger behind this Log, if there is any
+   *
+   * <p>Log4j gets the line numbers wrong when wrapping the loggers directly. To allow
+   * implementations to work around this issue, this method grants access to the raw
+   * Log4j logger.
+   * 
+   * @return raw backing Log4j logger, if there is any. null otherwise.  
+   */
+  public Logger getLog4jLogger();
+  
   /**
    * Logs objects in structured format in a single INFO line
    *

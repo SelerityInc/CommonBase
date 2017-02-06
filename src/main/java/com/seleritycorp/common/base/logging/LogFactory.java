@@ -24,7 +24,7 @@ import org.apache.commons.logging.LogConfigurationException;
  * Factory for creating Log instances.
  */
 public class LogFactory {
-  private static Formatter encoder = InjectorFactory.getInjector().getInstance(Formatter.class);
+  private static Formatter formatter = InjectorFactory.getInjector().getInstance(Formatter.class);
 
   /**
    * Gets the non-permanent Log for a given Class
@@ -55,7 +55,7 @@ public class LogFactory {
    *            can be returned.
    */
   public static Log getLog(String name) throws LogConfigurationException {
-    return new CommonsLog(org.apache.commons.logging.LogFactory.getLog(name), encoder);
+    return new CommonsLog(org.apache.commons.logging.LogFactory.getLog(name), formatter);
   }
 
   /**
@@ -90,6 +90,6 @@ public class LogFactory {
    *            can be returned.
    */
   public static Log getPermanentLog(String name) throws LogConfigurationException {
-    return new FlatLog(getLog("permanent." + name));
+    return new FlatLog(getLog("permanent." + name), formatter);
   }
 }

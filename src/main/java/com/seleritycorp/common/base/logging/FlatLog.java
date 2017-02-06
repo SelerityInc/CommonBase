@@ -22,22 +22,25 @@ import java.io.StringWriter;
 /**
  * Log wrapper that turns multi-line messages into single-line messages.
  */
-public class FlatLog implements Log {
-  /**
-   * The Log used by FlatLog to actually do the logging.
-   */
-  private final Log log;
-
+public class FlatLog extends CommonsLog {
   /**
    * Wraps a Log to force single-line messages.
    *
    * <p>Line breaks contained in user-provided log messages will get converted
    * to \n.
    * 
-   * @param log The log to log single-line messages to
+   * @param wrappedLog The log to log single-line messages to
+   * @param formatter Instance of Formating helper 
    */
-  public FlatLog(Log log) {
-    this.log = log;
+  public FlatLog(Log wrappedLog, Formatter formatter) {
+    super(wrappedLog, formatter);
+  }
+
+  @Override
+  protected Event processEvent(Event event) {
+    event.setMessage(toSingleLine(event.getMessage(), event.getThrowable()));
+    event.unsetThrowable();
+    return event;
   }
 
   /**
@@ -70,103 +73,5 @@ public class FlatLog implements Log {
       multiLineMessage += "\\n" + throwable.toString() + "\\n" + stringWriter.toString();
     }
     return toSingleLine(multiLineMessage);
-  }
-
-  @Override
-  public boolean isDebugEnabled() {
-    return log.isDebugEnabled();
-  }
-
-  @Override
-  public boolean isErrorEnabled() {
-    return log.isErrorEnabled();
-  }
-
-  @Override
-  public boolean isFatalEnabled() {
-    return log.isFatalEnabled();
-  }
-
-  @Override
-  public boolean isInfoEnabled() {
-    return log.isInfoEnabled();
-  }
-
-  @Override
-  public boolean isTraceEnabled() {
-    return log.isTraceEnabled();
-  }
-
-  @Override
-  public boolean isWarnEnabled() {
-    return log.isWarnEnabled();
-  }
-
-  @Override
-  public void trace(Object message) {
-    log.trace(toSingleLine(message));
-  }
-
-  @Override
-  public void trace(Object message, Throwable throwable) {
-    log.trace(toSingleLine(message, throwable));
-  }
-
-  @Override
-  public void debug(Object message) {
-    log.debug(toSingleLine(message));
-  }
-
-  @Override
-  public void debug(Object message, Throwable throwable) {
-    log.debug(toSingleLine(message, throwable));
-  }
-
-  @Override
-  public void info(Object message) {
-    log.info(toSingleLine(message));
-  }
-
-  @Override
-  public void info(Object message, Throwable throwable) {
-    log.info(toSingleLine(message, throwable));
-  }
-
-  @Override
-  public void warn(Object message) {
-    log.warn(toSingleLine(message));
-  }
-
-  @Override
-  public void warn(Object message, Throwable throwable) {
-    log.warn(toSingleLine(message, throwable));
-  }
-
-  @Override
-  public void error(Object message) {
-    log.error(toSingleLine(message));
-  }
-
-  @Override
-  public void error(Object message, Throwable throwable) {
-    log.error(toSingleLine(message, throwable));
-  }
-
-  @Override
-  public void fatal(Object message) {
-    log.fatal(toSingleLine(message));
-  }
-
-  @Override
-  public void fatal(Object message, Throwable throwable) {
-    log.fatal(toSingleLine(message, throwable));
-  }
-
-  @Override
-  public void structuredInfo(String tag, int version, Object... objs) {
-    // structuredInfo is required to log to a single line anyways with the
-    // same escaping, so me can just push down the values and need not care
-    // about toSingleLine.
-    log.structuredInfo(tag, version, objs);
   }
 }

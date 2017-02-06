@@ -28,10 +28,12 @@ import com.seleritycorp.common.base.logging.PrefixedLogger;
 
 public class PrefixedLoggerTest extends EasyMockSupport {
   Log parentLog;
+  Formatter formatter;
 
   @Before
   public void setUp() {
     parentLog = createMock(Log.class);
+    formatter = createMock(Formatter.class);
   }
 
   @Test
@@ -353,7 +355,33 @@ public class PrefixedLoggerTest extends EasyMockSupport {
     verifyAll();
   }
 
+  @Test
+  public void testStructuredInfo() {
+    parentLog.info("quux");
+    expect(formatter.formatStructuredLine("bar", 42, "prefix", "foo", "baz")).andReturn("quux");
+
+    replayAll();
+
+    PrefixedLogger log = createPrefixedLogger();
+    log.structuredInfo("bar", 42, "baz");
+
+    verifyAll();
+  }
+
+  @Test
+  public void testStructuredInfoNull() {
+    parentLog.info("baz");
+    expect(formatter.formatStructuredLine("bar", 42, "prefix", "foo")).andReturn("baz");
+
+    replayAll();
+
+    PrefixedLogger log = createPrefixedLogger();
+    log.structuredInfo("bar", 42);
+
+    verifyAll();
+  }
+
   private PrefixedLogger createPrefixedLogger() {
-    return new PrefixedLogger("foo", parentLog);
+    return new PrefixedLogger("foo", parentLog, formatter);
   }
 }

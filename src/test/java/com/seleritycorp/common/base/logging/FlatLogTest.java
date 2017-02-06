@@ -31,12 +31,14 @@ import com.seleritycorp.common.base.logging.Log;
 
 public class FlatLogTest extends EasyMockSupport {
   private Log backendLog;
-  private Log log;
+  private Formatter formatter;
 
   @Before
   public void setUp() {
     backendLog = createMock(Log.class);
-    log = new FlatLog(backendLog);
+    expect(backendLog.getLog4jLogger()).andReturn(null);
+
+    formatter = createMock(Formatter.class);
   }
 
   @Test
@@ -45,6 +47,7 @@ public class FlatLogTest extends EasyMockSupport {
 
     replayAll();
 
+    Log log = createFlatLogger();
     boolean actual = log.isFatalEnabled();
 
     verifyAll();
@@ -58,6 +61,7 @@ public class FlatLogTest extends EasyMockSupport {
 
     replayAll();
 
+    Log log = createFlatLogger();
     boolean actual = log.isFatalEnabled();
 
     verifyAll();
@@ -71,6 +75,7 @@ public class FlatLogTest extends EasyMockSupport {
 
     replayAll();
 
+    Log log = createFlatLogger();
     log.fatal("foo");
 
     verifyAll();
@@ -82,6 +87,7 @@ public class FlatLogTest extends EasyMockSupport {
 
     replayAll();
 
+    Log log = createFlatLogger();
     log.fatal("foo\nbar\nbaz");
 
     verifyAll();
@@ -95,6 +101,7 @@ public class FlatLogTest extends EasyMockSupport {
 
     replayAll();
 
+    Log log = createFlatLogger();
     log.fatal("foo", t);
 
     verifyAll();
@@ -114,6 +121,7 @@ public class FlatLogTest extends EasyMockSupport {
 
     replayAll();
 
+    Log log = createFlatLogger();
     log.fatal("foo\nbar\nbaz", t);
 
     verifyAll();
@@ -133,6 +141,7 @@ public class FlatLogTest extends EasyMockSupport {
 
     replayAll();
 
+    Log log = createFlatLogger();
     log.fatal("foo\n%s", t);
 
     verifyAll();
@@ -150,6 +159,7 @@ public class FlatLogTest extends EasyMockSupport {
 
     replayAll();
 
+    Log log = createFlatLogger();
     boolean actual = log.isErrorEnabled();
 
     verifyAll();
@@ -163,6 +173,7 @@ public class FlatLogTest extends EasyMockSupport {
 
     replayAll();
 
+    Log log = createFlatLogger();
     boolean actual = log.isErrorEnabled();
 
     verifyAll();
@@ -176,6 +187,7 @@ public class FlatLogTest extends EasyMockSupport {
 
     replayAll();
 
+    Log log = createFlatLogger();
     log.error("foo");
 
     verifyAll();
@@ -187,6 +199,7 @@ public class FlatLogTest extends EasyMockSupport {
 
     replayAll();
 
+    Log log = createFlatLogger();
     log.error("foo\nbar\nbaz");
 
     verifyAll();
@@ -200,6 +213,7 @@ public class FlatLogTest extends EasyMockSupport {
 
     replayAll();
 
+    Log log = createFlatLogger();
     log.error("foo", t);
 
     verifyAll();
@@ -219,6 +233,7 @@ public class FlatLogTest extends EasyMockSupport {
 
     replayAll();
 
+    Log log = createFlatLogger();
     log.error("foo\nbar\nbaz", t);
 
     verifyAll();
@@ -238,6 +253,7 @@ public class FlatLogTest extends EasyMockSupport {
 
     replayAll();
 
+    Log log = createFlatLogger();
     log.error("foo\n%s", t);
 
     verifyAll();
@@ -255,6 +271,7 @@ public class FlatLogTest extends EasyMockSupport {
 
     replayAll();
 
+    Log log = createFlatLogger();
     boolean actual = log.isWarnEnabled();
 
     verifyAll();
@@ -268,6 +285,7 @@ public class FlatLogTest extends EasyMockSupport {
 
     replayAll();
 
+    Log log = createFlatLogger();
     boolean actual = log.isWarnEnabled();
 
     verifyAll();
@@ -281,6 +299,7 @@ public class FlatLogTest extends EasyMockSupport {
 
     replayAll();
 
+    Log log = createFlatLogger();
     log.warn("foo");
 
     verifyAll();
@@ -292,6 +311,7 @@ public class FlatLogTest extends EasyMockSupport {
 
     replayAll();
 
+    Log log = createFlatLogger();
     log.warn("foo\nbar\nbaz");
 
     verifyAll();
@@ -305,6 +325,7 @@ public class FlatLogTest extends EasyMockSupport {
 
     replayAll();
 
+    Log log = createFlatLogger();
     log.warn("foo", t);
 
     verifyAll();
@@ -324,6 +345,7 @@ public class FlatLogTest extends EasyMockSupport {
 
     replayAll();
 
+    Log log = createFlatLogger();
     log.warn("foo\nbar\nbaz", t);
 
     verifyAll();
@@ -343,6 +365,7 @@ public class FlatLogTest extends EasyMockSupport {
 
     replayAll();
 
+    Log log = createFlatLogger();
     log.warn("foo\n%s", t);
 
     verifyAll();
@@ -360,6 +383,7 @@ public class FlatLogTest extends EasyMockSupport {
 
     replayAll();
 
+    Log log = createFlatLogger();
     boolean actual = log.isInfoEnabled();
 
     verifyAll();
@@ -373,6 +397,7 @@ public class FlatLogTest extends EasyMockSupport {
 
     replayAll();
 
+    Log log = createFlatLogger();
     boolean actual = log.isInfoEnabled();
 
     verifyAll();
@@ -386,6 +411,7 @@ public class FlatLogTest extends EasyMockSupport {
 
     replayAll();
 
+    Log log = createFlatLogger();
     log.info("foo");
 
     verifyAll();
@@ -397,6 +423,7 @@ public class FlatLogTest extends EasyMockSupport {
 
     replayAll();
 
+    Log log = createFlatLogger();
     log.info("foo\nbar\nbaz");
 
     verifyAll();
@@ -410,6 +437,7 @@ public class FlatLogTest extends EasyMockSupport {
 
     replayAll();
 
+    Log log = createFlatLogger();
     log.info("foo", t);
 
     verifyAll();
@@ -429,6 +457,7 @@ public class FlatLogTest extends EasyMockSupport {
 
     replayAll();
 
+    Log log = createFlatLogger();
     log.info("foo\nbar\nbaz", t);
 
     verifyAll();
@@ -448,6 +477,7 @@ public class FlatLogTest extends EasyMockSupport {
 
     replayAll();
 
+    Log log = createFlatLogger();
     log.info("foo\n%s", t);
 
     verifyAll();
@@ -465,6 +495,7 @@ public class FlatLogTest extends EasyMockSupport {
 
     replayAll();
 
+    Log log = createFlatLogger();
     boolean actual = log.isDebugEnabled();
 
     verifyAll();
@@ -478,6 +509,7 @@ public class FlatLogTest extends EasyMockSupport {
 
     replayAll();
 
+    Log log = createFlatLogger();
     boolean actual = log.isDebugEnabled();
 
     verifyAll();
@@ -491,6 +523,7 @@ public class FlatLogTest extends EasyMockSupport {
 
     replayAll();
 
+    Log log = createFlatLogger();
     log.debug("foo");
 
     verifyAll();
@@ -502,6 +535,7 @@ public class FlatLogTest extends EasyMockSupport {
 
     replayAll();
 
+    Log log = createFlatLogger();
     log.debug("foo\nbar\nbaz");
 
     verifyAll();
@@ -515,6 +549,7 @@ public class FlatLogTest extends EasyMockSupport {
 
     replayAll();
 
+    Log log = createFlatLogger();
     log.debug("foo", t);
 
     verifyAll();
@@ -534,6 +569,7 @@ public class FlatLogTest extends EasyMockSupport {
 
     replayAll();
 
+    Log log = createFlatLogger();
     log.debug("foo\nbar\nbaz", t);
 
     verifyAll();
@@ -553,6 +589,7 @@ public class FlatLogTest extends EasyMockSupport {
 
     replayAll();
 
+    Log log = createFlatLogger();
     log.debug("foo\n%s", t);
 
     verifyAll();
@@ -570,6 +607,7 @@ public class FlatLogTest extends EasyMockSupport {
 
     replayAll();
 
+    Log log = createFlatLogger();
     boolean actual = log.isTraceEnabled();
 
     verifyAll();
@@ -583,6 +621,7 @@ public class FlatLogTest extends EasyMockSupport {
 
     replayAll();
 
+    Log log = createFlatLogger();
     boolean actual = log.isTraceEnabled();
 
     verifyAll();
@@ -596,6 +635,7 @@ public class FlatLogTest extends EasyMockSupport {
 
     replayAll();
 
+    Log log = createFlatLogger();
     log.trace("foo");
 
     verifyAll();
@@ -607,6 +647,7 @@ public class FlatLogTest extends EasyMockSupport {
 
     replayAll();
 
+    Log log = createFlatLogger();
     log.trace("foo\nbar\nbaz");
 
     verifyAll();
@@ -620,6 +661,7 @@ public class FlatLogTest extends EasyMockSupport {
 
     replayAll();
 
+    Log log = createFlatLogger();
     log.trace("foo", t);
 
     verifyAll();
@@ -639,6 +681,7 @@ public class FlatLogTest extends EasyMockSupport {
 
     replayAll();
 
+    Log log = createFlatLogger();
     log.trace("foo\nbar\nbaz", t);
 
     verifyAll();
@@ -658,6 +701,7 @@ public class FlatLogTest extends EasyMockSupport {
 
     replayAll();
 
+    Log log = createFlatLogger();
     log.trace("foo\n%s", t);
 
     verifyAll();
@@ -670,26 +714,19 @@ public class FlatLogTest extends EasyMockSupport {
   }
 
   @Test
-  public void testStructuredInfoPlain() {
-    backendLog.structuredInfo("foo", 42, "bar");
+  public void testStructuredInfo() {
+    expect(formatter.formatStructuredLine("foo", 42, "bar")).andReturn("quux");
+    backendLog.info("quux");
 
     replayAll();
 
+    Log log = createFlatLogger();
     log.structuredInfo("foo", 42, "bar");
 
     verifyAll();
   }
 
-  @Test
-  public void testStructuredInfoEscaping() {
-    // Escaping gets pushed down to the wrapped Log.
-    // So no escaping handling within FlatLog itself.
-    backendLog.structuredInfo("foo", 42, "bar\\nbaz\\,quux\\\\quuux");
-
-    replayAll();
-
-    log.structuredInfo("foo", 42, "bar\\nbaz\\,quux\\\\quuux");
-
-    verifyAll();
+  private FlatLog createFlatLogger() {
+    return new FlatLog(backendLog, formatter);
   }
 }
