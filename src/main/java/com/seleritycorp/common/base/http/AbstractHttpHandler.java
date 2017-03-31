@@ -19,8 +19,10 @@ package com.seleritycorp.common.base.http;
 import com.seleritycorp.common.base.logging.Log;
 import com.seleritycorp.common.base.logging.LogFactory;
 
+import org.apache.commons.io.IOUtils;
 import org.eclipse.jetty.server.handler.AbstractHandler;
 
+import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.PrintWriter;
 
@@ -29,6 +31,24 @@ import java.io.PrintWriter;
  */
 public abstract class AbstractHttpHandler extends AbstractHandler {
   private static final Log log = LogFactory.getLog(AbstractHttpHandler.class);
+
+  /**
+   * Gets the request's body as string.
+   *
+   * <p>This method may replace the request's line-breaks with line-breaks used on the current
+   * system (E.g.: Replacing "\r\n" by "\n").
+   *
+   * @param handleParameters This parameters' request will get its body extracted.
+   * @return The string representation of the request's body
+   * @throws java.io.UnsupportedEncodingException if the character encoding is not supported.
+   * @throws IllegalStateException if the request was read already.
+   * @throws IOException if an input or output exception occurred
+   */
+  protected String getRequestBodyAsString(HandleParameters handleParameters) throws IOException {
+    try (BufferedReader reader = handleParameters.getRequest().getReader()) {
+      return IOUtils.toString(reader);
+    }
+  }
 
   /**
    * Sends a response to a request and marks it as handled.

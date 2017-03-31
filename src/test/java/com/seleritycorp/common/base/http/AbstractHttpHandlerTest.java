@@ -19,8 +19,10 @@ package com.seleritycorp.common.base.http;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.easymock.EasyMock.expect;
 
+import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.io.StringReader;
 import java.io.StringWriter;
 
 import javax.servlet.ServletException;
@@ -234,6 +236,23 @@ public class AbstractHttpHandlerTest extends EasyMockSupport {
     handler.respondNoContent(parameters);
     
     verifyAll();
+  }
+
+  @Test
+  public void testGetRequestBodyAsString() throws IOException {
+    HandleParameters parameters = createHandleParameters("/foo");
+    HandlerShim handler = new HandlerShim();
+
+    BufferedReader reader = new BufferedReader(new StringReader("bar"));
+    expect(request.getReader()).andReturn(reader);
+
+    replayAll();
+
+    String body = handler.getRequestBodyAsString(parameters);
+
+    verifyAll();
+
+    assertThat(body).isEqualTo("bar");
   }
 
   private HandleParameters createHandleParameters(String target) {
