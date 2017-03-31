@@ -43,30 +43,15 @@ import com.seleritycorp.common.base.thread.ThreadFactoryFactory;
 public class HttpServerTest extends EasyMockSupport {
 
   public boolean singleTestHandlerTry() throws Exception {
-    int port = 8192 + (int) (Math.random() * 8192); 
-    SettableConfig config = new SettableConfig();
-    config.setInt("server.http.port", port);
-    config.setInt("server.http.threads", 10);
+    int port = getPort();
 
     AppStatePushFacet facet = createStrictMock(AppStatePushFacet.class);
     facet.setAppState(AppState.INITIALIZING, "Starting");
     facet.setAppState(AppState.READY, "Started");
     facet.setAppState(AppState.FAULTY, "Stopped");
     
-    AppStateFacetFactory appStateFacetFactory = createMock(AppStateFacetFactory.class);
-    expect(appStateFacetFactory.createAppStatePushFacet("http-server")).andReturn(facet);
+    HttpServer server = createHttpServer(port, facet);
 
-    ThreadFactoryFactory threadFactoryFactory = new ThreadFactoryFactory();
-    ExecutorServiceFactory executorServiceFactory = new ExecutorServiceFactory(
-        threadFactoryFactory);
-    
-    AbstractHttpHandler httpHandler = new HttpHandler();
-
-    replayAll();
-
-    HttpServer server = new HttpServer(config, httpHandler, executorServiceFactory,
-        appStateFacetFactory);
-    
     try {
       server.start();
 
@@ -79,7 +64,7 @@ public class HttpServerTest extends EasyMockSupport {
   }
 
   @Test
-  public void testHandler() throws Exception {
+  public void testHandlerStart() throws Exception {
     Boolean success = null;
     for (int tries = 5; tries > 0 && success == null; tries--) {
       try {
@@ -96,6 +81,19 @@ public class HttpServerTest extends EasyMockSupport {
     verifyAll();
   }
 
+  @Test
+  public void testHandlerStopWithoutStart() throws Exception {
+    int port = getPort();
+
+    AppStatePushFacet facet = createStrictMock(AppStatePushFacet.class);
+    facet.setAppState(AppState.FAULTY, "Stopped");
+    
+    HttpServer server = createHttpServer(port, facet);
+    server.close();
+
+    verifyAll();
+  }
+
   private class HttpHandler extends AbstractHttpHandler {
     @Override
     public void handle(String target, Request baseRequest, HttpServletRequest request,
@@ -106,5 +104,31 @@ public class HttpServerTest extends EasyMockSupport {
       response.setStatus(200);
       baseRequest.setHandled(true);
     }
+  }
+
+  private int getPort() {
+    return 8192 + (int) (Math.random() * 8192);     
+  }
+
+  private HttpServer createHttpServer(int port, AppStatePushFacet facet) throws Exception {
+    SettableConfig config = new SettableConfig();
+    config.setInt("server.http.port", port);
+    config.setInt("server.http.threads", 10);
+
+    AppStateFacetFactory appStateFacetFactory = createMock(AppStateFacetFactory.class);
+    expect(appStateFacetFactory.createAppStatePushFacet("http-server")).andReturn(facet);
+
+    ThreadFactoryFactory threadFactoryFactory = new ThreadFactoryFactory();
+    ExecutorServiceFactory executorServiceFactory = new ExecutorServiceFactory(
+        threadFactoryFactory);
+    
+    AbstractHttpHandler httpHandler = new HttpHandler();
+
+    replayAll();
+
+    HttpServer server = new HttpServer(config, httpHandler, executorServiceFactory,
+        appStateFacetFactory);
+
+    return server;
   }
 }

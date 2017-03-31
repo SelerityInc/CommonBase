@@ -39,6 +39,7 @@ public class HttpServer implements AutoCloseable {
   private Server server;
   private ServerConnector serverConnector;
   private AppStatePushFacet facet;
+  private boolean isStarted;
 
   @Inject
   HttpServer(@ApplicationConfig Config config, AbstractHttpHandler httpHandler,
@@ -58,6 +59,8 @@ public class HttpServer implements AutoCloseable {
     server.setConnectors(new Connector[] {serverConnector});
     
     server.setHandler(httpHandler);
+    
+    isStarted = false;
   }
 
   /**
@@ -69,6 +72,7 @@ public class HttpServer implements AutoCloseable {
     facet.setAppState(AppState.INITIALIZING, "Starting");
     try {
       server.start();
+      isStarted = true;
       facet.setAppState(AppState.READY, "Started");
     } catch (Exception e) {
       facet.setAppState(AppState.FAULTY, "Starting failed. " + e.getMessage());
@@ -80,6 +84,8 @@ public class HttpServer implements AutoCloseable {
     facet.setAppState(AppState.FAULTY, "Stopped");
     serverConnector.close();
     server.stop();
-    server.join();
+    if (isStarted) {
+      server.join();
+    }
   }
 }
