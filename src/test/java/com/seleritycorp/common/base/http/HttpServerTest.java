@@ -18,6 +18,8 @@ package com.seleritycorp.common.base.http;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import static org.easymock.EasyMock.expect;
+
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.net.URL;
@@ -27,27 +29,43 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.io.IOUtils;
+import org.easymock.EasyMockSupport;
 import org.eclipse.jetty.server.Request;
 import org.junit.Test;
 
+import com.seleritycorp.common.base.state.AppState;
+import com.seleritycorp.common.base.state.AppStateFacetFactory;
+import com.seleritycorp.common.base.state.AppStatePushFacet;
 import com.seleritycorp.common.base.test.SettableConfig;
 import com.seleritycorp.common.base.thread.ExecutorServiceFactory;
 import com.seleritycorp.common.base.thread.ThreadFactoryFactory;
 
-public class HttpServerTest {
+public class HttpServerTest extends EasyMockSupport {
+
   public boolean singleTestHandlerTry() throws Exception {
     int port = 8192 + (int) (Math.random() * 8192); 
     SettableConfig config = new SettableConfig();
     config.setInt("server.http.port", port);
     config.setInt("server.http.threads", 10);
 
+    AppStatePushFacet facet = createStrictMock(AppStatePushFacet.class);
+    facet.setAppState(AppState.INITIALIZING, "Starting");
+    facet.setAppState(AppState.READY, "Started");
+    facet.setAppState(AppState.FAULTY, "Stopped");
+    
+    AppStateFacetFactory appStateFacetFactory = createMock(AppStateFacetFactory.class);
+    expect(appStateFacetFactory.createAppStatePushFacet("http-server")).andReturn(facet);
+
     ThreadFactoryFactory threadFactoryFactory = new ThreadFactoryFactory();
     ExecutorServiceFactory executorServiceFactory = new ExecutorServiceFactory(
         threadFactoryFactory);
     
     AbstractHttpHandler httpHandler = new HttpHandler();
-    
-    HttpServer server = new HttpServer(config, httpHandler, executorServiceFactory);
+
+    replayAll();
+
+    HttpServer server = new HttpServer(config, httpHandler, executorServiceFactory,
+        appStateFacetFactory);
     
     try {
       server.start();
@@ -65,6 +83,7 @@ public class HttpServerTest {
     Boolean success = null;
     for (int tries = 5; tries > 0 && success == null; tries--) {
       try {
+        resetAll();
         success = singleTestHandlerTry();
       } catch (Exception e) {
         if (tries != 0) {
@@ -74,6 +93,7 @@ public class HttpServerTest {
     }
     assertThat(success).isNotNull();
     assertThat(success).isTrue();
+    verifyAll();
   }
 
   private class HttpHandler extends AbstractHttpHandler {

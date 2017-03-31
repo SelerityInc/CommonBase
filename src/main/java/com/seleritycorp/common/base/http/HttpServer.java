@@ -18,6 +18,9 @@ package com.seleritycorp.common.base.http;
 
 import com.seleritycorp.common.base.config.ApplicationConfig;
 import com.seleritycorp.common.base.config.Config;
+import com.seleritycorp.common.base.state.AppState;
+import com.seleritycorp.common.base.state.AppStateFacetFactory;
+import com.seleritycorp.common.base.state.AppStatePushFacet;
 import com.seleritycorp.common.base.thread.ExecutorServiceFactory;
 
 import org.eclipse.jetty.server.Connector;
@@ -35,10 +38,13 @@ import javax.inject.Inject;
 public class HttpServer implements AutoCloseable {
   private Server server;
   private ServerConnector serverConnector;
+  private AppStatePushFacet facet;
 
   @Inject
   HttpServer(@ApplicationConfig Config config, AbstractHttpHandler httpHandler,
-      ExecutorServiceFactory executorServiceFactory) {
+      ExecutorServiceFactory executorServiceFactory, AppStateFacetFactory appStateFacetFactory) {
+    facet = appStateFacetFactory.createAppStatePushFacet("http-server");
+    
     int threadCount = config.getInt("server.http.threads", 32);    
     ExecutorService executorService = executorServiceFactory
         .createFixedUnboundedDaemonExecutorService("http-server", threadCount);
@@ -60,11 +66,18 @@ public class HttpServer implements AutoCloseable {
    * @throws Exception If the server fails to start. 
    */
   public void start() throws Exception {
-    server.start();
+    facet.setAppState(AppState.INITIALIZING, "Starting");
+    try {
+      server.start();
+      facet.setAppState(AppState.READY, "Started");
+    } catch (Exception e) {
+      facet.setAppState(AppState.FAULTY, "Starting failed. " + e.getMessage());
+    }
   }
   
   @Override
   public void close() throws Exception {
+    facet.setAppState(AppState.FAULTY, "Stopped");
     serverConnector.close();
     server.stop();
     server.join();
