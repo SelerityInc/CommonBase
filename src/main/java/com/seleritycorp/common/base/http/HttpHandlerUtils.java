@@ -25,11 +25,22 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.PrintWriter;
 
+import javax.inject.Inject;
+import javax.inject.Singleton;
+
 /**
  * Utilities for handling http requests.
  */
+@Singleton
 public class HttpHandlerUtils {
   private static final Log log = LogFactory.getLog(HttpHandlerUtils.class);
+
+  private final ForwardedForResolver forwardedForResolver;
+
+  @Inject
+  public HttpHandlerUtils(ForwardedForResolver forwardedForResolver) {
+    this.forwardedForResolver = forwardedForResolver;
+  }
 
   /**
    * Gets the request's body as string.
@@ -209,5 +220,22 @@ public class HttpHandlerUtils {
   public void respondNotFound(HandleParameters handleParameters) throws IOException {
     handleParameters.getResponse().setStatus(404);
     handleParameters.getBaseRequest().setHandled(true);
+  }
+
+  /**
+   * Resolves a remote address using X-Forwarded-For headers
+   * 
+   * <p>If requests pass through proxies, they are expected to set for which IP they proxied.
+   * Not all proxies do that, and one cannot trust external proxies. But our internal proxies
+   * do and we can trust them to not set bogus headers. So we use this information to determine
+   * from which IP a request originates.
+   *  
+   * @param handleParameters The parameters of the handle request
+   * @return the IP address we attribute a request to.
+   */
+  public String resolveRemoteAddr(HandleParameters handleParameters) {
+    String remoteAddr = handleParameters.getRequest().getRemoteAddr();
+    String forwardedFor = handleParameters.getRequest().getHeader("X-Forwarded-For");
+    return forwardedForResolver.resolve(remoteAddr,forwardedFor);
   }
 }

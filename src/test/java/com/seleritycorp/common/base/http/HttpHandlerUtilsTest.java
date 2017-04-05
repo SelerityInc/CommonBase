@@ -37,12 +37,14 @@ public class HttpHandlerUtilsTest extends EasyMockSupport {
   private Request baseRequest;
   private HttpServletRequest request;
   private HttpServletResponse response;
+  private ForwardedForResolver forwardedForResolver;
   
   @Before
   public void setUp() {
     baseRequest = createMock(Request.class);
     request = createMock(HttpServletRequest.class);
     response = createMock(HttpServletResponse.class);
+    forwardedForResolver = createMock(ForwardedForResolver.class);
   }
   
   @Test
@@ -254,11 +256,29 @@ public class HttpHandlerUtilsTest extends EasyMockSupport {
     assertThat(body).isEqualTo("bar");
   }
 
+  @Test
+  public void testResolveForwardedFor() throws IOException {
+    HandleParameters parameters = createHandleParameters("/foo");
+    HttpHandlerUtils utils = createHttpHandlerUtils();
+
+    expect(request.getRemoteAddr()).andReturn("foo");
+    expect(request.getHeader("X-Forwarded-For")).andReturn("bar");
+    expect(forwardedForResolver.resolve("foo", "bar")).andReturn("baz");
+
+    replayAll();
+
+    String actual = utils.resolveRemoteAddr(parameters);
+
+    verifyAll();
+
+    assertThat(actual).isEqualTo("baz");
+  }
+
   private HandleParameters createHandleParameters(String target) {
     return new HandleParameters(target, baseRequest, request, response);
   }
 
   private HttpHandlerUtils createHttpHandlerUtils () {
-    return new HttpHandlerUtils();
+    return new HttpHandlerUtils(forwardedForResolver);
   }
 }
