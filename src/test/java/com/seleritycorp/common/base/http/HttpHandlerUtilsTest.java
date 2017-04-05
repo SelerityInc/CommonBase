@@ -25,7 +25,6 @@ import java.io.PrintWriter;
 import java.io.StringReader;
 import java.io.StringWriter;
 
-import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -34,7 +33,7 @@ import org.eclipse.jetty.server.Request;
 import org.junit.Before;
 import org.junit.Test;
 
-public class AbstractHttpHandlerTest extends EasyMockSupport {
+public class HttpHandlerUtilsTest extends EasyMockSupport {
   private Request baseRequest;
   private HttpServletRequest request;
   private HttpServletResponse response;
@@ -51,14 +50,14 @@ public class AbstractHttpHandlerTest extends EasyMockSupport {
     StringWriter stringWriter = new StringWriter();
     PrintWriter printWriter = new PrintWriter(stringWriter);
     HandleParameters parameters = createHandleParameters("/foo");
-    HandlerShim handler = new HandlerShim();
+    HttpHandlerUtils utils = createHttpHandlerUtils();
 
     expect(response.getWriter()).andReturn(printWriter);
     baseRequest.setHandled(true);
 
     replayAll();
 
-    handler.respond("bar", parameters);
+    utils.respond("bar", parameters);
     
     verifyAll();
     
@@ -70,7 +69,7 @@ public class AbstractHttpHandlerTest extends EasyMockSupport {
     StringWriter stringWriter = new StringWriter();
     PrintWriter printWriter = new PrintWriter(stringWriter);
     HandleParameters parameters = createHandleParameters("/foo");
-    HandlerShim handler = new HandlerShim();
+    HttpHandlerUtils utils = createHttpHandlerUtils();
 
     expect(response.getWriter()).andReturn(printWriter);
     response.setStatus(123);
@@ -78,7 +77,7 @@ public class AbstractHttpHandlerTest extends EasyMockSupport {
 
     replayAll();
 
-    handler.respond(123, "bar", parameters);
+    utils.respond(123, "bar", parameters);
     
     verifyAll();
 
@@ -90,7 +89,7 @@ public class AbstractHttpHandlerTest extends EasyMockSupport {
     StringWriter stringWriter = new StringWriter();
     PrintWriter printWriter = new PrintWriter(stringWriter);
     HandleParameters parameters = createHandleParameters("/foo");
-    HandlerShim handler = new HandlerShim();
+    HttpHandlerUtils utils = createHttpHandlerUtils();
 
     expect(response.getWriter()).andReturn(printWriter);
     response.setStatus(123);
@@ -98,7 +97,7 @@ public class AbstractHttpHandlerTest extends EasyMockSupport {
 
     replayAll();
 
-    handler.respond(123, "bar", "baz", parameters);
+    utils.respond(123, "bar", "baz", parameters);
     
     verifyAll();
 
@@ -110,7 +109,7 @@ public class AbstractHttpHandlerTest extends EasyMockSupport {
     StringWriter stringWriter = new StringWriter();
     PrintWriter printWriter = new PrintWriter(stringWriter);
     HandleParameters parameters = createHandleParameters("/foo");
-    HandlerShim handler = new HandlerShim();
+    HttpHandlerUtils utils = createHttpHandlerUtils();
 
     expect(response.getWriter()).andReturn(printWriter);
     response.setStatus(123);
@@ -119,7 +118,7 @@ public class AbstractHttpHandlerTest extends EasyMockSupport {
     
     replayAll();
 
-    handler.respond(123, "bar", "baz", e, parameters);
+    utils.respond(123, "bar", "baz", e, parameters);
     
     verifyAll();
 
@@ -129,14 +128,14 @@ public class AbstractHttpHandlerTest extends EasyMockSupport {
   @Test
   public void testRespondNotFound() throws IOException {
     HandleParameters parameters = createHandleParameters("/foo");
-    HandlerShim handler = new HandlerShim();
+    HttpHandlerUtils utils = createHttpHandlerUtils();
 
     response.setStatus(404);
     baseRequest.setHandled(true);
     
     replayAll();
 
-    handler.respondNotFound(parameters);
+    utils.respondNotFound(parameters);
     
     verifyAll();
   }
@@ -146,7 +145,7 @@ public class AbstractHttpHandlerTest extends EasyMockSupport {
     StringWriter stringWriter = new StringWriter();
     PrintWriter printWriter = new PrintWriter(stringWriter);
     HandleParameters parameters = createHandleParameters("/foo");
-    HandlerShim handler = new HandlerShim();
+    HttpHandlerUtils utils = createHttpHandlerUtils();
 
     expect(response.getWriter()).andReturn(printWriter);
     response.setStatus(400);
@@ -154,7 +153,7 @@ public class AbstractHttpHandlerTest extends EasyMockSupport {
     
     replayAll();
 
-    handler.respondBadRequest("bar", parameters);
+    utils.respondBadRequest("bar", parameters);
     
     verifyAll();
 
@@ -166,7 +165,7 @@ public class AbstractHttpHandlerTest extends EasyMockSupport {
     StringWriter stringWriter = new StringWriter();
     PrintWriter printWriter = new PrintWriter(stringWriter);
     HandleParameters parameters = createHandleParameters("/foo");
-    HandlerShim handler = new HandlerShim();
+    HttpHandlerUtils utils = createHttpHandlerUtils();
 
     expect(response.getWriter()).andReturn(printWriter);
     response.setStatus(400);
@@ -174,7 +173,7 @@ public class AbstractHttpHandlerTest extends EasyMockSupport {
     
     replayAll();
 
-    handler.respondBadRequest("bar", "baz", parameters);
+    utils.respondBadRequest("bar", "baz", parameters);
     
     verifyAll();
 
@@ -186,7 +185,7 @@ public class AbstractHttpHandlerTest extends EasyMockSupport {
     StringWriter stringWriter = new StringWriter();
     PrintWriter printWriter = new PrintWriter(stringWriter);
     HandleParameters parameters = createHandleParameters("/foo");
-    HandlerShim handler = new HandlerShim();
+    HttpHandlerUtils utils = createHttpHandlerUtils();
 
     expect(response.getWriter()).andReturn(printWriter);
     response.setStatus(400);
@@ -195,7 +194,7 @@ public class AbstractHttpHandlerTest extends EasyMockSupport {
     
     replayAll();
 
-    handler.respondBadRequest("bar", "baz", e, parameters);
+    utils.respondBadRequest("bar", "baz", e, parameters);
     
     verifyAll();
 
@@ -207,7 +206,7 @@ public class AbstractHttpHandlerTest extends EasyMockSupport {
     StringWriter stringWriter = new StringWriter();
     PrintWriter printWriter = new PrintWriter(stringWriter);
     HandleParameters parameters = createHandleParameters("/foo");
-    HandlerShim handler = new HandlerShim();
+    HttpHandlerUtils utils = createHttpHandlerUtils();
 
     expect(response.getWriter()).andReturn(printWriter);
     response.setStatus(400);
@@ -216,7 +215,7 @@ public class AbstractHttpHandlerTest extends EasyMockSupport {
     
     replayAll();
 
-    handler.respondBadRequest("bar", e, parameters);
+    utils.respondBadRequest("bar", e, parameters);
     
     verifyAll();
 
@@ -226,14 +225,14 @@ public class AbstractHttpHandlerTest extends EasyMockSupport {
   @Test
   public void testRespondNoContent() throws IOException {
     HandleParameters parameters = createHandleParameters("/foo");
-    HandlerShim handler = new HandlerShim();
+    HttpHandlerUtils utils = createHttpHandlerUtils();
 
     response.setStatus(204);
     baseRequest.setHandled(true);
     
     replayAll();
 
-    handler.respondNoContent(parameters);
+    utils.respondNoContent(parameters);
     
     verifyAll();
   }
@@ -241,14 +240,14 @@ public class AbstractHttpHandlerTest extends EasyMockSupport {
   @Test
   public void testGetRequestBodyAsString() throws IOException {
     HandleParameters parameters = createHandleParameters("/foo");
-    HandlerShim handler = new HandlerShim();
+    HttpHandlerUtils utils = createHttpHandlerUtils();
 
     BufferedReader reader = new BufferedReader(new StringReader("bar"));
     expect(request.getReader()).andReturn(reader);
 
     replayAll();
 
-    String body = handler.getRequestBodyAsString(parameters);
+    String body = utils.getRequestBodyAsString(parameters);
 
     verifyAll();
 
@@ -258,34 +257,8 @@ public class AbstractHttpHandlerTest extends EasyMockSupport {
   private HandleParameters createHandleParameters(String target) {
     return new HandleParameters(target, baseRequest, request, response);
   }
-  
-  private class HandlerShim extends AbstractHttpHandler {
-    @Override
-    public void respond(String response, HandleParameters handleParameters) throws IOException {
-      super.respond(response, handleParameters);
-    }
 
-    @Override
-    public void respond(int status, String response, HandleParameters handleParameters)
-        throws IOException {    
-      super.respond(status, response, handleParameters);
-    }
-    
-    @Override
-    public void respond(int status, String response, String logMessage, HandleParameters handleParameters)
-        throws IOException {    
-      super.respond(status, response, logMessage, handleParameters);
-    }
-    
-    @Override
-    public void respond(int status, String response, String logMessage, Throwable logThrowable,
-        HandleParameters handleParameters) throws IOException {    
-      super.respond(status, response, logMessage, logThrowable, handleParameters);
-    }
-    
-    @Override
-    public void handle(String target, Request baseRequest, HttpServletRequest request,
-        HttpServletResponse response) throws IOException, ServletException {
-    }
+  private HttpHandlerUtils createHttpHandlerUtils () {
+    return new HttpHandlerUtils();
   }
 }
