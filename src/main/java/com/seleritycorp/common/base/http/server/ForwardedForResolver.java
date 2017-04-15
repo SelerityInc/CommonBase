@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.seleritycorp.common.base.http;
+package com.seleritycorp.common.base.http.server;
 
 /**
  * Resolves remote addresses of requests while considering X-Forwarded-For headers.

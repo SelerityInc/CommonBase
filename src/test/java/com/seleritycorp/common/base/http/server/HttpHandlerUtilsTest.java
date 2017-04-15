@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.seleritycorp.common.base.http;
+package com.seleritycorp.common.base.http.server;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.easymock.EasyMock.expect;
@@ -32,6 +32,10 @@ import org.easymock.EasyMockSupport;
 import org.eclipse.jetty.server.Request;
 import org.junit.Before;
 import org.junit.Test;
+
+import com.seleritycorp.common.base.http.server.ForwardedForResolver;
+import com.seleritycorp.common.base.http.server.HandleParameters;
+import com.seleritycorp.common.base.http.server.HttpHandlerUtils;
 
 public class HttpHandlerUtilsTest extends EasyMockSupport {
   private Request baseRequest;

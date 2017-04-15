@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.seleritycorp.common.base.http;
+package com.seleritycorp.common.base.http.server;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -33,6 +33,8 @@ import org.easymock.EasyMockSupport;
 import org.eclipse.jetty.server.Request;
 import org.junit.Test;
 
+import com.seleritycorp.common.base.http.server.AbstractHttpHandler;
+import com.seleritycorp.common.base.http.server.HttpServer;
 import com.seleritycorp.common.base.state.AppState;
 import com.seleritycorp.common.base.state.AppStateFacetFactory;
 import com.seleritycorp.common.base.state.AppStatePushFacet;

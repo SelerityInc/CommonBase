@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.seleritycorp.common.base.http;
+package com.seleritycorp.common.base.http.server;
 
 import org.eclipse.jetty.server.Request;
 
