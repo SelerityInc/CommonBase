@@ -114,15 +114,43 @@ public class InjectingTestCase extends FileTestCase {
    * @throws Throwable always. Thereby the test is skipped/fails.
    */
   protected void failInCiSkipOtherwise(String reason) throws Throwable {
+    failInCiSkipOtherwise(reason, null);
+  }
+
+  /**
+   * Fail the test inside CI environments, skip the test otherwise.
+   * 
+   * <p>This method helps to to abort tests that have unmet external dependencies
+   * (e.g.: Databases, network connection, ...). As not all developers can be bothered to setup
+   * all dependencies, the test is skipped for developers. But in CI environments, where we expect
+   * that all external dependencies are met, the test will fail hard.
+   * 
+   * @param reason The reason for the skip/failure.
+   * @param cause The exception leading to the skip/failure. 
+   * @throws Throwable always. Thereby the test is skipped/fails.
+   */
+  protected void failInCiSkipOtherwise(String reason, Throwable cause) throws Throwable {
     final Throwable t;
     if (isRunningInsideCi()) {
       if (reason != null) {
-        t = new AssertionError(reason);
+        if (cause == null) {
+          t = new AssertionError(reason);
+        } else {
+          t = new AssertionError(reason, cause);          
+        }
       } else { 
-        t = new AssertionError();
+        if (cause == null) {
+          t = new AssertionError();
+        } else {
+          t = new AssertionError(cause);          
+        }
       }
     } else {
-      t = new AssumptionViolatedException((reason != null) ? reason : "<no reason given>");
+      if (cause == null) {
+        t = new AssumptionViolatedException((reason != null) ? reason : "<no reason given>");
+      } else {
+        t = new AssumptionViolatedException((reason != null) ? reason : "<no reason given>", cause);        
+      }
     }
     throw t;
   }

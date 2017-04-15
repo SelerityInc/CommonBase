@@ -24,6 +24,7 @@ import com.google.inject.Module;
 
 import com.seleritycorp.common.base.config.ConfigModule;
 import com.seleritycorp.common.base.config.ProductionModule;
+import com.seleritycorp.common.base.http.client.HttpClientModule;
 import com.seleritycorp.common.base.logging.LoggingModule;
 import com.seleritycorp.common.base.state.StateModule;
 import com.seleritycorp.common.base.time.TimeModule;
@@ -60,6 +61,7 @@ public class InjectorFactory {
           modules.add(new LoggingModule());
           modules.add(new StateModule());
           modules.add(new UuidModule());
+          modules.add(new HttpClientModule());
           injector = Guice.createInjector(modules);
         }
       }
