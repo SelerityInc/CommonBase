@@ -34,6 +34,7 @@ public class HttpRequest {
   private final String uri;
   private final HttpClient httpClient;
   private final HttpResponse.Factory responseFactory;
+  private String userAgent;
   
   @Inject
   HttpRequest(@Assisted String uri, HttpClient httpClient,
@@ -41,6 +42,19 @@ public class HttpRequest {
     this.uri = uri;
     this.httpClient = httpClient;
     this.responseFactory = responseFactory;
+    this.userAgent = null;
+  }
+
+  /**
+   * Sets the User-Agent header to use for this request.
+   * 
+   * @param userAgent The value to use as User-Agent header. If null, no User-Agent header will
+   *     get sent.
+   * @return The current request instance.
+   */
+  public HttpRequest setUserAgent(String userAgent) {
+    this.userAgent = userAgent;
+    return this;
   }
 
   /**
@@ -57,6 +71,10 @@ public class HttpRequest {
       request = new HttpGet(uri);
     } catch (IllegalArgumentException e) {
       throw new HttpException("Failed to create URI '" + uri + "'", e);
+    }
+
+    if (userAgent != null) {
+      request.setHeader(HTTP.USER_AGENT, userAgent);
     }
 
     final org.apache.http.HttpResponse response;

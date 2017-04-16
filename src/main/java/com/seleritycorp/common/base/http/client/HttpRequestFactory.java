@@ -16,6 +16,8 @@
 
 package com.seleritycorp.common.base.http.client;
 
+import com.seleritycorp.common.base.meta.MetaDataFormatter;
+
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
@@ -25,10 +27,12 @@ import javax.inject.Singleton;
 @Singleton
 public class HttpRequestFactory {
   private final HttpRequest.Factory requestFactory;
+  private final String userAgent;
 
   @Inject
-  HttpRequestFactory(HttpRequest.Factory requestFactory) {
+  HttpRequestFactory(HttpRequest.Factory requestFactory, MetaDataFormatter metaDataFormatter) {
     this.requestFactory = requestFactory;
+    this.userAgent = metaDataFormatter.getUserAgent();
   }
 
   /**
@@ -38,6 +42,8 @@ public class HttpRequestFactory {
    * @return The created request
    */
   public HttpRequest create(String url) {
-    return requestFactory.create(url);
+    HttpRequest request = requestFactory.create(url);
+    request.setUserAgent(userAgent);
+    return request;
   }
 }

@@ -23,19 +23,27 @@ import org.easymock.EasyMockSupport;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.seleritycorp.common.base.meta.MetaDataFormatter;
+
 public class HttpRequestFactoryTest extends EasyMockSupport {
-  HttpRequest.Factory requestFactory;
+  private HttpRequest.Factory requestFactory;
+  private MetaDataFormatter metaDataFormatter;
 
   @Before
   public void setUp() {
-    requestFactory = createMock(HttpRequest.Factory.class);    
+    requestFactory = createMock(HttpRequest.Factory.class);
+
+    metaDataFormatter = createMock(MetaDataFormatter.class);
+    expect(metaDataFormatter.getUserAgent()).andReturn("userAgentBar").anyTimes();
   }
 
   @Test
   public void testCreate() {
     HttpRequest expected = createMock(HttpRequest.class);
-    expect(requestFactory.create("foo")).andReturn(expected);
+    expect(expected.setUserAgent("userAgentBar")).andReturn(expected);
 
+    expect(requestFactory.create("foo")).andReturn(expected);
+    
     replayAll();
 
     HttpRequestFactory factory = createHttpRequestFactory();
@@ -47,6 +55,6 @@ public class HttpRequestFactoryTest extends EasyMockSupport {
   }
   
   private HttpRequestFactory createHttpRequestFactory() {
-    return new HttpRequestFactory(requestFactory);
+    return new HttpRequestFactory(requestFactory, metaDataFormatter);
   }
 }

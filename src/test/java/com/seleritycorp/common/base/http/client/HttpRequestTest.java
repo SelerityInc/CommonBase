@@ -108,6 +108,69 @@ public class HttpRequestTest extends EasyMockSupport {
     verifyAll();
   }
 
+  @Test
+  public void testSetUserAgentPlain() throws Exception {
+    replayAll();
+    
+    HttpRequest request = createHttpRequest("foo");
+    HttpRequest requestAfterSetting = request.setUserAgent("foo");
+    HttpResponse response = request.execute();
+    
+    verifyAll();
+    
+    assertThat(request).isSameAs(requestAfterSetting);
+    assertThat(response).isEqualTo(httpResponse);
+
+    HttpUriRequest backendRequest = backendRequestCapture.getValue();
+    assertThat(backendRequest.getMethod()).isEqualTo("GET");
+    assertThat(backendRequest.getURI().toString()).isEqualTo("foo");
+    assertThat(backendRequest.getHeaders("User-Agent")).hasSize(1);    
+    assertThat(backendRequest.getFirstHeader("User-Agent").getValue()).isEqualTo("foo");    
+  }
+
+  @Test
+  public void testSetUserAgentOverwrite() throws Exception {
+    replayAll();
+    
+    HttpRequest request = createHttpRequest("foo");
+    HttpRequest requestAfterSetting1 = request.setUserAgent("foo1");
+    HttpRequest requestAfterSetting2 = request.setUserAgent("foo2");
+    HttpResponse response = request.execute();
+    
+    verifyAll();
+    
+    assertThat(request).isSameAs(requestAfterSetting1);
+    assertThat(request).isSameAs(requestAfterSetting2);
+    assertThat(response).isEqualTo(httpResponse);
+
+    HttpUriRequest backendRequest = backendRequestCapture.getValue();
+    assertThat(backendRequest.getMethod()).isEqualTo("GET");
+    assertThat(backendRequest.getURI().toString()).isEqualTo("foo");
+    assertThat(backendRequest.getHeaders("User-Agent")).hasSize(1);    
+    assertThat(backendRequest.getFirstHeader("User-Agent").getValue()).isEqualTo("foo2");    
+  }
+
+  @Test
+  public void testSetUserAgentReset() throws Exception {
+    replayAll();
+    
+    HttpRequest request = createHttpRequest("foo");
+    HttpRequest requestAfterSetting1 = request.setUserAgent("foo1");
+    HttpRequest requestAfterSetting2 = request.setUserAgent(null);
+    HttpResponse response = request.execute();
+    
+    verifyAll();
+    
+    assertThat(request).isSameAs(requestAfterSetting1);
+    assertThat(request).isSameAs(requestAfterSetting2);
+    assertThat(response).isEqualTo(httpResponse);
+
+    HttpUriRequest backendRequest = backendRequestCapture.getValue();
+    assertThat(backendRequest.getMethod()).isEqualTo("GET");
+    assertThat(backendRequest.getURI().toString()).isEqualTo("foo");
+    assertThat(backendRequest.getHeaders("User-Agent")).hasSize(0);    
+  }
+
   private HttpRequest createHttpRequest(String url) throws HttpException {
     return new HttpRequest(url, httpClient, responseFactory);
   }
