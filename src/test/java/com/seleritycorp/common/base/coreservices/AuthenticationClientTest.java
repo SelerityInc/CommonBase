@@ -50,7 +50,7 @@ public class AuthenticationClientTest extends EasyMockSupport {
   }
 
   @Test
-  public void testGetAuthTokenOk() throws IOException, CallErrorException {
+  public void testGetAuthTokenOk() throws Exception {
     Capture<String> methodCapture = newCapture();
     Capture<JsonElement> paramCapture = newCapture();
 
@@ -76,7 +76,7 @@ public class AuthenticationClientTest extends EasyMockSupport {
   }
 
   @Test
-  public void testGetAuthTokenFaultyResponse() throws IOException, CallErrorException {
+  public void testGetAuthTokenFaultyResponse() throws Exception {
     Capture<String> methodCapture = newCapture();
     Capture<JsonElement> paramCapture = newCapture();
 

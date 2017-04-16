@@ -22,8 +22,8 @@ import com.google.gson.JsonObject;
 import com.seleritycorp.common.base.config.ApplicationConfig;
 import com.seleritycorp.common.base.config.Config;
 import com.seleritycorp.common.base.config.ConfigUtils;
+import com.seleritycorp.common.base.http.client.HttpException;
 
-import java.io.IOException;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
@@ -54,10 +54,10 @@ public class AuthenticationClient {
    * <p>User and password for the authentication are taken from the application's config.
    * 
    * @return the authentication token
-   * @throws IOException for network or other IO issues occur..
+   * @throws HttpException for network or other IO issues occur..
    * @throws CallErrorException for server and semantics errors.
    */
-  public String getAuthThoken() throws IOException, CallErrorException {
+  public String getAuthThoken() throws HttpException, CallErrorException {
     final JsonObject params = new JsonObject();
     params.addProperty("user", user);
     params.addProperty("password", password);

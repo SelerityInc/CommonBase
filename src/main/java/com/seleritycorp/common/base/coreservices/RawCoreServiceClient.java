@@ -18,24 +18,15 @@ package com.seleritycorp.common.base.coreservices;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
 
 import com.seleritycorp.common.base.config.ApplicationConfig;
 import com.seleritycorp.common.base.config.Config;
 import com.seleritycorp.common.base.config.ConfigUtils;
-import com.seleritycorp.common.base.logging.Log;
-import com.seleritycorp.common.base.logging.LogFactory;
+import com.seleritycorp.common.base.http.client.HttpException;
+import com.seleritycorp.common.base.http.client.HttpRequestFactory;
 import com.seleritycorp.common.base.meta.MetaDataFormatter;
 import com.seleritycorp.common.base.uuid.UuidGenerator;
-import org.apache.commons.io.IOUtils;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.net.URLConnection;
-import java.nio.charset.StandardCharsets;
 import java.util.concurrent.TimeUnit;
 
 import javax.inject.Inject;
@@ -43,13 +34,12 @@ import javax.inject.Singleton;
 
 @Singleton
 public class RawCoreServiceClient {
-  private static final Log log = LogFactory.getLog(RawCoreServiceClient.class);
-
   private final UuidGenerator uuidGenerator;
-  private final URL apiUrl;
+  private final String apiUrl;
   private final int timeoutMillis;
   private final String user;
   private final String client;
+  private final HttpRequestFactory requestFactory;
 
   /**
    * Creates a raw client for CoreService calls.
@@ -57,52 +47,29 @@ public class RawCoreServiceClient {
    * @param appConfig The application config to use.
    * @param uuidGenerator Used for request ids.
    * @param metaDataFormatter Formatter for the used user agent.
-   * @throws MalformedURLException if the CoreServices URL is malformed
+   * @param requestFactory Factory for Http requests.
    */
   @Inject
   public RawCoreServiceClient(@ApplicationConfig Config appConfig, UuidGenerator uuidGenerator,
-      MetaDataFormatter metaDataFormatter) throws MalformedURLException {
+      MetaDataFormatter metaDataFormatter, HttpRequestFactory requestFactory) {
     this.uuidGenerator = uuidGenerator;
     Config config = ConfigUtils.subconfig(appConfig, "CoreServices");
-    apiUrl = new URL(config.get("url"));
+    this.apiUrl = config.get("url");
     this.user = config.get("user");
 
     this.timeoutMillis = (int) config.getDurationMillis("timeout", 300, TimeUnit.SECONDS);
 
     this.client = metaDataFormatter.getUserAgent();
-  }
-
-  private String getRawResponse(String rawRequest, int timeoutMillis) throws IOException {
-    URLConnection connection = apiUrl.openConnection();
-    connection.setRequestProperty("Accept", "text/plain");
-    connection.setRequestProperty("Content-type", "application/json");
-    connection.setRequestProperty("User-Agent", client);
-    connection.setDoOutput(true);
-    connection.setReadTimeout(timeoutMillis);
-
-    final OutputStream out = connection.getOutputStream();
-    out.write(rawRequest.getBytes(StandardCharsets.UTF_8));
-    out.flush();
-    out.close();
-
-    log.debug("wrote request " + rawRequest + " (timeout wanted: " + timeoutMillis + ", actual: "
-        + connection.getReadTimeout() + ")");
-
-    String response = null;
-    try (final InputStream in = connection.getInputStream()) {
-      response = IOUtils.toString(in, StandardCharsets.UTF_8);
-    }
-
-    return response;
+    this.requestFactory = requestFactory;
   }
 
   public JsonElement call(String method, JsonElement params, int timeout)
-      throws IOException, CallErrorException {
+      throws HttpException, CallErrorException {
     return call(method, params, null, -1);
   }
 
   JsonElement call(String method, JsonElement params, String token, int timeoutMillis)
-      throws IOException, CallErrorException {
+      throws HttpException, CallErrorException {
     JsonObject header = new JsonObject();
     header.addProperty("user", user);
     if (token != null) {
@@ -118,10 +85,10 @@ public class RawCoreServiceClient {
 
     final int effectiveTimeoutMillis = (timeoutMillis > 0) ? timeoutMillis : this.timeoutMillis;
 
-    final String responseString = getRawResponse(request.toString(), effectiveTimeoutMillis);
-
-    final JsonParser parser = new JsonParser();
-    final JsonObject responseObj = parser.parse(responseString).getAsJsonObject();
+    JsonObject responseObj = requestFactory.createPostJson(apiUrl, request)
+          .setReadTimeoutMillis(effectiveTimeoutMillis)
+          .execute()
+          .getBodyAsJsonObject();
 
     final JsonElement error = responseObj.get("error");
     if (error != null && !error.isJsonNull()) {

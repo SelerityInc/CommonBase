@@ -58,7 +58,7 @@ public class RawAuthenticatedCoreServiceClientTest extends InjectingTestCase {
   }
 
   @Test
-  public void testAuthenticatedCallSingleCall() throws IOException, CallErrorException {
+  public void testAuthenticatedCallSingleCall() throws Exception {
     JsonObject params = new JsonObject();
     params.addProperty("bar", "baz");
 
@@ -86,7 +86,7 @@ public class RawAuthenticatedCoreServiceClientTest extends InjectingTestCase {
   }
 
   @Test
-  public void testAuthenticatedCallTokenReuseOkSameTime() throws IOException, CallErrorException {
+  public void testAuthenticatedCallTokenReuseOkSameTime() throws Exception {
     JsonObject params = new JsonObject();
     params.addProperty("bar", "baz");
 
@@ -125,8 +125,7 @@ public class RawAuthenticatedCoreServiceClientTest extends InjectingTestCase {
   }
 
   @Test
-  public void testAuthenticatedCallTokenReuseOkTimeIncrease()
-      throws IOException, CallErrorException {
+  public void testAuthenticatedCallTokenReuseOkTimeIncrease() throws Exception {
     JsonObject params = new JsonObject();
     params.addProperty("bar", "baz");
 
@@ -168,7 +167,7 @@ public class RawAuthenticatedCoreServiceClientTest extends InjectingTestCase {
   }
 
   @Test
-  public void testAuthenticatedCallTokenReuseTokenTimeout() throws IOException, CallErrorException {
+  public void testAuthenticatedCallTokenReuseTokenTimeout() throws Exception {
     JsonObject params = new JsonObject();
     params.addProperty("bar", "baz");
 
@@ -210,7 +209,7 @@ public class RawAuthenticatedCoreServiceClientTest extends InjectingTestCase {
   }
 
   @Test
-  public void testAuthenticatedCallTokenReuseFailure() throws IOException, CallErrorException {
+  public void testAuthenticatedCallTokenReuseFailure() throws Exception {
     JsonObject params = new JsonObject();
     params.addProperty("bar", "baz");
 

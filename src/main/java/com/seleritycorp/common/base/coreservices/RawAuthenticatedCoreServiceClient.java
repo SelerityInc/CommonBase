@@ -21,9 +21,9 @@ import com.google.gson.JsonElement;
 import com.seleritycorp.common.base.config.ApplicationConfig;
 import com.seleritycorp.common.base.config.Config;
 import com.seleritycorp.common.base.config.ConfigUtils;
+import com.seleritycorp.common.base.http.client.HttpException;
 import com.seleritycorp.common.base.time.Clock;
 
-import java.io.IOException;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
@@ -64,11 +64,11 @@ public class RawAuthenticatedCoreServiceClient {
    * @param method The CoreServices method to call
    * @param params The parameters to the method
    * @return The methods result object
-   * @throws IOException for network or other IO issues occur..
+   * @throws HttpException for network or other IO issues occur..
    * @throws CallErrorException for server and semantics errors.
    */
   public JsonElement authenticatedCall(String method, JsonElement params)
-      throws IOException, CallErrorException {
+      throws HttpException, CallErrorException {
     if (token == null || tokenTimeoutTimestamp < clock.getSecondsEpoch()) {
       // Resetting the token, so in case things go wrong from here, we have a well resetted
       // environment.

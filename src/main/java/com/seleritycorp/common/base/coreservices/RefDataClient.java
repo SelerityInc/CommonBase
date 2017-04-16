@@ -19,7 +19,7 @@ package com.seleritycorp.common.base.coreservices;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 
-import java.io.IOException;
+import com.seleritycorp.common.base.http.client.HttpException;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -38,11 +38,11 @@ public class RefDataClient {
    * 
    * @param enumType The enumType to fetch the identifiers for.
    * @return The found identifiers.
-   * @throws IOException for network or other IO issues occur..
+   * @throws HttpException for network or other IO issues occur..
    * @throws CallErrorException for server and semantics errors.
    */
   public JsonElement getIdentifiersForEnumType(String enumType)
-      throws IOException, CallErrorException {
+      throws HttpException, CallErrorException {
     JsonArray params = new JsonArray();
     params.add(enumType);
 

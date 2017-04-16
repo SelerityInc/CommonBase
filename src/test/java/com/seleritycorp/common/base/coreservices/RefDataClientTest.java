@@ -32,7 +32,6 @@ import org.junit.Test;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import com.seleritycorp.common.base.coreservices.CallErrorException;
 import com.seleritycorp.common.base.test.SettableConfig;
 
 public class RefDataClientTest extends EasyMockSupport {
@@ -49,7 +48,7 @@ public class RefDataClientTest extends EasyMockSupport {
   }
 
   @Test
-  public void testGetAuthTokenOk() throws IOException, CallErrorException {
+  public void testGetAuthTokenOk() throws Exception {
     Capture<String> methodCapture = newCapture();
     Capture<JsonElement> paramCapture = newCapture();
 
