@@ -66,7 +66,11 @@ public class BuildProperties {
       properties = new Properties();
       log.debug("Load properties from resource " + resourceName);
       try (InputStream stream = BuildProperties.class.getResourceAsStream(resourceName)) {
-        properties.load(stream);
+        if (stream != null) {
+          properties.load(stream);
+        } else {
+          log.error("Could not load '" + resourceName + "'");
+        }
       } catch (IOException e) {
         log.error("Could not load '" + resourceName + "'", e);
       }
