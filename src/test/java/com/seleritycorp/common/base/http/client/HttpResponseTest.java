@@ -17,6 +17,7 @@
 package com.seleritycorp.common.base.http.client;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.failBecauseExceptionWasNotThrown;
 
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
@@ -30,6 +31,8 @@ import org.apache.http.message.BasicStatusLine;
 import org.easymock.EasyMockSupport;
 import org.junit.Test;
 
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParseException;
 import com.seleritycorp.common.base.http.client.HttpResponse;
 
 public class HttpResponseTest extends EasyMockSupport {
@@ -62,10 +65,45 @@ public class HttpResponseTest extends EasyMockSupport {
   public void testGetBodyNull() throws Exception {
     HttpResponse response = createHttpResponse(200, null, null);
     String actual = response.getBody();
-    
     assertThat(actual).isEqualTo("");
   }
-  
+
+  public void testGetBodyAsJsonObjectOk() throws Exception {
+    HttpResponse response = createHttpResponse(200, "{\"foo\": 4711}");
+
+    JsonObject actual = response.getBodyAsJsonObject();
+
+    JsonObject expected = new JsonObject();
+    expected.addProperty("foo", 4711);
+    assertThat(actual).isEqualTo(expected);
+  }
+
+  @Test
+  public void testGetBodyAsJsonObjectIsJsonArray() throws Exception {
+    HttpResponse response = createHttpResponse(200, "[1,2]");
+
+    try {
+      response.getBodyAsJsonObject();
+      failBecauseExceptionWasNotThrown(HttpException.class);
+    } catch (HttpException e) {
+      assertThat(e.getCause()).isInstanceOf(IllegalStateException.class);
+    }
+  }
+
+  @Test
+  public void testGetBodyAsJsonObjectInvalidJson() throws Exception {
+    HttpResponse response = createHttpResponse(200, "{foo: bar baz}");
+
+    try {
+      response.getBodyAsJsonObject();
+      failBecauseExceptionWasNotThrown(HttpException.class);
+    } catch (HttpException e) {
+      assertThat(e.getCause()).isInstanceOf(JsonParseException.class);
+    }
+
+    verifyAll();
+  }
+
   @Test
   public void testGetStatusCodeInt() throws Exception {
     HttpResponse response = createHttpResponse(123, "");

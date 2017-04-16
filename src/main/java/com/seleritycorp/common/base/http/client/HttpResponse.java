@@ -16,6 +16,9 @@
 
 package com.seleritycorp.common.base.http.client;
 
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParseException;
+import com.google.gson.JsonParser;
 import com.google.inject.assistedinject.Assisted;
 
 import org.apache.http.HttpEntity;
@@ -72,6 +75,29 @@ public class HttpResponse {
    */
   public String getBody() {
     return body;
+  }
+
+  /**
+   * Gets the response's body for this response as Gson JsonObject.
+   *
+   * <p>It is safe to call this method multiple times.
+   * 
+   * <p>Exceptions from the json parser are wrapped in {@link HttpException}.
+   *
+   * @return the response's body as JsonObject
+   * @throws HttpException if getting the body, or parsing it as JsonObject fails.
+   */
+  public JsonObject getBodyAsJsonObject() throws HttpException {
+    final JsonParser parser = new JsonParser();
+    final JsonObject ret;
+    try {
+      ret = parser.parse(getBody()).getAsJsonObject();
+    } catch (JsonParseException e) {
+      throw new HttpException("Failed to parse server response as JSON", e);
+    } catch (IllegalStateException e) {
+      throw new HttpException("Parsed entity is not a JsonObject", e);
+    }
+    return ret;
   }
 
   /**
