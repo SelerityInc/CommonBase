@@ -16,7 +16,11 @@
 
 package com.seleritycorp.common.base.http.client;
 
+import com.google.gson.JsonObject;
+
 import com.seleritycorp.common.base.meta.MetaDataFormatter;
+
+import org.apache.http.entity.ContentType;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -45,5 +49,19 @@ public class HttpRequestFactory {
     HttpRequest request = requestFactory.create(url);
     request.setUserAgent(userAgent);
     return request;
+  }
+
+  /**
+   * Creates a POST request for plain Json data.
+   *
+   * @param url The URL to request.
+   * @param json The json object to post to the url.
+   * @return The created request.
+   */
+  public HttpRequest createPostJson(String url, JsonObject json) {
+    return create(url)
+        .setMethodPost()
+        .setContentType(ContentType.APPLICATION_JSON)
+        .addData(json.toString());
   }
 }

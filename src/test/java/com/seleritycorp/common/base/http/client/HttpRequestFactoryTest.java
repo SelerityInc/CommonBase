@@ -19,10 +19,12 @@ package com.seleritycorp.common.base.http.client;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.easymock.EasyMock.expect;
 
+import org.apache.http.entity.ContentType;
 import org.easymock.EasyMockSupport;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.google.gson.JsonObject;
 import com.seleritycorp.common.base.meta.MetaDataFormatter;
 
 public class HttpRequestFactoryTest extends EasyMockSupport {
@@ -48,6 +50,28 @@ public class HttpRequestFactoryTest extends EasyMockSupport {
 
     HttpRequestFactory factory = createHttpRequestFactory();
     HttpRequest request = factory.create("foo");
+    
+    verifyAll();
+    
+    assertThat(request).isEqualTo(expected);
+  }
+  
+  @Test
+  public void testCreatePostJson() {
+    HttpRequest expected = createMock(HttpRequest.class);
+    expect(expected.setUserAgent("userAgentBar")).andReturn(expected);
+    expect(expected.setMethodPost()).andReturn(expected);
+    expect(expected.setContentType(ContentType.APPLICATION_JSON)).andReturn(expected);
+    expect(expected.addData("{\"bar\":4711}")).andReturn(expected);
+
+    expect(requestFactory.create("foo")).andReturn(expected);
+    
+    replayAll();
+
+    JsonObject json = new JsonObject();
+    json.addProperty("bar", 4711);
+    HttpRequestFactory factory = createHttpRequestFactory();
+    HttpRequest request = factory.createPostJson("foo", json);
     
     verifyAll();
     
