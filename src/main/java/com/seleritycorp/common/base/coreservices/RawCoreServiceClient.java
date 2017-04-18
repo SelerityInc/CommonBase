@@ -32,6 +32,9 @@ import java.util.concurrent.TimeUnit;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
+/**
+ * Raw client for calling calling CoreServices methods.
+ */
 @Singleton
 public class RawCoreServiceClient {
   private final UuidGenerator uuidGenerator;
@@ -63,6 +66,17 @@ public class RawCoreServiceClient {
     this.requestFactory = requestFactory;
   }
 
+  /**
+   * Calls a CoreServices method.
+   * 
+   * @param method The CoreServices method to call
+   * @param params The parameters to pass to the CoreServices call
+   * @param token The authentication token. Set to null to perform an unauthenticated call.
+   * @param timeoutMillis The read timeout for new data on the connection.
+   * @return The call's result JsonElement
+   * @throws HttpException if network errors or parsing errors occured on the client.
+   * @throws CallErrorException if the server responded with an error.
+   */
   JsonElement call(String method, JsonElement params, String token, int timeoutMillis)
       throws HttpException, CallErrorException {
     JsonObject header = new JsonObject();

@@ -27,6 +27,9 @@ import com.seleritycorp.common.base.time.Clock;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
+/**
+ * Raw client for calling calling authenticated CoreServices methods.
+ */
 @Singleton
 public class RawAuthenticatedCoreServiceClient {
   private final RawCoreServiceClient client;

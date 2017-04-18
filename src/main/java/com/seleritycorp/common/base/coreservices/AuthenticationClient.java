@@ -27,6 +27,9 @@ import com.seleritycorp.common.base.http.client.HttpException;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
+/**
+ * CoreServices client for authentication calls.
+ */
 @Singleton
 public class AuthenticationClient {
   private RawCoreServiceClient client;

@@ -24,6 +24,9 @@ import com.seleritycorp.common.base.http.client.HttpException;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
+/**
+ * CoreServices client for RDS (Reference Data Service) calls.
+ */
 @Singleton
 public class RefDataClient {
   private final RawAuthenticatedCoreServiceClient client;
