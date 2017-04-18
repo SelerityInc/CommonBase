@@ -63,11 +63,6 @@ public class RawCoreServiceClient {
     this.requestFactory = requestFactory;
   }
 
-  public JsonElement call(String method, JsonElement params, int timeout)
-      throws HttpException, CallErrorException {
-    return call(method, params, null, -1);
-  }
-
   JsonElement call(String method, JsonElement params, String token, int timeoutMillis)
       throws HttpException, CallErrorException {
     JsonObject header = new JsonObject();
