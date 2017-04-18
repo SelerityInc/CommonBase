@@ -18,14 +18,20 @@ package com.seleritycorp.common.base.http.client;
 
 import com.google.inject.assistedinject.Assisted;
 
+import org.apache.http.HttpEntity;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.config.RequestConfig;
+import org.apache.http.client.methods.HttpEntityEnclosingRequestBase;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpRequestBase;
+import org.apache.http.entity.ContentType;
+import org.apache.http.entity.StringEntity;
+import org.apache.http.protocol.HTTP;
 
 import java.io.IOException;
 import java.net.URI;
+import java.nio.charset.StandardCharsets;
 
 import javax.inject.Inject;
 
@@ -40,6 +46,8 @@ public class HttpRequest {
   private String method;
   private String userAgent;
   private int readTimeoutMillis;
+  private String data;
+  private ContentType contentType;
   
   @Inject
   HttpRequest(@Assisted String uri, HttpClient httpClient,
@@ -50,6 +58,8 @@ public class HttpRequest {
     this.method = "GET";
     this.userAgent = null;
     this.readTimeoutMillis = -1;
+    this.data = "";
+    this.contentType = null;
   }
 
   /**
@@ -87,6 +97,35 @@ public class HttpRequest {
   }
 
   /**
+   * Adds content to the data sent with the request. 
+   * 
+   * @param data The data to add. This data is expected to be in the correct encoding already.
+   *     If there is already some data stored with the request, an ampersand and the new data
+   *     get appended to the existing data.
+   * @return The current request instance.
+   */
+  public HttpRequest addData(String data) {
+    if (data != null) {
+      if (!this.data.isEmpty()) {
+        this.data += "&";
+      }
+      this.data += data;
+    }
+    return this;
+  }
+
+  /**
+   * Set the content type for the payload to send with requests.
+   * 
+   * @param contentType The content type for the data to send with the request.
+   * @return The current request instance.
+   */
+  public HttpRequest setContentType(ContentType contentType) {
+    this.contentType = contentType;
+    return this;
+  }
+
+  /**
    * Executes the configured request.
    *
    * @return The server's response to the request.
@@ -119,6 +158,22 @@ public class HttpRequest {
 
     if (readTimeoutMillis >= 0) {
       request.setConfig(RequestConfig.custom().setSocketTimeout(readTimeoutMillis).build());
+    }
+
+    if (!data.isEmpty()) {
+      if (request instanceof HttpEntityEnclosingRequestBase) {
+        final HttpEntity entity;
+        ContentType localContentType = contentType;
+        if (localContentType == null) {
+          localContentType = ContentType.create("text/plain", StandardCharsets.UTF_8);
+        }
+        entity = new StringEntity(data, localContentType);
+        HttpEntityEnclosingRequestBase entityRequest = (HttpEntityEnclosingRequestBase) request;
+        entityRequest.setEntity(entity);
+      } else {
+        throw new HttpException("Request " + request.getMethod() + " does not allow to send data "
+            + "with the request");
+      }
     }
 
     final org.apache.http.HttpResponse response;

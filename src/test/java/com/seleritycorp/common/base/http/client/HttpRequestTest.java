@@ -24,10 +24,15 @@ import static org.easymock.EasyMock.newCapture;
 import static org.easymock.EasyMock.reset;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 
+import org.apache.commons.io.IOUtils;
+import org.apache.http.HttpEntity;
 import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpEntityEnclosingRequestBase;
 import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.http.client.methods.HttpUriRequest;
+import org.apache.http.entity.ContentType;
 import org.easymock.Capture;
 import org.easymock.EasyMockSupport;
 import org.junit.Before;
@@ -104,6 +109,25 @@ public class HttpRequestTest extends EasyMockSupport {
       failBecauseExceptionWasNotThrown(HttpException.class);
     } catch (HttpException e) {
       assertThat(e.getCause()).isEqualTo(expected);
+    }
+    
+    verifyAll();
+  }
+
+  @Test
+  public void testExecuteGetWithData() throws Exception {
+    reset(httpClient);
+    reset(responseFactory);
+
+    replayAll();
+    
+    HttpRequest request = createHttpRequest("foo").addData("bar");
+
+    try {
+      request.execute();
+      failBecauseExceptionWasNotThrown(HttpException.class);
+    } catch (HttpException e) {
+      assertThat(e.getMessage()).contains("data");
     }
     
     verifyAll();
@@ -209,6 +233,118 @@ public class HttpRequestTest extends EasyMockSupport {
     HttpUriRequest backendRequest = backendRequestCapture.getValue();
     assertThat(backendRequest.getMethod()).isEqualTo("POST");
     assertThat(backendRequest.getURI().toString()).isEqualTo("foo");
+  }
+
+  @Test
+  public void testAddDataSingle() throws Exception {
+    replayAll();
+    
+    HttpRequest request = createHttpRequest("foo");
+    HttpRequest requestAfterSetting1 = request.setMethodPost();
+    HttpRequest requestAfterSetting2 = request.addData("foo=bar%");
+    HttpResponse response = request.execute();
+    
+    verifyAll();
+    
+    assertThat(request).isSameAs(requestAfterSetting1);
+    assertThat(request).isSameAs(requestAfterSetting2);
+    assertThat(response).isEqualTo(httpResponse);
+
+    HttpUriRequest backendRequestRaw = backendRequestCapture.getValue();
+    assertThat(backendRequestRaw).isInstanceOf(HttpEntityEnclosingRequestBase.class);
+    HttpEntityEnclosingRequestBase backendRequest =
+        (HttpEntityEnclosingRequestBase) backendRequestRaw;
+    assertThat(backendRequest.getMethod()).isEqualTo("POST");
+    assertThat(backendRequest.getURI().toString()).isEqualTo("foo");
+    HttpEntity entity = backendRequest.getEntity();
+    assertThat(entity.getContentType().getValue()).isEqualTo("text/plain; charset=UTF-8");
+    assertThat(IOUtils.toString(entity.getContent(), StandardCharsets.UTF_8)).isEqualTo("foo=bar%");
+  }
+
+  @Test
+  public void testAddDataSingleWithContentType() throws Exception {
+    replayAll();
+    
+    HttpRequest request = createHttpRequest("foo");
+    HttpRequest requestAfterSetting1 = request.setMethodPost();
+    HttpRequest requestAfterSetting2 = request.setContentType(ContentType.APPLICATION_JSON);
+    HttpRequest requestAfterSetting3 = request.addData("foo=bar%");
+    HttpResponse response = request.execute();
+    
+    verifyAll();
+    
+    assertThat(request).isSameAs(requestAfterSetting1);
+    assertThat(request).isSameAs(requestAfterSetting2);
+    assertThat(request).isSameAs(requestAfterSetting3);
+    assertThat(response).isEqualTo(httpResponse);
+
+    HttpUriRequest backendRequestRaw = backendRequestCapture.getValue();
+    assertThat(backendRequestRaw).isInstanceOf(HttpEntityEnclosingRequestBase.class);
+    HttpEntityEnclosingRequestBase backendRequest =
+        (HttpEntityEnclosingRequestBase) backendRequestRaw;
+    assertThat(backendRequest.getMethod()).isEqualTo("POST");
+    assertThat(backendRequest.getURI().toString()).isEqualTo("foo");
+    HttpEntity entity = backendRequest.getEntity();
+    assertThat(entity.getContentType().getValue()).isEqualTo("application/json; charset=UTF-8");
+    assertThat(IOUtils.toString(entity.getContent(), StandardCharsets.UTF_8)).isEqualTo("foo=bar%");
+  }
+
+  @Test
+  public void testAddDataAppending() throws Exception {
+    replayAll();
+    
+    HttpRequest request = createHttpRequest("foo");
+    HttpRequest requestAfterSetting1 = request.setMethodPost();
+    HttpRequest requestAfterSetting2 = request.addData("foo=bar%");
+    HttpRequest requestAfterSetting3 = request.addData("baz&quux");
+    HttpResponse response = request.execute();
+    
+    verifyAll();
+    
+    assertThat(request).isSameAs(requestAfterSetting1);
+    assertThat(request).isSameAs(requestAfterSetting2);
+    assertThat(request).isSameAs(requestAfterSetting3);
+    assertThat(response).isEqualTo(httpResponse);
+
+    HttpUriRequest backendRequestRaw = backendRequestCapture.getValue();
+    assertThat(backendRequestRaw).isInstanceOf(HttpEntityEnclosingRequestBase.class);
+    HttpEntityEnclosingRequestBase backendRequest =
+        (HttpEntityEnclosingRequestBase) backendRequestRaw;
+    assertThat(backendRequest.getMethod()).isEqualTo("POST");
+    assertThat(backendRequest.getURI().toString()).isEqualTo("foo");
+    HttpEntity entity = backendRequest.getEntity();
+    assertThat(entity.getContentType().getValue()).isEqualTo("text/plain; charset=UTF-8");
+    assertThat(IOUtils.toString(entity.getContent(), StandardCharsets.UTF_8)).isEqualTo("foo=bar%&baz&quux");
+  }
+
+  @Test
+  public void testAddDataAppendingWithContentType() throws Exception {
+    replayAll();
+    
+    HttpRequest request = createHttpRequest("foo");
+    HttpRequest requestAfterSetting1 = request.setMethodPost();
+    HttpRequest requestAfterSetting2 = request.addData("foo=bar%");
+    HttpRequest requestAfterSetting3 = request.setContentType(ContentType.APPLICATION_JSON);
+    HttpRequest requestAfterSetting4 = request.addData("baz&quux");
+    HttpResponse response = request.execute();
+    
+    verifyAll();
+    
+    assertThat(request).isSameAs(requestAfterSetting1);
+    assertThat(request).isSameAs(requestAfterSetting2);
+    assertThat(request).isSameAs(requestAfterSetting3);
+    assertThat(request).isSameAs(requestAfterSetting4);
+    assertThat(response).isEqualTo(httpResponse);
+
+    HttpUriRequest backendRequestRaw = backendRequestCapture.getValue();
+    assertThat(backendRequestRaw).isInstanceOf(HttpEntityEnclosingRequestBase.class);
+    HttpEntityEnclosingRequestBase backendRequest =
+        (HttpEntityEnclosingRequestBase) backendRequestRaw;
+    assertThat(backendRequest.getMethod()).isEqualTo("POST");
+    assertThat(backendRequest.getURI().toString()).isEqualTo("foo");
+    HttpEntity entity = backendRequest.getEntity();
+    assertThat(entity.getContentType().getValue()).isEqualTo("application/json; charset=UTF-8");
+    assertThat(IOUtils.toString(entity.getContent(), StandardCharsets.UTF_8)).isEqualTo("foo=bar%&baz&quux");
   }
 
   private HttpRequest createHttpRequest(String url) throws HttpException {
