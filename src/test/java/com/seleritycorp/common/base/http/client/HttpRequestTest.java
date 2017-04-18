@@ -26,6 +26,7 @@ import static org.easymock.EasyMock.reset;
 import java.io.IOException;
 
 import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.http.client.methods.HttpUriRequest;
 import org.easymock.Capture;
 import org.easymock.EasyMockSupport;
@@ -169,6 +170,27 @@ public class HttpRequestTest extends EasyMockSupport {
     assertThat(backendRequest.getMethod()).isEqualTo("GET");
     assertThat(backendRequest.getURI().toString()).isEqualTo("foo");
     assertThat(backendRequest.getHeaders("User-Agent")).hasSize(0);    
+  }
+
+  @Test
+  public void testSetReadTimeout() throws Exception {
+    replayAll();
+    
+    HttpRequest request = createHttpRequest("foo");
+    HttpRequest requestAfterSetting = request.setReadTimeoutMillis(4711);
+    HttpResponse response = request.execute();
+    
+    verifyAll();
+    
+    assertThat(request).isSameAs(requestAfterSetting);
+    assertThat(response).isEqualTo(httpResponse);
+
+    HttpUriRequest backendRequestRaw = backendRequestCapture.getValue();
+    assertThat(backendRequestRaw).isInstanceOf(HttpRequestBase.class);
+    HttpRequestBase backendRequest = (HttpRequestBase) backendRequestRaw;
+    assertThat(backendRequest.getMethod()).isEqualTo("GET");
+    assertThat(backendRequest.getURI().toString()).isEqualTo("foo");
+    assertThat(backendRequest.getConfig().getSocketTimeout()).isEqualTo(4711);    
   }
 
   private HttpRequest createHttpRequest(String url) throws HttpException {

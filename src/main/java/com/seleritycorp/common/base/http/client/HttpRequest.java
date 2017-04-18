@@ -19,8 +19,9 @@ package com.seleritycorp.common.base.http.client;
 import com.google.inject.assistedinject.Assisted;
 
 import org.apache.http.client.HttpClient;
+import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.methods.HttpUriRequest;
+import org.apache.http.client.methods.HttpRequestBase;
 
 import java.io.IOException;
 
@@ -35,6 +36,7 @@ public class HttpRequest {
   private final HttpClient httpClient;
   private final HttpResponse.Factory responseFactory;
   private String userAgent;
+  private int readTimeoutMillis;
   
   @Inject
   HttpRequest(@Assisted String uri, HttpClient httpClient,
@@ -43,6 +45,7 @@ public class HttpRequest {
     this.httpClient = httpClient;
     this.responseFactory = responseFactory;
     this.userAgent = null;
+    this.readTimeoutMillis = -1;
   }
 
   /**
@@ -58,6 +61,18 @@ public class HttpRequest {
   }
 
   /**
+   * Sets the timeout for reading the response.
+   * 
+   * @param readTimeoutMillis The requested timeout in milliseconds for reading new data.
+   *     If negative, use the default timeout. If zero, the read timeout is set to infinite.
+   * @return The current request instance.
+   */
+  public HttpRequest setReadTimeoutMillis(int readTimeoutMillis) {
+    this.readTimeoutMillis = readTimeoutMillis;
+    return this;
+  }
+
+  /**
    * Executes the configured request.
    *
    * @return The server's response to the request.
@@ -65,7 +80,7 @@ public class HttpRequest {
    */
   public HttpResponse execute() throws HttpException {
     final HttpResponse ret;
-    final HttpUriRequest request;
+    final HttpRequestBase request;
 
     try {
       request = new HttpGet(uri);
@@ -75,6 +90,10 @@ public class HttpRequest {
 
     if (userAgent != null) {
       request.setHeader(HTTP.USER_AGENT, userAgent);
+    }
+
+    if (readTimeoutMillis >= 0) {
+      request.setConfig(RequestConfig.custom().setSocketTimeout(readTimeoutMillis).build());
     }
 
     final org.apache.http.HttpResponse response;
