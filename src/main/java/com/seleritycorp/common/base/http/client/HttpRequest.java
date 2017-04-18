@@ -21,9 +21,11 @@ import com.google.inject.assistedinject.Assisted;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpRequestBase;
 
 import java.io.IOException;
+import java.net.URI;
 
 import javax.inject.Inject;
 
@@ -35,6 +37,7 @@ public class HttpRequest {
   private final String uri;
   private final HttpClient httpClient;
   private final HttpResponse.Factory responseFactory;
+  private String method;
   private String userAgent;
   private int readTimeoutMillis;
   
@@ -44,6 +47,7 @@ public class HttpRequest {
     this.uri = uri;
     this.httpClient = httpClient;
     this.responseFactory = responseFactory;
+    this.method = "GET";
     this.userAgent = null;
     this.readTimeoutMillis = -1;
   }
@@ -73,6 +77,16 @@ public class HttpRequest {
   }
 
   /**
+   * Use POST to execute the request.
+   *
+   * @return The current request instance.
+   */
+  public HttpRequest setMethodPost() {
+    this.method = "POST";
+    return this;
+  }
+
+  /**
    * Executes the configured request.
    *
    * @return The server's response to the request.
@@ -82,8 +96,19 @@ public class HttpRequest {
     final HttpResponse ret;
     final HttpRequestBase request;
 
+    switch (method) {
+      case HttpGet.METHOD_NAME:
+        request = new HttpGet();
+        break;
+      case HttpPost.METHOD_NAME:
+        request = new HttpPost();
+        break;
+      default:
+        throw new HttpException("Unknown HTTP method '" + method + "'");
+    }
+
     try {
-      request = new HttpGet(uri);
+      request.setURI(URI.create(uri));
     } catch (IllegalArgumentException e) {
       throw new HttpException("Failed to create URI '" + uri + "'", e);
     }

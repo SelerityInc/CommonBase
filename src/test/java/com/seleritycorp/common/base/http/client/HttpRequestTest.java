@@ -193,6 +193,24 @@ public class HttpRequestTest extends EasyMockSupport {
     assertThat(backendRequest.getConfig().getSocketTimeout()).isEqualTo(4711);    
   }
 
+  @Test
+  public void testSetMethodPost() throws Exception {
+    replayAll();
+    
+    HttpRequest request = createHttpRequest("foo");
+    HttpRequest requestAfterSetting = request.setMethodPost();
+    HttpResponse response = request.execute();
+    
+    verifyAll();
+    
+    assertThat(request).isSameAs(requestAfterSetting);
+    assertThat(response).isEqualTo(httpResponse);
+
+    HttpUriRequest backendRequest = backendRequestCapture.getValue();
+    assertThat(backendRequest.getMethod()).isEqualTo("POST");
+    assertThat(backendRequest.getURI().toString()).isEqualTo("foo");
+  }
+
   private HttpRequest createHttpRequest(String url) throws HttpException {
     return new HttpRequest(url, httpClient, responseFactory);
   }
