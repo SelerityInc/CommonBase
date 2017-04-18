@@ -43,6 +43,7 @@ public class HttpRequestFactoryTest extends EasyMockSupport {
   public void testCreate() {
     HttpRequest expected = createMock(HttpRequest.class);
     expect(expected.setUserAgent("userAgentBar")).andReturn(expected);
+    expect(expected.setExpectedStatusCode(200)).andReturn(expected);
 
     expect(requestFactory.create("foo")).andReturn(expected);
     
@@ -60,6 +61,7 @@ public class HttpRequestFactoryTest extends EasyMockSupport {
   public void testCreatePostJson() {
     HttpRequest expected = createMock(HttpRequest.class);
     expect(expected.setUserAgent("userAgentBar")).andReturn(expected);
+    expect(expected.setExpectedStatusCode(200)).andReturn(expected);
     expect(expected.setMethodPost()).andReturn(expected);
     expect(expected.setContentType(ContentType.APPLICATION_JSON)).andReturn(expected);
     expect(expected.addData("{\"bar\":4711}")).andReturn(expected);

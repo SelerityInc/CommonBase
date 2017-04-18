@@ -48,6 +48,7 @@ public class HttpRequest {
   private int readTimeoutMillis;
   private String data;
   private ContentType contentType;
+  private int expectedStatusCode;
   
   @Inject
   HttpRequest(@Assisted String uri, HttpClient httpClient,
@@ -60,6 +61,7 @@ public class HttpRequest {
     this.readTimeoutMillis = -1;
     this.data = "";
     this.contentType = null;
+    this.expectedStatusCode = -1;
   }
 
   /**
@@ -111,6 +113,17 @@ public class HttpRequest {
       }
       this.data += data;
     }
+    return this;
+  }
+
+  /**
+   * Set expected status code.
+   *
+   * @param statusCode The expected status code of the response to this request.
+   * @return The current request instance.
+   */
+  public HttpRequest setExpectedStatusCode(int statusCode) {
+    this.expectedStatusCode = statusCode;
     return this;
   }
 
@@ -184,6 +197,14 @@ public class HttpRequest {
     }
 
     ret = responseFactory.create(response);
+
+    if (expectedStatusCode >= 0) {
+      int statusCode = ret.getStatusCode();
+      if (statusCode != expectedStatusCode) {
+        throw new HttpException("Expected status code " + expectedStatusCode + " for call to '"
+            + uri + "', but was " + statusCode);
+      }
+    }
 
     return ret;
   }

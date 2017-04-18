@@ -20,6 +20,7 @@ import com.google.gson.JsonObject;
 
 import com.seleritycorp.common.base.meta.MetaDataFormatter;
 
+import org.apache.http.HttpStatus;
 import org.apache.http.entity.ContentType;
 
 import javax.inject.Inject;
@@ -46,9 +47,9 @@ public class HttpRequestFactory {
    * @return The created request
    */
   public HttpRequest create(String url) {
-    HttpRequest request = requestFactory.create(url);
-    request.setUserAgent(userAgent);
-    return request;
+    return requestFactory.create(url)
+        .setUserAgent(userAgent)
+        .setExpectedStatusCode(HttpStatus.SC_OK);
   }
 
   /**

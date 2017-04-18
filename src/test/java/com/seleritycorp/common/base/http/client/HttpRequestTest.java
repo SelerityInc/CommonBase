@@ -134,6 +134,45 @@ public class HttpRequestTest extends EasyMockSupport {
   }
 
   @Test
+  public void testExecuteExpecedStatusCode() throws Exception {
+    expect(httpResponse.getStatusCode()).andReturn(123);
+
+    replayAll();
+    
+    HttpRequest request = createHttpRequest("foo").setExpectedStatusCode(123);
+
+    HttpResponse response = request.execute();
+
+    verifyAll();
+    
+    assertThat(response).isEqualTo(httpResponse);
+
+    HttpUriRequest backendRequest = backendRequestCapture.getValue();
+    assertThat(backendRequest.getMethod()).isEqualTo("GET");
+    assertThat(backendRequest.getURI().toString()).isEqualTo("foo");
+
+  }
+
+  @Test
+  public void testExecuteUnexpecedStatusCode() throws Exception {
+    expect(httpResponse.getStatusCode()).andReturn(200);
+
+    replayAll();
+    
+    HttpRequest request = createHttpRequest("foo").setExpectedStatusCode(123);
+
+    try {
+      request.execute();
+      failBecauseExceptionWasNotThrown(HttpException.class);
+    } catch (HttpException e) {
+      assertThat(e.getMessage()).contains("123");
+      assertThat(e.getMessage()).contains("200");
+    }
+    
+    verifyAll();
+  }
+
+  @Test
   public void testSetUserAgentPlain() throws Exception {
     replayAll();
     
