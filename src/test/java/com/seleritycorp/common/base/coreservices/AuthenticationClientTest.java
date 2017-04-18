@@ -20,9 +20,10 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.failBecauseExceptionWasNotThrown;
 
 import static org.easymock.EasyMock.capture;
+import static org.easymock.EasyMock.eq;
 import static org.easymock.EasyMock.expect;
 import static org.easymock.EasyMock.newCapture;
-import static org.easymock.EasyMock.anyInt;
+import static org.easymock.EasyMock.isNull;
 
 import java.io.IOException;
 
@@ -57,7 +58,8 @@ public class AuthenticationClientTest extends EasyMockSupport {
     JsonObject ret = new JsonObject();
     ret.addProperty("id", "bar");
 
-    expect(rawClient.call(capture(methodCapture), capture(paramCapture), anyInt())).andReturn(ret);
+    expect(rawClient.call(capture(methodCapture), capture(paramCapture), isNull(String.class),
+        eq(10000))).andReturn(ret);
 
     replayAll();
 
@@ -82,7 +84,8 @@ public class AuthenticationClientTest extends EasyMockSupport {
 
     JsonObject ret = new JsonObject();
 
-    expect(rawClient.call(capture(methodCapture), capture(paramCapture), anyInt())).andReturn(ret);
+    expect(rawClient.call(capture(methodCapture), capture(paramCapture), isNull(String.class),
+        eq(10000))).andReturn(ret);
 
     replayAll();
 

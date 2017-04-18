@@ -62,7 +62,8 @@ public class AuthenticationClient {
     params.addProperty("user", user);
     params.addProperty("password", password);
 
-    final JsonElement result = client.call("AuthenticationHandler.authenticate", params, 10000);
+    final String method = "AuthenticationHandler.authenticate";
+    final JsonElement result = client.call(method, params, null, 10000);
 
     final String token;
     try {
