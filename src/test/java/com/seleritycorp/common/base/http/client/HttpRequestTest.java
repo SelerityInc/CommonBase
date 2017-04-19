@@ -29,6 +29,7 @@ import java.nio.charset.StandardCharsets;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpEntity;
 import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpEntityEnclosingRequestBase;
 import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.http.client.methods.HttpUriRequest;
@@ -39,22 +40,24 @@ import org.junit.Before;
 import org.junit.Test;
 
 public class HttpRequestTest extends EasyMockSupport {
-  private HttpClient httpClient;
+  private HttpClient netHttpClient;
+  private FileHttpClient fileHttpClient;
   private HttpResponse.Factory responseFactory;
   private HttpResponse httpResponse;
-  private org.apache.http.HttpResponse backendResponse;
+  private CloseableHttpResponse backendResponse;
   private Capture<HttpUriRequest> backendRequestCapture;
 
   @Before
   public void setUp() throws Exception {
-    httpClient = createMock(HttpClient.class);
+    netHttpClient = createMock(HttpClient.class);
+    fileHttpClient = createMock(FileHttpClient.class);
     responseFactory = createMock(HttpResponse.Factory.class);
 
     httpResponse = createMock(HttpResponse.class);
-    backendResponse = createMock(org.apache.http.HttpResponse.class);
+    backendResponse = createMock(CloseableHttpResponse.class);
 
     backendRequestCapture = newCapture();
-    expect(httpClient.execute(capture(backendRequestCapture))).andReturn(backendResponse);
+    expect(netHttpClient.execute(capture(backendRequestCapture))).andReturn(backendResponse);
     expect(responseFactory.create(backendResponse)).andReturn(httpResponse);
   }
 
@@ -76,7 +79,7 @@ public class HttpRequestTest extends EasyMockSupport {
   
   @Test
   public void testExecuteMalformedUri() throws Exception {
-    reset(httpClient);
+    reset(netHttpClient);
     reset(responseFactory);
 
     replayAll();
@@ -94,12 +97,12 @@ public class HttpRequestTest extends EasyMockSupport {
     
   @Test
   public void testPerformPerformingFails() throws Exception {
-    reset(httpClient);
+    reset(netHttpClient);
     reset(responseFactory);
 
     IOException expected = new IOException("catch me");
 
-    expect(httpClient.execute(capture(backendRequestCapture))).andThrow(expected);
+    expect(netHttpClient.execute(capture(backendRequestCapture))).andThrow(expected);
     
     replayAll();
     
@@ -116,7 +119,7 @@ public class HttpRequestTest extends EasyMockSupport {
 
   @Test
   public void testExecuteGetWithData() throws Exception {
-    reset(httpClient);
+    reset(netHttpClient);
     reset(responseFactory);
 
     replayAll();
@@ -386,7 +389,26 @@ public class HttpRequestTest extends EasyMockSupport {
     assertThat(IOUtils.toString(entity.getContent(), StandardCharsets.UTF_8)).isEqualTo("foo=bar%&baz&quux");
   }
 
+  @Test
+  public void testExecuteFileUriOk() throws Exception {
+    reset(netHttpClient);
+    expect(fileHttpClient.execute(capture(backendRequestCapture))).andReturn(backendResponse);
+
+    replayAll();
+    
+    HttpRequest request = createHttpRequest("file:///foo");
+    HttpResponse response = request.execute();
+    
+    verifyAll();
+    
+    assertThat(response).isEqualTo(httpResponse);
+
+    HttpUriRequest backendRequest = backendRequestCapture.getValue();
+    assertThat(backendRequest.getMethod()).isEqualTo("GET");
+    assertThat(backendRequest.getURI().toString()).isEqualTo("file:///foo");
+  }
+
   private HttpRequest createHttpRequest(String url) throws HttpException {
-    return new HttpRequest(url, httpClient, responseFactory);
+    return new HttpRequest(url, netHttpClient, fileHttpClient, responseFactory);
   }
 }

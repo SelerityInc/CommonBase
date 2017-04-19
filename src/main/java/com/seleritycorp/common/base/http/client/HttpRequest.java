@@ -41,7 +41,8 @@ public class HttpRequest {
   }
 
   private final String uri;
-  private final HttpClient httpClient;
+  private final HttpClient netHttpClient;
+  private final HttpClient fileHttpClient;
   private final HttpResponse.Factory responseFactory;
   private String method;
   private String userAgent;
@@ -51,10 +52,11 @@ public class HttpRequest {
   private int expectedStatusCode;
   
   @Inject
-  HttpRequest(@Assisted String uri, HttpClient httpClient,
+  HttpRequest(@Assisted String uri, HttpClient netHttpClient, FileHttpClient fileHttpClient,
       HttpResponse.Factory responseFactory) {
     this.uri = uri;
-    this.httpClient = httpClient;
+    this.netHttpClient = netHttpClient;
+    this.fileHttpClient = fileHttpClient;
     this.responseFactory = responseFactory;
     this.method = "GET";
     this.userAgent = null;
@@ -189,6 +191,12 @@ public class HttpRequest {
       }
     }
 
+    final HttpClient httpClient;
+    if (uri.startsWith("file://")) {
+      httpClient = this.fileHttpClient;
+    } else {
+      httpClient = this.netHttpClient;
+    }
     final org.apache.http.HttpResponse response;
     try {
       response = httpClient.execute(request);
