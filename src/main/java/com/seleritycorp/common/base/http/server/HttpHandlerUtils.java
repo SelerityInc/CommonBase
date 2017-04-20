@@ -21,6 +21,7 @@ import com.seleritycorp.common.base.logging.LogFactory;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpPost;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -277,5 +278,15 @@ public class HttpHandlerUtils {
    */
   public boolean isMethodGet(HandleParameters handleParameters) {
     return HttpGet.METHOD_NAME.equals(handleParameters.getRequest().getMethod());
+  }
+
+  /**
+   * Checks if a request is a POST request.
+   * 
+   * @param handleParameters The parameters of the handle request
+   * @return true, if it is a POST request. false otherwise.
+   */
+  public boolean isMethodPost(HandleParameters handleParameters) {
+    return HttpPost.METHOD_NAME.equals(handleParameters.getRequest().getMethod());
   }
 }
