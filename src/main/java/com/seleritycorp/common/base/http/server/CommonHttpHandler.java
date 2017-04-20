@@ -21,7 +21,6 @@ import com.google.inject.assistedinject.Assisted;
 
 import com.seleritycorp.common.base.state.AppStateManager;
 
-import org.apache.http.client.methods.HttpGet;
 import org.eclipse.jetty.server.Request;
 
 import java.io.IOException;
@@ -56,7 +55,7 @@ public class CommonHttpHandler extends AbstractHttpHandler {
     HandleParameters params = new HandleParameters(target, baseRequest, request, response);
     switch (target) {
       case "/status":
-        if (HttpGet.METHOD_NAME.equals(request.getMethod())) {
+        if (utils.isMethodGet(params)) {
           String sender = utils.resolveRemoteAddr(params);
           if (sender.startsWith("10.") || sender.startsWith("127.")) {
             utils.respond(appStateManager.getStatusReport(), params);

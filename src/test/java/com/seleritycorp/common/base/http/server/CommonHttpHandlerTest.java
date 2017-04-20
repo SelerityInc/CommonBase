@@ -58,11 +58,11 @@ public class CommonHttpHandlerTest extends EasyMockSupport {
   public void testHandleStatusOk() throws Exception {
     Capture<HandleParameters> params1 = newCapture();
     Capture<HandleParameters> params2 = newCapture();
+    Capture<HandleParameters> params3 = newCapture();
 
-    expect(request.getMethod()).andReturn("GET");
-    
     expect(utils.resolveRemoteAddr(capture(params1))).andReturn("10.0.0.1");
     utils.respond(eq("foo"), capture(params2));
+    expect(utils.isMethodGet(capture(params3))).andReturn(true);
 
     expect(appStateManager.getStatusReport()).andReturn("foo");
 
@@ -75,19 +75,39 @@ public class CommonHttpHandlerTest extends EasyMockSupport {
 
     verifyAll();
     
-    assertParams("/status", params1, params2);
+    assertParams("/status", params1, params2, params3);
   }
 
   @Test
   public void testHandleStatusNotLocal() throws Exception {
     Capture<HandleParameters> params1 = newCapture();
     Capture<HandleParameters> params2 = newCapture();
+    Capture<HandleParameters> params3 = newCapture();
 
-    expect(request.getMethod()).andReturn("GET");
-    
     expect(utils.resolveRemoteAddr(capture(params1))).andReturn("1.2.3.4");
     utils.respondForbidden(capture(params2));
+    expect(utils.isMethodGet(capture(params3))).andReturn(true);
 
+    expect(baseRequest.isHandled()).andReturn(true);
+
+    replayAll();
+    
+    AbstractHttpHandler handler = createCommonHttpHandler();
+    handler.handle("/status", baseRequest, request, response);
+
+    verifyAll();
+    
+    assertParams("/status", params1, params2, params3);
+  }
+
+  @Test
+  public void testHandleStatusNotGet() throws Exception {
+    Capture<HandleParameters> params1 = newCapture();
+    Capture<HandleParameters> params2 = newCapture();
+
+    utils.respondBadRequest(anyObject(String.class), capture(params1));
+    expect(utils.isMethodGet(capture(params2))).andReturn(false);
+    
     expect(baseRequest.isHandled()).andReturn(true);
 
     replayAll();
@@ -98,26 +118,6 @@ public class CommonHttpHandlerTest extends EasyMockSupport {
     verifyAll();
     
     assertParams("/status", params1, params2);
-  }
-
-  @Test
-  public void testHandleStatusNotGet() throws Exception {
-    Capture<HandleParameters> params = newCapture();
-
-    expect(request.getMethod()).andReturn("POST");
-    
-    utils.respondBadRequest(anyObject(String.class), capture(params));
-
-    expect(baseRequest.isHandled()).andReturn(true);
-
-    replayAll();
-    
-    AbstractHttpHandler handler = createCommonHttpHandler();
-    handler.handle("/status", baseRequest, request, response);
-
-    verifyAll();
-    
-    assertParams("/status", params);
   }
 
   @Test

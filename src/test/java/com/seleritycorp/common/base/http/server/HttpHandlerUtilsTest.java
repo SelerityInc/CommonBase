@@ -322,6 +322,54 @@ public class HttpHandlerUtilsTest extends EasyMockSupport {
     assertThat(actual).isEqualTo("baz");
   }
 
+  @Test
+  public void testIsMethodGetTrue() throws IOException {
+    HandleParameters parameters = createHandleParameters("/foo");
+    HttpHandlerUtils utils = createHttpHandlerUtils();
+
+    expect(request.getMethod()).andReturn("GET");
+
+    replayAll();
+
+    boolean actual = utils.isMethodGet(parameters);
+
+    verifyAll();
+
+    assertThat(actual).isTrue();
+  }
+
+  @Test
+  public void testIsMethodGetFalseLowercase() throws IOException {
+    HandleParameters parameters = createHandleParameters("/foo");
+    HttpHandlerUtils utils = createHttpHandlerUtils();
+
+    expect(request.getMethod()).andReturn("get");
+
+    replayAll();
+
+    boolean actual = utils.isMethodGet(parameters);
+
+    verifyAll();
+
+    assertThat(actual).isFalse();
+  }
+
+  @Test
+  public void testIsMethodGetFalseDifferent() throws IOException {
+    HandleParameters parameters = createHandleParameters("/foo");
+    HttpHandlerUtils utils = createHttpHandlerUtils();
+
+    expect(request.getMethod()).andReturn("POST");
+
+    replayAll();
+
+    boolean actual = utils.isMethodGet(parameters);
+
+    verifyAll();
+
+    assertThat(actual).isFalse();
+  }
+
   private HandleParameters createHandleParameters(String target) {
     return new HandleParameters(target, baseRequest, request, response);
   }

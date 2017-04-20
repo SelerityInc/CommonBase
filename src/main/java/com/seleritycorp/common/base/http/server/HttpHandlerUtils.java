@@ -20,6 +20,7 @@ import com.seleritycorp.common.base.logging.Log;
 import com.seleritycorp.common.base.logging.LogFactory;
 
 import org.apache.commons.io.IOUtils;
+import org.apache.http.client.methods.HttpGet;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -266,5 +267,15 @@ public class HttpHandlerUtils {
     String remoteAddr = handleParameters.getRequest().getRemoteAddr();
     String forwardedFor = handleParameters.getRequest().getHeader("X-Forwarded-For");
     return forwardedForResolver.resolve(remoteAddr,forwardedFor);
+  }
+
+  /**
+   * Checks if a request is a GET request.
+   * 
+   * @param handleParameters The parameters of the handle request
+   * @return true, if it is a GET request. false otherwise.
+   */
+  public boolean isMethodGet(HandleParameters handleParameters) {
+    return HttpGet.METHOD_NAME.equals(handleParameters.getRequest().getMethod());
   }
 }
