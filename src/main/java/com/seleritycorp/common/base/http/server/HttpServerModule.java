@@ -22,13 +22,9 @@ import com.google.inject.Provides;
 import com.seleritycorp.common.base.inject.FactoryModule;
 import com.seleritycorp.common.base.inject.InjectorFactory;
 
-import org.eclipse.jetty.server.Request;
-
 import java.io.IOException;
 
 import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 
 /**
  * Configures injection for http server classes.
@@ -56,8 +52,8 @@ public class HttpServerModule extends FactoryModule {
     } catch (Exception e) {
       delegate = new AbstractHttpHandler() {
         @Override
-        public void handle(String target, Request baseRequest, HttpServletRequest request,
-            HttpServletResponse response) throws IOException, ServletException {
+        public void handle(String target, HandleParameters params)
+            throws IOException, ServletException {
           // Intentionally doing nothing, as it's only the fallback AbstractHttpHandler.
         }
       };

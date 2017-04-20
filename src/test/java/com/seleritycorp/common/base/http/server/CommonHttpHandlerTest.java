@@ -122,7 +122,9 @@ public class CommonHttpHandlerTest extends EasyMockSupport {
 
   @Test
   public void testHandleDelegateHandled() throws Exception {
-    delegateHttpHandler.handle("/foo", baseRequest, request, response);
+    Capture<HandleParameters> params = newCapture();
+
+    delegateHttpHandler.handle(eq("/foo"), capture(params));
 
     expect(baseRequest.isHandled()).andReturn(true);
 
@@ -132,17 +134,20 @@ public class CommonHttpHandlerTest extends EasyMockSupport {
     handler.handle("/foo", baseRequest, request, response);
 
     verifyAll();
+
+    assertParams("/foo", params);
   }
 
   @Test
   public void testHandleDelegateUnhandled() throws Exception {
-    Capture<HandleParameters> params = newCapture();
+    Capture<HandleParameters> params1 = newCapture();
+    Capture<HandleParameters> params2 = newCapture();
 
-    delegateHttpHandler.handle("/foo", baseRequest, request, response);
+    delegateHttpHandler.handle(eq("/foo"), capture(params1));
 
     expect(baseRequest.isHandled()).andReturn(false);
 
-    utils.respondNotFound(capture(params));
+    utils.respondNotFound(capture(params2));
 
     replayAll();
     
@@ -151,7 +156,7 @@ public class CommonHttpHandlerTest extends EasyMockSupport {
 
     verifyAll();
     
-    assertParams("/foo", params);
+    assertParams("/foo", params1, params2);
   }
 
   @SafeVarargs

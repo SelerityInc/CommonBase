@@ -21,13 +21,9 @@ import com.google.inject.assistedinject.Assisted;
 
 import com.seleritycorp.common.base.state.AppStateManager;
 
-import org.eclipse.jetty.server.Request;
-
 import java.io.IOException;
 
 import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 
 /**
  * Http Handler for pages and tasks on all applications. 
@@ -50,9 +46,8 @@ public class CommonHttpHandler extends AbstractHttpHandler {
   }
 
   @Override
-  public void handle(String target, Request baseRequest, HttpServletRequest request,
-      HttpServletResponse response) throws IOException, ServletException {
-    HandleParameters params = new HandleParameters(target, baseRequest, request, response);
+  public void handle(String target, HandleParameters params) throws IOException,
+      ServletException {
     switch (target) {
       case "/status":
         if (utils.isMethodGet(params)) {
@@ -67,11 +62,11 @@ public class CommonHttpHandler extends AbstractHttpHandler {
         }
         break;
       default:
-        delegateHttpHandler.handle(target, baseRequest, request, response);
+        delegateHttpHandler.handle(target, params);
         break;
     }
 
-    if (!baseRequest.isHandled()) {
+    if (!params.getBaseRequest().isHandled()) {
       utils.respondNotFound(params);
     }
   }  

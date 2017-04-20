@@ -25,12 +25,9 @@ import java.io.PrintWriter;
 import java.net.URL;
 
 import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.io.IOUtils;
 import org.easymock.EasyMockSupport;
-import org.eclipse.jetty.server.Request;
 import org.junit.Test;
 
 import com.seleritycorp.common.base.http.server.AbstractHttpHandler;
@@ -98,13 +95,13 @@ public class HttpServerTest extends EasyMockSupport {
 
   private class HttpHandler extends AbstractHttpHandler {
     @Override
-    public void handle(String target, Request baseRequest, HttpServletRequest request,
-        HttpServletResponse response) throws IOException, ServletException {
-      PrintWriter writer = response.getWriter();
+    public void handle(String target, HandleParameters params) throws IOException,
+        ServletException {
+      PrintWriter writer = params.getResponse().getWriter();
       writer.println("bar");
       writer.close();
-      response.setStatus(200);
-      baseRequest.setHandled(true);
+      params.getResponse().setStatus(200);
+      params.getBaseRequest().setHandled(true);
     }
   }
 

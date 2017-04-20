@@ -16,10 +16,36 @@
 
 package com.seleritycorp.common.base.http.server;
 
+import org.eclipse.jetty.server.Request;
 import org.eclipse.jetty.server.handler.AbstractHandler;
+
+import java.io.IOException;
+
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 /**
  * Handler for http requests.
  */
 public abstract class AbstractHttpHandler extends AbstractHandler {
+  /**
+   * Handles a Http request
+   * 
+   * @param target The target of the request.
+   * @param params The parameters of this handle request.
+   * @throws IOException see
+   *    {@link #handle(String, Request, HttpServletRequest, HttpServletResponse)}
+   * @throws ServletException see
+   *    {@link #handle(String, Request, HttpServletRequest, HttpServletResponse)}
+   */
+  public abstract void handle(String target, HandleParameters params) throws IOException,
+    ServletException;
+
+  @Override
+  public void handle(String target, Request baseRequest, HttpServletRequest request,
+      HttpServletResponse response) throws IOException, ServletException {
+    HandleParameters params = new HandleParameters(target, baseRequest, request, response);
+    handle(target, params);
+  }
 }
