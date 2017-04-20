@@ -63,15 +63,17 @@ public class HttpHandlerUtils {
   /**
    * Sends a response to a request and marks it as handled.
    * 
-   * @param response The response text
+   * @param response The response text. If null, no response gets written.
    * @param handleParameters The parameters of the handle request 
    * @throws java.io.UnsupportedEncodingException if the character encoding is unusable.
    * @throws IllegalStateException if a response was sent already.
    * @throws IOException if an input/output error occurs
    */
   public void respond(String response, HandleParameters handleParameters) throws IOException {
-    try (PrintWriter writer = handleParameters.getResponse().getWriter()) {
-      writer.print(response);
+    if (response != null) {
+      try (PrintWriter writer = handleParameters.getResponse().getWriter()) {
+        writer.print(response);
+      }
     }
     handleParameters.getBaseRequest().setHandled(true);
   }
@@ -90,6 +92,20 @@ public class HttpHandlerUtils {
       throws IOException {
     handleParameters.getResponse().setStatus(status);
     respond(response, handleParameters);
+  }
+
+  /**
+   * Sends a response with status code to a request and marks it as handled.
+   *  
+   * @param status The status code to send
+   * @param handleParameters The parameters of the handle request
+   * @throws java.io.UnsupportedEncodingException if the character encoding is unusable.
+   * @throws IllegalStateException if a response was sent already.
+   * @throws IOException if an input/output error occurs
+   */
+  public void respond(int status, HandleParameters handleParameters)
+      throws IOException {
+    respond(status, null, handleParameters);
   }
 
   /**
@@ -207,6 +223,19 @@ public class HttpHandlerUtils {
   public void respondBadRequest(String response, Throwable logThrowable,
       HandleParameters handleParameters) throws IOException {
     respond(400, response, null, logThrowable, handleParameters);
+  }
+
+  /**
+   * Sends a '403 Forbidden' response to a request and marks it as handled.
+   *  
+   * @param handleParameters The parameters of the handle request
+   * @throws java.io.UnsupportedEncodingException if the character encoding is unusable.
+   * @throws IllegalStateException if a response was sent already.
+   * @throws IOException if an input/output error occurs
+   */
+  public void respondForbidden(HandleParameters handleParameters)
+      throws IOException {
+    respond(403, handleParameters);
   }
 
   /**

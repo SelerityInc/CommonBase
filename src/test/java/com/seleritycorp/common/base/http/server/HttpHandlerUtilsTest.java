@@ -52,7 +52,7 @@ public class HttpHandlerUtilsTest extends EasyMockSupport {
   }
   
   @Test
-  public void testRespond() throws IOException {
+  public void testRespondResponse() throws IOException {
     StringWriter stringWriter = new StringWriter();
     PrintWriter printWriter = new PrintWriter(stringWriter);
     HandleParameters parameters = createHandleParameters("/foo");
@@ -71,7 +71,21 @@ public class HttpHandlerUtilsTest extends EasyMockSupport {
   }
 
   @Test
-  public void testRespondWithStatus() throws IOException {
+  public void testRespondResponseNull() throws IOException {
+    HandleParameters parameters = createHandleParameters("/foo");
+    HttpHandlerUtils utils = createHttpHandlerUtils();
+
+    baseRequest.setHandled(true);
+
+    replayAll();
+
+    utils.respond(null, parameters);
+    
+    verifyAll();
+  }
+
+  @Test
+  public void testRespondStatusResponse() throws IOException {
     StringWriter stringWriter = new StringWriter();
     PrintWriter printWriter = new PrintWriter(stringWriter);
     HandleParameters parameters = createHandleParameters("/foo");
@@ -91,7 +105,22 @@ public class HttpHandlerUtilsTest extends EasyMockSupport {
   }
 
   @Test
-  public void testRespondWithStatusAndMessage() throws IOException {
+  public void testRespondStatus() throws IOException {
+    HandleParameters parameters = createHandleParameters("/foo");
+    HttpHandlerUtils utils = createHttpHandlerUtils();
+
+    response.setStatus(123);
+    baseRequest.setHandled(true);
+
+    replayAll();
+
+    utils.respond(123, parameters);
+    
+    verifyAll();
+  }
+
+  @Test
+  public void testRespondStatusResponseLogMessage() throws IOException {
     StringWriter stringWriter = new StringWriter();
     PrintWriter printWriter = new PrintWriter(stringWriter);
     HandleParameters parameters = createHandleParameters("/foo");
@@ -111,7 +140,7 @@ public class HttpHandlerUtilsTest extends EasyMockSupport {
   }
 
   @Test
-  public void testRespondWithStatusAndMessageAndThrowable() throws IOException {
+  public void testRespondStatusResponseLogMessageThrowable() throws IOException {
     StringWriter stringWriter = new StringWriter();
     PrintWriter printWriter = new PrintWriter(stringWriter);
     HandleParameters parameters = createHandleParameters("/foo");
@@ -129,6 +158,21 @@ public class HttpHandlerUtilsTest extends EasyMockSupport {
     verifyAll();
 
     assertThat(stringWriter.toString()).isEqualTo("bar");
+  }
+
+  @Test
+  public void testRespondForbidden() throws IOException {
+    HandleParameters parameters = createHandleParameters("/foo");
+    HttpHandlerUtils utils = createHttpHandlerUtils();
+
+    response.setStatus(403);
+    baseRequest.setHandled(true);
+    
+    replayAll();
+
+    utils.respondForbidden(parameters);
+    
+    verifyAll();
   }
 
   @Test

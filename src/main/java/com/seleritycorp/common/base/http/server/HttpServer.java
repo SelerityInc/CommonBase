@@ -42,7 +42,7 @@ public class HttpServer implements AutoCloseable {
   private boolean isStarted;
 
   @Inject
-  HttpServer(@ApplicationConfig Config config, AbstractHttpHandler httpHandler,
+  HttpServer(@ApplicationConfig Config config, @BaseHttpHandler AbstractHttpHandler httpHandler,
       ExecutorServiceFactory executorServiceFactory, AppStateFacetFactory appStateFacetFactory) {
     facet = appStateFacetFactory.createAppStatePushFacet("http-server");
     
