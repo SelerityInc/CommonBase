@@ -90,5 +90,9 @@ public class ApplicationRunner {
     Injector injector = InjectorFactory.getInjector();
     ApplicationRunner runner = injector.getInstance(ApplicationRunner.class);
     runner.run();
+
+    // Hard exit to avoid leaving an (otherwise dead) application hanging with still running
+    // non-daemon threads. 
+    System.exit(0);
   }
 }

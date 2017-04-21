@@ -36,7 +36,10 @@ import org.easymock.EasyMockSupport;
  */
 
 import org.easymock.IMocksControl;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.contrib.java.lang.system.Assertion;
+import org.junit.contrib.java.lang.system.ExpectedSystemExit;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.Key;
@@ -45,6 +48,9 @@ import com.seleritycorp.common.base.state.AppState;
 import com.seleritycorp.common.base.state.StateManager;
 
 public class ApplicationRunnerTest extends EasyMockSupport {
+  @Rule
+  public final ExpectedSystemExit exit = ExpectedSystemExit.none();
+
   @Test
   public void testRun() throws Exception {
     IMocksControl control = createStrictControl();
@@ -76,22 +82,27 @@ public class ApplicationRunnerTest extends EasyMockSupport {
     application.run();
     application.shutdown();
     
-    String[] args = new String[] { "foo" };    
-    PlainShimModule module1 = new PlainShimModule();
-    PlainShimModule module2 = new ApplicationShimModule(application);
+    final String[] args = new String[] { "foo" };    
+    final PlainShimModule module1 = new PlainShimModule();
+    final PlainShimModule module2 = new ApplicationShimModule(application);
 
     replayAll();
 
+    exit.expectSystemExit();
+    exit.checkAssertionAfterwards(new Assertion() {
+      @Override
+      public void checkAssertion() throws Exception {
+        verifyAll();
+
+        assertThat(module1.isConfigured()).isTrue();
+        assertThat(module2.isConfigured()).isTrue();
+
+        Key<String[]> key = Key.get(String[].class, CommandLineArguments.class);
+        String[] actualArgs = InjectorFactory.getInjector().getInstance(key);
+        assertThat(actualArgs).isSameAs(args);
+      }      
+    });
     ApplicationRunner.run(args, module1, module2);
-    
-    verifyAll();
-
-    assertThat(module1.isConfigured()).isTrue();
-    assertThat(module2.isConfigured()).isTrue();
-
-    Key<String[]> key = Key.get(String[].class, CommandLineArguments.class);
-    String[] actualArgs = InjectorFactory.getInjector().getInstance(key);
-    assertThat(actualArgs).isSameAs(args);
   }
 
   private static class PlainShimModule extends AbstractModule {
