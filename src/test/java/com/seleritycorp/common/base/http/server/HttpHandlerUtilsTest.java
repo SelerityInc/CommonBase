@@ -419,6 +419,52 @@ public class HttpHandlerUtilsTest extends EasyMockSupport {
     assertThat(actual).isFalse();
   }
 
+  @Test
+  public void testIsHandledTrue() throws IOException {
+    HandleParameters parameters = createHandleParameters("/foo");
+    HttpHandlerUtils utils = createHttpHandlerUtils();
+
+    expect(baseRequest.isHandled()).andReturn(true);
+
+    replayAll();
+
+    boolean actual = utils.isHandled(parameters);
+
+    verifyAll();
+
+    assertThat(actual).isTrue();
+  }
+
+  @Test
+  public void testIsHandledFalse() throws IOException {
+    HandleParameters parameters = createHandleParameters("/foo");
+    HttpHandlerUtils utils = createHttpHandlerUtils();
+
+    expect(baseRequest.isHandled()).andReturn(false);
+
+    replayAll();
+
+    boolean actual = utils.isHandled(parameters);
+
+    verifyAll();
+
+    assertThat(actual).isFalse();
+  }
+
+  @Test
+  public void testSetHandled() throws IOException {
+    HandleParameters parameters = createHandleParameters("/foo");
+    HttpHandlerUtils utils = createHttpHandlerUtils();
+
+    baseRequest.setHandled(true);
+
+    replayAll();
+
+    utils.setHandled(parameters);
+
+    verifyAll();
+  }
+
   private HandleParameters createHandleParameters(String target) {
     return new HandleParameters(target, baseRequest, request, response);
   }

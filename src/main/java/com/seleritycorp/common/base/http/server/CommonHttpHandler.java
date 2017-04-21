@@ -66,7 +66,7 @@ public class CommonHttpHandler extends AbstractHttpHandler {
         break;
     }
 
-    if (!params.getBaseRequest().isHandled()) {
+    if (!utils.isHandled(params)) {
       utils.respondNotFound(params);
     }
   }  

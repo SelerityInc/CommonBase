@@ -250,7 +250,7 @@ public class HttpHandlerUtils {
    */
   public void respondNotFound(HandleParameters handleParameters) throws IOException {
     handleParameters.getResponse().setStatus(404);
-    handleParameters.getBaseRequest().setHandled(true);
+    setHandled(handleParameters);
   }
 
   /**
@@ -288,5 +288,24 @@ public class HttpHandlerUtils {
    */
   public boolean isMethodPost(HandleParameters handleParameters) {
     return HttpPost.METHOD_NAME.equals(handleParameters.getRequest().getMethod());
+  }
+
+  /**
+   * Checks if a request has been marked handlend.
+   * 
+   * @param handleParameters The parameters of the handle request
+   * @return true, if the request has been marked handled. false otherwise.
+   */
+  public boolean isHandled(HandleParameters handleParameters) {
+    return handleParameters.getBaseRequest().isHandled();
+  }
+
+  /**
+   * Marks a request as handled.
+   * 
+   * @param handleParameters The parameters of the handle request
+   */
+  public void setHandled(HandleParameters handleParameters) {
+    handleParameters.getBaseRequest().setHandled(true);
   }
 }

@@ -16,17 +16,13 @@
 
 package com.seleritycorp.common.base.http.server;
 
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.easymock.EasyMock.anyObject;
-import static org.easymock.EasyMock.capture;
-import static org.easymock.EasyMock.eq;
 import static org.easymock.EasyMock.expect;
-import static org.easymock.EasyMock.newCapture;
+import static org.easymock.EasyMock.same;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.easymock.Capture;
 import org.easymock.EasyMockSupport;
 import org.eclipse.jetty.server.Request;
 import org.junit.Before;
@@ -42,7 +38,8 @@ public class CommonHttpHandlerTest extends EasyMockSupport {
   private Request baseRequest;
   private HttpServletRequest request;
   private HttpServletResponse response;
-  
+  private HandleParameters params;
+
   @Before
   public void setUp() {
     delegateHttpHandler = createMock(AbstractHttpHandler.class);
@@ -56,118 +53,91 @@ public class CommonHttpHandlerTest extends EasyMockSupport {
   
   @Test
   public void testHandleStatusOk() throws Exception {
-    Capture<HandleParameters> params1 = newCapture();
-    Capture<HandleParameters> params2 = newCapture();
-    Capture<HandleParameters> params3 = newCapture();
+    params = new HandleParameters("/status", baseRequest, request, response);
 
-    expect(utils.resolveRemoteAddr(capture(params1))).andReturn("10.0.0.1");
-    utils.respond(eq("foo"), capture(params2));
-    expect(utils.isMethodGet(capture(params3))).andReturn(true);
+    expect(utils.resolveRemoteAddr(params)).andReturn("10.0.0.1");
+    utils.respond("foo", params);
+    expect(utils.isMethodGet(params)).andReturn(true);
 
     expect(appStateManager.getStatusReport()).andReturn("foo");
 
-    expect(baseRequest.isHandled()).andReturn(true);
+    expect(utils.isHandled(params)).andReturn(true);
 
     replayAll();
     
     AbstractHttpHandler handler = createCommonHttpHandler();
-    handler.handle("/status", baseRequest, request, response);
+    handler.handle("/status", params);
 
     verifyAll();
-    
-    assertParams("/status", params1, params2, params3);
   }
 
   @Test
   public void testHandleStatusNotLocal() throws Exception {
-    Capture<HandleParameters> params1 = newCapture();
-    Capture<HandleParameters> params2 = newCapture();
-    Capture<HandleParameters> params3 = newCapture();
+    params = new HandleParameters("/status", baseRequest, request, response);
 
-    expect(utils.resolveRemoteAddr(capture(params1))).andReturn("1.2.3.4");
-    utils.respondForbidden(capture(params2));
-    expect(utils.isMethodGet(capture(params3))).andReturn(true);
+    expect(utils.resolveRemoteAddr(params)).andReturn("1.2.3.4");
+    utils.respondForbidden(params);
+    expect(utils.isMethodGet(params)).andReturn(true);
 
-    expect(baseRequest.isHandled()).andReturn(true);
+    expect(utils.isHandled(params)).andReturn(true);
 
     replayAll();
     
     AbstractHttpHandler handler = createCommonHttpHandler();
-    handler.handle("/status", baseRequest, request, response);
+    handler.handle("/status", params);
 
     verifyAll();
-    
-    assertParams("/status", params1, params2, params3);
   }
 
   @Test
   public void testHandleStatusNotGet() throws Exception {
-    Capture<HandleParameters> params1 = newCapture();
-    Capture<HandleParameters> params2 = newCapture();
+    params = new HandleParameters("/status", baseRequest, request, response);
 
-    utils.respondBadRequest(anyObject(String.class), capture(params1));
-    expect(utils.isMethodGet(capture(params2))).andReturn(false);
+    utils.respondBadRequest(anyObject(String.class), same(params));
+    expect(utils.isMethodGet(params)).andReturn(false);
     
-    expect(baseRequest.isHandled()).andReturn(true);
+    expect(utils.isHandled(params)).andReturn(true);
 
     replayAll();
     
     AbstractHttpHandler handler = createCommonHttpHandler();
-    handler.handle("/status", baseRequest, request, response);
+    handler.handle("/status", params);
 
     verifyAll();
-    
-    assertParams("/status", params1, params2);
   }
 
   @Test
   public void testHandleDelegateHandled() throws Exception {
-    Capture<HandleParameters> params = newCapture();
+    params = new HandleParameters("/foo", baseRequest, request, response);
 
-    delegateHttpHandler.handle(eq("/foo"), capture(params));
+    delegateHttpHandler.handle("/foo", params);
 
-    expect(baseRequest.isHandled()).andReturn(true);
+    expect(utils.isHandled(params)).andReturn(true);
 
     replayAll();
     
     AbstractHttpHandler handler = createCommonHttpHandler();
-    handler.handle("/foo", baseRequest, request, response);
+    handler.handle("/foo", params);
 
     verifyAll();
-
-    assertParams("/foo", params);
   }
 
   @Test
   public void testHandleDelegateUnhandled() throws Exception {
-    Capture<HandleParameters> params1 = newCapture();
-    Capture<HandleParameters> params2 = newCapture();
+    params = new HandleParameters("/foo", baseRequest, request, response);
 
-    delegateHttpHandler.handle(eq("/foo"), capture(params1));
+    delegateHttpHandler.handle("/foo", params);
 
-    expect(baseRequest.isHandled()).andReturn(false);
+    expect(utils.isHandled(params)).andReturn(false);
 
-    utils.respondNotFound(capture(params2));
+    utils.respondNotFound(params);
 
     replayAll();
     
     AbstractHttpHandler handler = createCommonHttpHandler();
-    handler.handle("/foo", baseRequest, request, response);
+    handler.handle("/foo", params);
 
     verifyAll();
-    
-    assertParams("/foo", params1, params2);
-  }
-
-  @SafeVarargs
-  private final void assertParams(final String target, final Capture<HandleParameters>... paramCaptures) {
-    for (Capture<HandleParameters> capture : paramCaptures) {
-      HandleParameters params = capture.getValue();
-      assertThat(params.getTarget()).isEqualTo(target);
-      assertThat(params.getBaseRequest()).isSameAs(baseRequest);
-      assertThat(params.getRequest()).isSameAs(request);
-      assertThat(params.getResponse()).isSameAs(response);      
-    }
   }
 
   private CommonHttpHandler createCommonHttpHandler() {
