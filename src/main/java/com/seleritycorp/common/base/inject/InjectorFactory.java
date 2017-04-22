@@ -31,8 +31,6 @@ import com.seleritycorp.common.base.state.StateModule;
 import com.seleritycorp.common.base.time.TimeModule;
 import com.seleritycorp.common.base.uuid.UuidModule;
 
-import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -49,24 +47,18 @@ public class InjectorFactory {
    * 
    * @return The current injector.
    */
-  @SuppressFBWarnings(value = "DC_DOUBLECHECK",
-      justification = "Outer check is quick and unsynchronized. Inner check is synchronized")
-  public static Injector getInjector() {
+  public static synchronized Injector getInjector() {
     if (injector == null) {
-      synchronized (Injector.class) {
-        if (injector == null) {
-          List<Module> modules = new ArrayList<>(5);
-          modules.add(new ProductionModule());
-          modules.add(new TimeModule());
-          modules.add(new ConfigModule());
-          modules.add(new LoggingModule());
-          modules.add(new StateModule());
-          modules.add(new UuidModule());
-          modules.add(new HttpClientModule());
-          modules.add(new HttpServerModule());
-          injector = Guice.createInjector(modules);
-        }
-      }
+      List<Module> modules = new ArrayList<>(5);
+      modules.add(new ProductionModule());
+      modules.add(new TimeModule());
+      modules.add(new ConfigModule());
+      modules.add(new LoggingModule());
+      modules.add(new StateModule());
+      modules.add(new UuidModule());
+      modules.add(new HttpClientModule());
+      modules.add(new HttpServerModule());
+      injector = Guice.createInjector(modules);
     }
     return injector;
   }
@@ -80,7 +72,7 @@ public class InjectorFactory {
    * @param module The module to register
    * @return The new injector with the registered module.
    */
-  public static Injector register(AbstractModule module) {
+  public static synchronized Injector register(AbstractModule module) {
     Injector parent = getInjector();
     injector = parent.createChildInjector(module);
     return injector;
@@ -95,9 +87,7 @@ public class InjectorFactory {
    * @param injector The injector to force. If null, the injector gets
    *        reset, and re-initialized upon the getting anInjector next time.
    */
-  public static void forceInjector(Injector injector) {
-    synchronized (Injector.class) {
-      InjectorFactory.injector = injector;
-    }
+  public static synchronized void forceInjector(Injector injector) {
+    InjectorFactory.injector = injector;
   }
 }
