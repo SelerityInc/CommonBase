@@ -105,12 +105,14 @@ public class InjectorFactoryTest extends InjectingTestCase {
     Injector injectorA = InjectorFactory.getInjector();
     Foo fooA = injectorA.getInstance(Foo.class);
     Bar barA = injectorA.getInstance(Bar.class);
-    Injector injectorB = InjectorFactory.register(new AbstractModule() {
+
+    InjectorFactory.register(new AbstractModule() {
       @Override
       protected void configure() {
         this.bind(Baz.class).toInstance(baz);
       }
     });
+    Injector injectorB = InjectorFactory.getInjector();
 
     assertThat(injectorA).isNotSameAs(injectorB);
 

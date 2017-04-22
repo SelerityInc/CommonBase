@@ -70,12 +70,10 @@ public class InjectorFactory {
    * previously registered module, and the currently passed one.
    * 
    * @param module The module to register
-   * @return The new injector with the registered module.
    */
-  public static synchronized Injector register(AbstractModule module) {
+  public static synchronized void register(AbstractModule module) {
     Injector parent = getInjector();
     injector = parent.createChildInjector(module);
-    return injector;
   }
 
   /**
