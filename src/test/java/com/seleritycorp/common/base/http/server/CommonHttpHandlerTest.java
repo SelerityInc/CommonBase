@@ -141,7 +141,9 @@ public class CommonHttpHandlerTest extends EasyMockSupport {
   }
 
   private CommonHttpHandler createCommonHttpHandler() {
-    return new CommonHttpHandler(delegateHttpHandler, appStateManager, utils);
-    
+    CommonHttpHandler.AbstractHttpHandlerHolder holder =
+        new CommonHttpHandler.AbstractHttpHandlerHolder();
+    holder.value = delegateHttpHandler;
+    return new CommonHttpHandler(holder, appStateManager, utils);
   }
 }
