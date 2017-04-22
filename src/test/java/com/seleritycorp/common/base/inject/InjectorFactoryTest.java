@@ -17,6 +17,7 @@
 package com.seleritycorp.common.base.inject;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.failBecauseExceptionWasNotThrown;
 
 import java.nio.file.Path;
 
@@ -27,6 +28,7 @@ import org.junit.After;
 import org.junit.Test;
 
 import com.google.inject.AbstractModule;
+import com.google.inject.ConfigurationException;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.seleritycorp.common.base.config.ApplicationConfig;
@@ -79,6 +81,17 @@ public class InjectorFactoryTest extends InjectingTestCase {
   }
 
   @Test
+  public void testGetInjectorClean() {
+    InjectorFactory.forceInjector(Guice.createInjector());
+    Injector injector = InjectorFactory.getInjector();
+    try {
+      injector.getInstance(BasicEnvironmentAccessor.class);
+      failBecauseExceptionWasNotThrown(ConfigurationException.class);
+    } catch (ConfigurationException e) {
+    }
+  }
+
+  @Test
   public void testForcingNull() {
     Injector injectorA = InjectorFactory.getInjector();
     InjectorFactory.forceInjector(null);
@@ -125,6 +138,20 @@ public class InjectorFactoryTest extends InjectingTestCase {
     assertThat(bazB).isSameAs(baz);
   }
 
+  @Test
+  public void testLazyInjectorCreation() {
+    InjectorFactory.forceInjector(null);
+
+    ModuleShim module = new ModuleShim();
+    InjectorFactory.register(module);
+
+    assertThat(module.hasBeenConfigured()).isFalse();
+
+    InjectorFactory.getInjector();
+
+    assertThat(module.hasBeenConfigured()).isTrue();
+  }
+
   static class Foo {
   }
 
@@ -152,6 +179,23 @@ public class InjectorFactoryTest extends InjectingTestCase {
 
     public Config getApplicationConfig() {
       return applicationConfig;
+    }
+  }
+  
+  static class ModuleShim extends AbstractModule {
+    private boolean configured;
+    
+    public ModuleShim() {
+      configured = false;
+    }
+
+    @Override
+    protected void configure() {
+      configured = true;
+    }
+
+    public boolean hasBeenConfigured() {
+      return configured;
     }
   }
 }

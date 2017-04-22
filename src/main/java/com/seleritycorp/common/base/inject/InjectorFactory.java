@@ -20,7 +20,6 @@ package com.seleritycorp.common.base.inject;
 import com.google.inject.AbstractModule;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
-import com.google.inject.Module;
 
 import com.seleritycorp.common.base.config.ConfigModule;
 import com.seleritycorp.common.base.config.ProductionModule;
@@ -32,10 +31,23 @@ import com.seleritycorp.common.base.time.TimeModule;
 import com.seleritycorp.common.base.uuid.UuidModule;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public class InjectorFactory {
   private static Injector injector = null;
+
+  private static List<AbstractModule> defaultModules = Arrays.asList(
+      new ProductionModule(),
+      new TimeModule(),
+      new ConfigModule(),
+      new LoggingModule(),
+      new StateModule(),
+      new UuidModule(),
+      new HttpClientModule(),
+      new HttpServerModule());
+
+  private static List<AbstractModule> modules = new ArrayList<>(defaultModules);
 
   /**
    * Gets the current injector
@@ -49,15 +61,6 @@ public class InjectorFactory {
    */
   public static synchronized Injector getInjector() {
     if (injector == null) {
-      List<Module> modules = new ArrayList<>(5);
-      modules.add(new ProductionModule());
-      modules.add(new TimeModule());
-      modules.add(new ConfigModule());
-      modules.add(new LoggingModule());
-      modules.add(new StateModule());
-      modules.add(new UuidModule());
-      modules.add(new HttpClientModule());
-      modules.add(new HttpServerModule());
       injector = Guice.createInjector(modules);
     }
     return injector;
@@ -72,8 +75,11 @@ public class InjectorFactory {
    * @param module The module to register
    */
   public static synchronized void register(AbstractModule module) {
-    Injector parent = getInjector();
-    injector = parent.createChildInjector(module);
+    if (injector == null) {
+      modules.add(module);
+    } else {
+      injector = injector.createChildInjector(module);
+    }
   }
 
   /**
@@ -87,5 +93,10 @@ public class InjectorFactory {
    */
   public static synchronized void forceInjector(Injector injector) {
     InjectorFactory.injector = injector;
+    if (injector == null) {
+      modules = new ArrayList<>(defaultModules);
+    } else {
+      modules = new ArrayList<>();
+    }
   }
 }
