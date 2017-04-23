@@ -27,6 +27,7 @@ import com.seleritycorp.common.base.http.client.HttpClientModule;
 import com.seleritycorp.common.base.http.server.HttpServerModule;
 import com.seleritycorp.common.base.logging.LoggingModule;
 import com.seleritycorp.common.base.state.StateModule;
+import com.seleritycorp.common.base.thread.ThreadModule;
 import com.seleritycorp.common.base.time.TimeModule;
 import com.seleritycorp.common.base.uuid.UuidModule;
 
@@ -45,7 +46,8 @@ public class InjectorFactory {
       new StateModule(),
       new UuidModule(),
       new HttpClientModule(),
-      new HttpServerModule());
+      new HttpServerModule(),
+      new ThreadModule());
 
   private static List<AbstractModule> modules = new ArrayList<>(defaultModules);
 

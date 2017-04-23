@@ -18,18 +18,42 @@ package com.seleritycorp.common.base.thread;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import static org.easymock.EasyMock.capture;
+import static org.easymock.EasyMock.expect;
+import static org.easymock.EasyMock.newCapture;
+
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
+import java.util.concurrent.ThreadPoolExecutor;
 
+import org.easymock.Capture;
+import org.easymock.EasyMockSupport;
+import org.junit.Before;
 import org.junit.Test;
 
-public class ExecutorServiceFactoryTest {
+public class ExecutorServiceFactoryTest extends EasyMockSupport {
   // Not mocking out this Factory as the ExecutorService relies on being able to run its runnables.
   private ThreadFactoryFactory threadFactoryFactory = new ThreadFactoryFactory();
 
+  private ExecutorServiceMetrics.Factory executorServiceMetricsFactory;
+  private Capture<ThreadPoolExecutor> expectedExecutorCapture;
+  private ExecutorServiceMetrics metrics;
+
+  @Before
+  public void setUp() {
+    executorServiceMetricsFactory = createMock(ExecutorServiceMetrics.Factory.class);
+
+    expectedExecutorCapture = newCapture();
+    metrics = createMock(ExecutorServiceMetrics.class);
+    expect(executorServiceMetricsFactory.create(capture(expectedExecutorCapture))).andReturn(
+        metrics);
+  }
+
   @Test
   public void testCreateFixedDaemonExecutorServiceSingle() throws Exception {
+    replayAll();
+    
     ExecutorServiceFactory executorServiceFactory = createExecutorServiceFactory();
 
     ExecutorService executor = executorServiceFactory
@@ -41,10 +65,17 @@ public class ExecutorServiceFactoryTest {
     Future<Boolean> future = executor.submit(callable);
     
     assertThat(future.get()).isTrue();
+
+    verifyAll();
+
+    ThreadPoolExecutor expectedExecutor = expectedExecutorCapture.getValue(); 
+    assertThat(expectedExecutor).isSameAs(executor);
   }
   
   @Test
   public void testCreateFixedDaemonExecutorServiceMultiple() throws Exception {
+    replayAll();
+    
     ExecutorServiceFactory executorServiceFactory = createExecutorServiceFactory();
 
     ExecutorService executor = executorServiceFactory
@@ -61,10 +92,17 @@ public class ExecutorServiceFactoryTest {
 
     callable2.allowExit();
     assertThat(future2.get()).isTrue();
+
+    verifyAll();
+
+    ThreadPoolExecutor expectedExecutor = expectedExecutorCapture.getValue(); 
+    assertThat(expectedExecutor).isSameAs(executor);
   }
   
   @Test
   public void testCreateFixedDaemonExecutorServiceQueueing() throws Exception {
+    replayAll();
+
     ExecutorServiceFactory executorServiceFactory = createExecutorServiceFactory();
 
     ExecutorService executor = executorServiceFactory
@@ -81,10 +119,15 @@ public class ExecutorServiceFactoryTest {
 
     callable2.allowExit();
     assertThat(future2.get()).isTrue();
+
+    verifyAll();
+
+    ThreadPoolExecutor expectedExecutor = expectedExecutorCapture.getValue(); 
+    assertThat(expectedExecutor).isSameAs(executor);
   }
   
   private ExecutorServiceFactory createExecutorServiceFactory() {
-    return new ExecutorServiceFactory(threadFactoryFactory);
+    return new ExecutorServiceFactory(threadFactoryFactory, executorServiceMetricsFactory);
   }
   
   private class CallableShim implements Callable<Boolean> {

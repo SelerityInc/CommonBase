@@ -19,10 +19,12 @@ package com.seleritycorp.common.base.http.server;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import static org.easymock.EasyMock.expect;
+import static org.easymock.EasyMock.anyObject;
 
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.net.URL;
+import java.util.concurrent.ThreadPoolExecutor;
 
 import javax.servlet.ServletException;
 
@@ -37,6 +39,7 @@ import com.seleritycorp.common.base.state.AppStateFacetFactory;
 import com.seleritycorp.common.base.state.AppStatePushFacet;
 import com.seleritycorp.common.base.test.SettableConfig;
 import com.seleritycorp.common.base.thread.ExecutorServiceFactory;
+import com.seleritycorp.common.base.thread.ExecutorServiceMetrics;
 import com.seleritycorp.common.base.thread.ThreadFactoryFactory;
 
 public class HttpServerTest extends EasyMockSupport {
@@ -117,9 +120,15 @@ public class HttpServerTest extends EasyMockSupport {
     AppStateFacetFactory appStateFacetFactory = createMock(AppStateFacetFactory.class);
     expect(appStateFacetFactory.createAppStatePushFacet("http-server")).andReturn(facet);
 
+    ExecutorServiceMetrics.Factory executorServiceMetricsFactory = createMock(
+        ExecutorServiceMetrics.Factory.class);
+    ExecutorServiceMetrics executorServiceMetrics = createMock(ExecutorServiceMetrics.class);
+    expect(executorServiceMetricsFactory.create(anyObject(ThreadPoolExecutor.class)))
+      .andReturn(executorServiceMetrics);
+  
     ThreadFactoryFactory threadFactoryFactory = new ThreadFactoryFactory();
     ExecutorServiceFactory executorServiceFactory = new ExecutorServiceFactory(
-        threadFactoryFactory);
+        threadFactoryFactory, executorServiceMetricsFactory);
     
     AbstractHttpHandler httpHandler = new HttpHandler();
 

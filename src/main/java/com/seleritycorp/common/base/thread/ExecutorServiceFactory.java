@@ -18,9 +18,15 @@ package com.seleritycorp.common.base.thread;
 
 import com.google.inject.Inject;
 
+import com.seleritycorp.common.base.jmx.MBeanUtils;
+
+import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
+
 import javax.inject.Singleton;
 
 /**
@@ -29,15 +35,19 @@ import javax.inject.Singleton;
 @Singleton
 public class ExecutorServiceFactory {
   private ThreadFactoryFactory threadFactoryFactory;
+  private final ExecutorServiceMetrics.Factory executorServiceMetricsFactory;
 
   /**
    * Creates a ExecuterService factory for a given ThreadFactory factory.
    * 
    * @param threadFactoryFactory The factory to create ThreadFactories for ExecutorServices
+   * @param executorServiceMetricsFactory The factory to create metrics with.
    */
   @Inject
-  public ExecutorServiceFactory(ThreadFactoryFactory threadFactoryFactory) {
+  public ExecutorServiceFactory(ThreadFactoryFactory threadFactoryFactory,
+      ExecutorServiceMetrics.Factory executorServiceMetricsFactory) {
     this.threadFactoryFactory = threadFactoryFactory;
+    this.executorServiceMetricsFactory = executorServiceMetricsFactory;
   }
 
   /**
@@ -50,6 +60,14 @@ public class ExecutorServiceFactory {
   public ExecutorService createFixedUnboundedDaemonExecutorService(String prefix,
       int threadCount) {
     ThreadFactory threadFactory = threadFactoryFactory.createDaemonThreadFactory(prefix);
-    return Executors.newFixedThreadPool(threadCount, threadFactory);
+    BlockingQueue<Runnable> queue = new LinkedBlockingQueue<>();
+    ThreadPoolExecutor executor = new ThreadPoolExecutor(threadCount, threadCount,
+        0L, TimeUnit.MILLISECONDS, queue, threadFactory);
+    
+    ExecutorServiceMetrics metrics = executorServiceMetricsFactory.create(executor);
+    String name = "com.seleritycorp.common.base.thread:type=ThreadPool,name=" + prefix;
+    MBeanUtils.register(name, metrics);
+    
+    return executor;
   }
 }
