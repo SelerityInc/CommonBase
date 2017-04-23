@@ -21,6 +21,7 @@ import com.google.inject.AbstractModule;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 
+import com.seleritycorp.common.base.cache.CacheModule;
 import com.seleritycorp.common.base.config.ConfigModule;
 import com.seleritycorp.common.base.config.ProductionModule;
 import com.seleritycorp.common.base.http.client.HttpClientModule;
@@ -47,7 +48,8 @@ public class InjectorFactory {
       new UuidModule(),
       new HttpClientModule(),
       new HttpServerModule(),
-      new ThreadModule());
+      new ThreadModule(),
+      new CacheModule());
 
   private static List<AbstractModule> modules = new ArrayList<>(defaultModules);
 
