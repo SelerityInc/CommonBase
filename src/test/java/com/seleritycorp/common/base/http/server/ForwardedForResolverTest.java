@@ -175,6 +175,13 @@ public class ForwardedForResolverTest {
   }
 
   @Test
+  public void testIsTrustedIpInternal127() {
+    ForwardedForResolver resolver = createForwardedForResolver();
+        
+    assertThat(resolver.isTrustedIp("127.1.2.3")).isTrue();
+  }
+
+  @Test
   public void testIsTrustedIpInternal192_168() {
     ForwardedForResolver resolver = createForwardedForResolver();
         

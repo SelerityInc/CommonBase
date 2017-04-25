@@ -57,6 +57,7 @@ public class ForwardedForResolver {
   boolean isTrustedIp(String ip) {
     boolean ret = false;
     ret |= ip.startsWith("10.");
+    ret |= ip.startsWith("127.");
     ret |= ip.startsWith("192.168.");
     return ret;
   }
