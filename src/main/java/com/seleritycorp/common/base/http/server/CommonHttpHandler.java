@@ -30,39 +30,37 @@ import javax.servlet.ServletException;
 public class CommonHttpHandler extends AbstractHttpHandler {
   private final AbstractHttpHandler delegateHttpHandler;
   private final AppStateManager appStateManager;
-  private final HttpHandlerUtils utils;
   
   @Inject
   CommonHttpHandler(AbstractHttpHandlerHolder delegateHttpHandlerHolder,
-      AppStateManager appStateManager, HttpHandlerUtils utils) {
+      AppStateManager appStateManager) {
     this.delegateHttpHandler = delegateHttpHandlerHolder.value;
     this.appStateManager = appStateManager;
-    this.utils = utils;
   }
 
   @Override
-  public void handle(String target, HandleParameters params) throws IOException,
+  public void handle(HttpRequest request) throws IOException,
       ServletException {
-    switch (target) {
+    switch (request.getTarget()) {
       case "/status":
-        if (utils.isMethodGet(params)) {
-          String sender = utils.resolveRemoteAddr(params);
+        if (request.isMethodGet()) {
+          String sender = request.getResolvedRemoteAddr();
           if (sender.startsWith("10.") || sender.startsWith("127.")) {
-            utils.respond(appStateManager.getStatusReport(), params);
+            request.respond(appStateManager.getStatusReport());
           } else {
-            utils.respondForbidden(params);
+            request.respondForbidden();
           }
         } else {
-          utils.respondBadRequest("Target " + target + " expects GET method", params);
+          request.respondBadRequest("Target " + request.getTarget() + " expects GET method");
         }
         break;
       default:
-        delegateHttpHandler.handle(target, params);
+        delegateHttpHandler.handle(request);
         break;
     }
 
-    if (!utils.isHandled(params)) {
-      utils.respondNotFound(params);
+    if (!request.hasBeenHandled()) {
+      request.respondNotFound();
     }
   }  
 
@@ -70,7 +68,7 @@ public class CommonHttpHandler extends AbstractHttpHandler {
     @Inject(optional = true)
     AbstractHttpHandler value = new AbstractHttpHandler() {
       @Override
-      public void handle(String target, HandleParameters params)
+      public void handle(HttpRequest request)
           throws IOException, ServletException {
         // Intentionally doing nothing, as it's only the fallback AbstractHttpHandler.
       }

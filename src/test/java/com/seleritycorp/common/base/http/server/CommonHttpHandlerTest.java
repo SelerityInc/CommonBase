@@ -18,124 +18,118 @@ package com.seleritycorp.common.base.http.server;
 
 import static org.easymock.EasyMock.anyObject;
 import static org.easymock.EasyMock.expect;
-import static org.easymock.EasyMock.same;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
-import org.easymock.EasyMockSupport;
-import org.eclipse.jetty.server.Request;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.google.inject.AbstractModule;
+import com.seleritycorp.common.base.inject.InjectorFactory;
 import com.seleritycorp.common.base.state.AppStateManager;
+import com.seleritycorp.common.base.test.InjectingTestCase;
 
-public class CommonHttpHandlerTest extends EasyMockSupport {
+public class CommonHttpHandlerTest extends InjectingTestCase {
   private AbstractHttpHandler delegateHttpHandler;
   private AppStateManager appStateManager;
-  private HttpHandlerUtils utils;
 
-  private Request baseRequest;
-  private HttpServletRequest request;
-  private HttpServletResponse response;
-  private HandleParameters params;
+  private HttpRequest httpRequest;
+  private HttpRequest.Factory httpRequestFactory;
 
   @Before
   public void setUp() {
     delegateHttpHandler = createMock(AbstractHttpHandler.class);
     appStateManager = createMock(AppStateManager.class);
-    utils = createMock(HttpHandlerUtils.class);
-    
-    baseRequest = createMock(Request.class);
-    request = createMock(HttpServletRequest.class);
-    response = createMock(HttpServletResponse.class);
+    httpRequestFactory = createMock(HttpRequest.Factory.class);
+
+    httpRequest = createMock(HttpRequest.class);
+
+    InjectorFactory.register(new AbstractModule(){
+      @Override
+      protected void configure() {
+        bind(HttpRequest.Factory.class).toInstance(httpRequestFactory);
+      }
+    });
   }
   
   @Test
   public void testHandleStatusOk() throws Exception {
-    params = new HandleParameters("/status", baseRequest, request, response);
-
-    expect(utils.resolveRemoteAddr(params)).andReturn("10.0.0.1");
-    utils.respond("foo", params);
-    expect(utils.isMethodGet(params)).andReturn(true);
+    expect(httpRequest.getTarget()).andReturn("/status");
+    expect(httpRequest.getResolvedRemoteAddr()).andReturn("10.0.0.1");
+    expect(httpRequest.isMethodGet()).andReturn(true);
 
     expect(appStateManager.getStatusReport()).andReturn("foo");
+    httpRequest.respond("foo");
 
-    expect(utils.isHandled(params)).andReturn(true);
+    expect(httpRequest.hasBeenHandled()).andReturn(true);
 
     replayAll();
-    
+
     AbstractHttpHandler handler = createCommonHttpHandler();
-    handler.handle("/status", params);
+    handler.handle(httpRequest);
 
     verifyAll();
   }
 
   @Test
   public void testHandleStatusNotLocal() throws Exception {
-    params = new HandleParameters("/status", baseRequest, request, response);
+    expect(httpRequest.getTarget()).andReturn("/status");
+    expect(httpRequest.getResolvedRemoteAddr()).andReturn("1.2.3.4");
+    httpRequest.respondForbidden();
+    expect(httpRequest.isMethodGet()).andReturn(true);
 
-    expect(utils.resolveRemoteAddr(params)).andReturn("1.2.3.4");
-    utils.respondForbidden(params);
-    expect(utils.isMethodGet(params)).andReturn(true);
-
-    expect(utils.isHandled(params)).andReturn(true);
+    expect(httpRequest.hasBeenHandled()).andReturn(true);
 
     replayAll();
     
     AbstractHttpHandler handler = createCommonHttpHandler();
-    handler.handle("/status", params);
+    handler.handle(httpRequest);
 
     verifyAll();
   }
 
   @Test
   public void testHandleStatusNotGet() throws Exception {
-    params = new HandleParameters("/status", baseRequest, request, response);
-
-    utils.respondBadRequest(anyObject(String.class), same(params));
-    expect(utils.isMethodGet(params)).andReturn(false);
+    expect(httpRequest.getTarget()).andReturn("/status").anyTimes();
+    httpRequest.respondBadRequest(anyObject(String.class));
+    expect(httpRequest.isMethodGet()).andReturn(false);
     
-    expect(utils.isHandled(params)).andReturn(true);
+    expect(httpRequest.hasBeenHandled()).andReturn(true);
 
     replayAll();
     
     AbstractHttpHandler handler = createCommonHttpHandler();
-    handler.handle("/status", params);
+    handler.handle(httpRequest);
 
     verifyAll();
   }
 
   @Test
   public void testHandleDelegateHandled() throws Exception {
-    params = new HandleParameters("/foo", baseRequest, request, response);
+    expect(httpRequest.getTarget()).andReturn("/foo");
+    delegateHttpHandler.handle(httpRequest);
 
-    delegateHttpHandler.handle("/foo", params);
-
-    expect(utils.isHandled(params)).andReturn(true);
+    expect(httpRequest.hasBeenHandled()).andReturn(true);
 
     replayAll();
     
     AbstractHttpHandler handler = createCommonHttpHandler();
-    handler.handle("/foo", params);
+    handler.handle(httpRequest);
 
     verifyAll();
   }
 
   @Test
   public void testHandleDelegateUnhandled() throws Exception {
-    params = new HandleParameters("/foo", baseRequest, request, response);
+    expect(httpRequest.getTarget()).andReturn("/foo");
+    delegateHttpHandler.handle(httpRequest);
 
-    delegateHttpHandler.handle("/foo", params);
+    expect(httpRequest.hasBeenHandled()).andReturn(false);
 
-    expect(utils.isHandled(params)).andReturn(false);
-
-    utils.respondNotFound(params);
+    httpRequest.respondNotFound();
 
     replayAll();
     
     AbstractHttpHandler handler = createCommonHttpHandler();
-    handler.handle("/foo", params);
+    handler.handle(httpRequest);
 
     verifyAll();
   }
@@ -144,6 +138,8 @@ public class CommonHttpHandlerTest extends EasyMockSupport {
     CommonHttpHandler.AbstractHttpHandlerHolder holder =
         new CommonHttpHandler.AbstractHttpHandlerHolder();
     holder.value = delegateHttpHandler;
-    return new CommonHttpHandler(holder, appStateManager, utils);
+    CommonHttpHandler ret = new CommonHttpHandler(holder, appStateManager);
+    ret.setHttpRequestFactory(httpRequestFactory);
+    return ret;
   }
 }

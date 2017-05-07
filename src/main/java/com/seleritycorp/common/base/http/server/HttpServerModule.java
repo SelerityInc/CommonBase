@@ -16,14 +16,15 @@
 
 package com.seleritycorp.common.base.http.server;
 
-import com.google.inject.AbstractModule;
+import com.seleritycorp.common.base.inject.FactoryModule;
 
 /**
  * Configures injection for http server classes.
  */
-public class HttpServerModule extends AbstractModule {
+public class HttpServerModule extends FactoryModule {
   @Override
   protected void configure() {
+    installFactory(HttpRequest.Factory.class);
     bind(AbstractHttpHandler.class).annotatedWith(BaseHttpHandler.class).to(
         CommonHttpHandler.class);
   }

@@ -16,33 +16,83 @@
 
 package com.seleritycorp.common.base.http.server;
 
+import com.google.inject.assistedinject.Assisted;
+
 import com.seleritycorp.common.base.logging.Log;
 import com.seleritycorp.common.base.logging.LogFactory;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
+import org.eclipse.jetty.server.Request;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.PrintWriter;
 
 import javax.inject.Inject;
-import javax.inject.Singleton;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 /**
- * Utilities for handling http requests.
+ * Http Request enhanced by tooling for common work flows.
  */
-@Singleton
-public class HttpHandlerUtils {
-  private static final Log log = LogFactory.getLog(HttpHandlerUtils.class);
+public class HttpRequest {
+  private static final Log log = LogFactory.getLog(HttpRequest.class);
 
+  public interface Factory {
+    /**
+     * Create a HttpRequest.
+     * 
+     * @param target Target URL for the handle request parameters
+     * @param request Base Jetty request for the handle request parameters
+     * @param httpServletRequest Http request for the handle request parameters
+     * @param httpServletResponse Response for the handle request parameters
+     * @return The created HttpRequest
+     */
+    HttpRequest create(String target, Request request, HttpServletRequest httpServletRequest,
+        HttpServletResponse httpServletResponse);
+  }
+
+  private final String target;
+  private final Request request;
+  private final HttpServletRequest httpServletRequest;
+  private final HttpServletResponse httpServletResponse;
   private final ForwardedForResolver forwardedForResolver;
 
+  /**
+   * Create a HttpRequest.
+   * 
+   * @param target Target URL for the handle request parameters
+   * @param request Base Jetty request for the handle request parameters
+   * @param httpServletRequest Http request for the handle request parameters
+   * @param httpServletResponse Response for the handle request parameters
+   * @param forwardedForResolver The resolver for IP addresses
+   */
   @Inject
-  public HttpHandlerUtils(ForwardedForResolver forwardedForResolver) {
+  public HttpRequest(@Assisted String target, @Assisted Request request,
+      @Assisted HttpServletRequest httpServletRequest,
+      @Assisted HttpServletResponse httpServletResponse,
+      ForwardedForResolver forwardedForResolver) {
+    this.target = target;
+    this.request = request;
+    this.httpServletRequest = httpServletRequest;
+    this.httpServletResponse = httpServletResponse;
     this.forwardedForResolver = forwardedForResolver;
   }
+
+  // -- Raw request objects ---------------------------------------------------
+
+  /**
+   * Gets the target URL of the handle request.
+   * 
+   * @return the target.
+   */
+  public String getTarget() {
+    return target;
+  }
+
+  // -- Information extraction helpers ----------------------------------------
 
   /**
    * Gets the request's body as string.
@@ -50,34 +100,77 @@ public class HttpHandlerUtils {
    * <p>This method may replace the request's line-breaks with line-breaks used on the current
    * system (E.g.: Replacing "\r\n" by "\n").
    *
-   * @param handleParameters This parameters' request will get its body extracted.
    * @return The string representation of the request's body
    * @throws java.io.UnsupportedEncodingException if the character encoding is not supported.
    * @throws IllegalStateException if the request was read already.
    * @throws IOException if an input or output exception occurred
    */
-  public String getRequestBodyAsString(HandleParameters handleParameters) throws IOException {
-    try (BufferedReader reader = handleParameters.getRequest().getReader()) {
+  public String getRequestBodyAsString() throws IOException {
+    try (BufferedReader reader = httpServletRequest.getReader()) {
       return IOUtils.toString(reader);
     }
   }
+  
+  /**
+   * Checks if a request is a GET request.
+   * 
+   * @return true, if it is a GET request. false otherwise.
+   */
+  public boolean isMethodGet() {
+    return HttpGet.METHOD_NAME.equals(httpServletRequest.getMethod());
+  }
 
+  /**
+   * Checks if a request is a POST request.
+   * 
+   * @return true, if it is a POST request. false otherwise.
+   */
+  public boolean isMethodPost() {
+    return HttpPost.METHOD_NAME.equals(httpServletRequest.getMethod());
+  }
+
+  /**
+   * Checks if a request has been marked handlend.
+   * 
+   * @return true, if the request has been marked handled. false otherwise.
+   */
+  public boolean hasBeenHandled() {
+    return request.isHandled();
+  }
+
+  /**
+   * Resolves a remote address using X-Forwarded-For headers
+   * 
+   * <p>If requests pass through proxies, they are expected to set for which IP they proxied.
+   * Not all proxies do that, and one cannot trust external proxies. But our internal proxies
+   * do and we can trust them to not set bogus headers. So we use this information to determine
+   * from which IP a request originates.
+   *  
+   * @return the IP address we attribute a request to.
+   */
+  public String getResolvedRemoteAddr() {
+    String remoteAddr = httpServletRequest.getRemoteAddr();
+    String forwardedFor = httpServletRequest.getHeader("X-Forwarded-For");
+    return forwardedForResolver.resolve(remoteAddr,forwardedFor);
+  }
+
+  // -- Response helpers  -----------------------------------------------------
+  
   /**
    * Sends a response to a request and marks it as handled.
    * 
    * @param response The response text. If null, no response gets written.
-   * @param handleParameters The parameters of the handle request 
    * @throws java.io.UnsupportedEncodingException if the character encoding is unusable.
    * @throws IllegalStateException if a response was sent already.
    * @throws IOException if an input/output error occurs
    */
-  public void respond(String response, HandleParameters handleParameters) throws IOException {
+  public void respond(String response) throws IOException {
     if (response != null) {
-      try (PrintWriter writer = handleParameters.getResponse().getWriter()) {
+      try (PrintWriter writer = httpServletResponse.getWriter()) {
         writer.print(response);
       }
     }
-    handleParameters.getBaseRequest().setHandled(true);
+    setHandled();
   }
 
   /**
@@ -85,29 +178,26 @@ public class HttpHandlerUtils {
    *  
    * @param status The status code to send
    * @param response The response text
-   * @param handleParameters The parameters of the handle request
    * @throws java.io.UnsupportedEncodingException if the character encoding is unusable.
    * @throws IllegalStateException if a response was sent already.
    * @throws IOException if an input/output error occurs
    */
-  public void respond(int status, String response, HandleParameters handleParameters)
-      throws IOException {
-    handleParameters.getResponse().setStatus(status);
-    respond(response, handleParameters);
+  public void respond(int status, String response) throws IOException {
+    httpServletResponse.setStatus(status);
+    respond(response);
   }
 
   /**
    * Sends a response with status code to a request and marks it as handled.
    *  
    * @param status The status code to send
-   * @param handleParameters The parameters of the handle request
    * @throws java.io.UnsupportedEncodingException if the character encoding is unusable.
    * @throws IllegalStateException if a response was sent already.
    * @throws IOException if an input/output error occurs
    */
-  public void respond(int status, HandleParameters handleParameters)
+  public void respond(int status)
       throws IOException {
-    respond(status, null, handleParameters);
+    respond(status, null);
   }
 
   /**
@@ -116,14 +206,12 @@ public class HttpHandlerUtils {
    * @param status The status code to send
    * @param response The response text
    * @param logMessage A message to log for the request
-   * @param handleParameters The parameters of the handle request
    * @throws java.io.UnsupportedEncodingException if the character encoding is unusable.
    * @throws IllegalStateException if a response was sent already.
    * @throws IOException if an input/output error occurs
    */
-  public void respond(int status, String response, String logMessage,
-      HandleParameters handleParameters) throws IOException {
-    respond(status, response, logMessage, null, handleParameters);
+  public void respond(int status, String response, String logMessage) throws IOException {
+    respond(status, response, logMessage, null);
   }
 
   /**
@@ -133,17 +221,16 @@ public class HttpHandlerUtils {
    * @param response The response text
    * @param logMessage A message to log for the request
    * @param logThrowable A throwable to log for the request
-   * @param handleParameters The parameters of the handle request
    * @throws java.io.UnsupportedEncodingException if the character encoding is unusable.
    * @throws IllegalStateException if a response was sent already.
    * @throws IOException if an input/output error occurs
    */
-  public void respond(int status, String response, String logMessage, Throwable logThrowable,
-      HandleParameters handleParameters) throws IOException {
-    handleParameters.getResponse().setStatus(status);
-    respond(response, handleParameters);
+  public void respond(int status, String response, String logMessage, Throwable logThrowable)
+      throws IOException {
+    httpServletResponse.setStatus(status);
+    respond(response);
 
-    String msg = "Status " + status + " for request to " + handleParameters.getTarget() + ".";
+    String msg = "Status " + status + " for request to " + getTarget() + ".";
     if (logMessage != null) {
       msg += " " + logMessage;
     }
@@ -157,28 +244,25 @@ public class HttpHandlerUtils {
   /**
    * Sends a '204 Bad Request' response to a request and marks it as handled.
    *  
-   * @param handleParameters The parameters of the handle request
    * @throws java.io.UnsupportedEncodingException if the character encoding is unusable.
    * @throws IllegalStateException if a response was sent already.
    * @throws IOException if an input/output error occurs
    */
-  public void respondNoContent(HandleParameters handleParameters) throws IOException {
-    handleParameters.getResponse().setStatus(204);
-    handleParameters.getBaseRequest().setHandled(true);
+  public void respondNoContent() throws IOException {
+    respond(204);
   }
 
   /**
    * Sends a '400 Bad Request' response to a request and marks it as handled.
    *  
    * @param response The response text
-   * @param handleParameters The parameters of the handle request
    * @throws java.io.UnsupportedEncodingException if the character encoding is unusable.
    * @throws IllegalStateException if a response was sent already.
    * @throws IOException if an input/output error occurs
    */
-  public void respondBadRequest(String response, HandleParameters handleParameters)
+  public void respondBadRequest(String response)
       throws IOException {
-    respond(400, response, handleParameters);
+    respond(400, response);
   }
 
   /**
@@ -186,14 +270,12 @@ public class HttpHandlerUtils {
    *  
    * @param response The response text
    * @param logMessage A message to log for the request
-   * @param handleParameters The parameters of the handle request
    * @throws java.io.UnsupportedEncodingException if the character encoding is unusable.
    * @throws IllegalStateException if a response was sent already.
    * @throws IOException if an input/output error occurs
    */
-  public void respondBadRequest(String response, String logMessage,
-      HandleParameters handleParameters) throws IOException {
-    respond(400, response, logMessage, handleParameters);
+  public void respondBadRequest(String response, String logMessage) throws IOException {
+    respond(400, response, logMessage);
   }
 
   /**
@@ -202,14 +284,13 @@ public class HttpHandlerUtils {
    * @param response The response text
    * @param logMessage A message to log for the request
    * @param logThrowable A throwable to log for the request
-   * @param handleParameters The parameters of the handle request
    * @throws java.io.UnsupportedEncodingException if the character encoding is unusable.
    * @throws IllegalStateException if a response was sent already.
    * @throws IOException if an input/output error occurs
    */
-  public void respondBadRequest(String response, String logMessage, Throwable logThrowable,
-      HandleParameters handleParameters) throws IOException {
-    respond(400, response, logMessage, logThrowable, handleParameters);
+  public void respondBadRequest(String response, String logMessage, Throwable logThrowable)
+      throws IOException {
+    respond(400, response, logMessage, logThrowable);
   }
 
   /**
@@ -217,95 +298,41 @@ public class HttpHandlerUtils {
    *  
    * @param response The response text
    * @param logThrowable A throwable to log for the request
-   * @param handleParameters The parameters of the handle request
    * @throws java.io.UnsupportedEncodingException if the character encoding is unusable.
    * @throws IllegalStateException if a response was sent already.
    * @throws IOException if an input/output error occurs
    */
-  public void respondBadRequest(String response, Throwable logThrowable,
-      HandleParameters handleParameters) throws IOException {
-    respond(400, response, null, logThrowable, handleParameters);
+  public void respondBadRequest(String response, Throwable logThrowable) throws IOException {
+    respond(400, response, null, logThrowable);
   }
 
   /**
    * Sends a '403 Forbidden' response to a request and marks it as handled.
    *  
-   * @param handleParameters The parameters of the handle request
    * @throws java.io.UnsupportedEncodingException if the character encoding is unusable.
    * @throws IllegalStateException if a response was sent already.
    * @throws IOException if an input/output error occurs
    */
-  public void respondForbidden(HandleParameters handleParameters)
+  public void respondForbidden()
       throws IOException {
-    respond(403, handleParameters);
+    respond(403);
   }
 
   /**
    * Sends a '404 Not Found' response to a request and marks it as handled.
    *  
-   * @param handleParameters The parameters of the handle request
    * @throws java.io.UnsupportedEncodingException if the character encoding is unusable.
    * @throws IllegalStateException if a response was sent already.
    * @throws IOException if an input/output error occurs
    */
-  public void respondNotFound(HandleParameters handleParameters) throws IOException {
-    handleParameters.getResponse().setStatus(404);
-    setHandled(handleParameters);
+  public void respondNotFound() throws IOException {
+    respond(404);
   }
-
-  /**
-   * Resolves a remote address using X-Forwarded-For headers
-   * 
-   * <p>If requests pass through proxies, they are expected to set for which IP they proxied.
-   * Not all proxies do that, and one cannot trust external proxies. But our internal proxies
-   * do and we can trust them to not set bogus headers. So we use this information to determine
-   * from which IP a request originates.
-   *  
-   * @param handleParameters The parameters of the handle request
-   * @return the IP address we attribute a request to.
-   */
-  public String resolveRemoteAddr(HandleParameters handleParameters) {
-    String remoteAddr = handleParameters.getRequest().getRemoteAddr();
-    String forwardedFor = handleParameters.getRequest().getHeader("X-Forwarded-For");
-    return forwardedForResolver.resolve(remoteAddr,forwardedFor);
-  }
-
-  /**
-   * Checks if a request is a GET request.
-   * 
-   * @param handleParameters The parameters of the handle request
-   * @return true, if it is a GET request. false otherwise.
-   */
-  public boolean isMethodGet(HandleParameters handleParameters) {
-    return HttpGet.METHOD_NAME.equals(handleParameters.getRequest().getMethod());
-  }
-
-  /**
-   * Checks if a request is a POST request.
-   * 
-   * @param handleParameters The parameters of the handle request
-   * @return true, if it is a POST request. false otherwise.
-   */
-  public boolean isMethodPost(HandleParameters handleParameters) {
-    return HttpPost.METHOD_NAME.equals(handleParameters.getRequest().getMethod());
-  }
-
-  /**
-   * Checks if a request has been marked handlend.
-   * 
-   * @param handleParameters The parameters of the handle request
-   * @return true, if the request has been marked handled. false otherwise.
-   */
-  public boolean isHandled(HandleParameters handleParameters) {
-    return handleParameters.getBaseRequest().isHandled();
-  }
-
+  
   /**
    * Marks a request as handled.
-   * 
-   * @param handleParameters The parameters of the handle request
    */
-  public void setHandled(HandleParameters handleParameters) {
-    handleParameters.getBaseRequest().setHandled(true);
+  public void setHandled() {
+    request.setHandled(true);
   }
 }
