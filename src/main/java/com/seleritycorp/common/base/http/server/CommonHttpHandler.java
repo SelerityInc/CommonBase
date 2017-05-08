@@ -46,12 +46,13 @@ public class CommonHttpHandler extends AbstractHttpHandler {
         if (request.isMethodGet()) {
           String sender = request.getResolvedRemoteAddr();
           if (sender.startsWith("10.") || sender.startsWith("127.")) {
-            request.respond(appStateManager.getStatusReport());
+            request.respondOkText(appStateManager.getStatusReport());
           } else {
             request.respondForbidden();
           }
         } else {
-          request.respondBadRequest("Target " + request.getTarget() + " expects GET method");
+          request.respondBadRequest(BasicErrorCode.E_WRONG_METHOD,
+              "Target " + request.getTarget() + " expects GET method");
         }
         break;
       default:

@@ -18,6 +18,7 @@ package com.seleritycorp.common.base.http.server;
 
 import static org.easymock.EasyMock.anyObject;
 import static org.easymock.EasyMock.expect;
+import static org.easymock.EasyMock.same;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -57,7 +58,7 @@ public class CommonHttpHandlerTest extends InjectingTestCase {
     expect(httpRequest.isMethodGet()).andReturn(true);
 
     expect(appStateManager.getStatusReport()).andReturn("foo");
-    httpRequest.respond("foo");
+    httpRequest.respondOkText("foo");
 
     expect(httpRequest.hasBeenHandled()).andReturn(true);
 
@@ -73,7 +74,7 @@ public class CommonHttpHandlerTest extends InjectingTestCase {
   public void testHandleStatusNotLocal() throws Exception {
     expect(httpRequest.getTarget()).andReturn("/status");
     expect(httpRequest.getResolvedRemoteAddr()).andReturn("1.2.3.4");
-    httpRequest.respondForbidden();
+    expect(httpRequest.respondForbidden()).andReturn(getUuidGenerator().generate());
     expect(httpRequest.isMethodGet()).andReturn(true);
 
     expect(httpRequest.hasBeenHandled()).andReturn(true);
@@ -89,7 +90,8 @@ public class CommonHttpHandlerTest extends InjectingTestCase {
   @Test
   public void testHandleStatusNotGet() throws Exception {
     expect(httpRequest.getTarget()).andReturn("/status").anyTimes();
-    httpRequest.respondBadRequest(anyObject(String.class));
+    expect(httpRequest.respondBadRequest(same(BasicErrorCode.E_WRONG_METHOD),
+        anyObject(String.class))).andReturn(getUuidGenerator().generate());
     expect(httpRequest.isMethodGet()).andReturn(false);
     
     expect(httpRequest.hasBeenHandled()).andReturn(true);
@@ -124,7 +126,7 @@ public class CommonHttpHandlerTest extends InjectingTestCase {
 
     expect(httpRequest.hasBeenHandled()).andReturn(false);
 
-    httpRequest.respondNotFound();
+    expect(httpRequest.respondNotFound()).andReturn(getUuidGenerator().generate());
 
     replayAll();
     

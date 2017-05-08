@@ -17,30 +17,45 @@
 package com.seleritycorp.common.base.http.server;
 
 import static org.assertj.core.api.Assertions.assertThat;
+
+import static com.seleritycorp.common.base.http.common.ContentType.APPLICATION_JSON;
+import static com.seleritycorp.common.base.http.common.ContentType.TEXT_HTML;
+import static com.seleritycorp.common.base.http.common.ContentType.TEXT_PLAIN;
+
+import static org.easymock.EasyMock.capture;
+import static org.easymock.EasyMock.eq;
 import static org.easymock.EasyMock.expect;
+import static org.easymock.EasyMock.newCapture;
+import static org.easymock.EasyMock.reset;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringReader;
 import java.io.StringWriter;
+import java.util.UUID;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.easymock.EasyMockSupport;
+import org.easymock.Capture;
 import org.eclipse.jetty.server.Request;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.seleritycorp.common.base.escape.Escaper;
+import com.seleritycorp.common.base.http.common.ContentType;
 import com.seleritycorp.common.base.http.server.ForwardedForResolver;
 import com.seleritycorp.common.base.http.server.HttpRequest;
+import com.seleritycorp.common.base.test.InjectingTestCase;
 
-public class HttpRequestTest extends EasyMockSupport {
+public class HttpRequestTest extends InjectingTestCase {
   private Request request;
   private HttpServletRequest httpServletRequest;
   private HttpServletResponse httpServletResponse;
   private ForwardedForResolver forwardedForResolver;
+  private ContentTypeNegotiator contentTypeNegotiator;
+  private Escaper escaper;
   
   @Before
   public void setUp() {
@@ -48,6 +63,8 @@ public class HttpRequestTest extends EasyMockSupport {
     httpServletRequest = createMock(HttpServletRequest.class);
     httpServletResponse = createMock(HttpServletResponse.class);
     forwardedForResolver = createMock(ForwardedForResolver.class);
+    contentTypeNegotiator = createMock(ContentTypeNegotiator.class);
+    escaper = createMock(Escaper.class);
   }
 
   @Test
@@ -62,207 +79,537 @@ public class HttpRequestTest extends EasyMockSupport {
   }
 
   @Test
-  public void testRespondResponse() throws IOException {
-    StringWriter stringWriter = new StringWriter();
-    PrintWriter printWriter = new PrintWriter(stringWriter);
-    expect(httpServletResponse.getWriter()).andReturn(printWriter);
-    request.setHandled(true);
+  public void testRespondForbiddenText() throws IOException {
+    expect(httpServletRequest.getMethod()).andReturn("METHOD_FOO");
+    expect(httpServletRequest.getHeader("Accept")).andReturn("text/foo");
 
-    replayAll();
+    expect(contentTypeNegotiator.negotiate("text/foo", TEXT_PLAIN, TEXT_HTML, APPLICATION_JSON))
+      .andReturn(TEXT_PLAIN);
 
-    HttpRequest httpRequest = createHttpRequest("/foo");
-    httpRequest.respond("bar");
-    
-    verifyAll();
-    
-    assertThat(stringWriter.toString()).isEqualTo("bar");
-  }
-
-  @Test
-  public void testRespondResponseNull() throws IOException {
-    request.setHandled(true);
-
-    replayAll();
-
-    HttpRequest httpRequest = createHttpRequest("/foo");
-    httpRequest.respond(null);
-    
-    verifyAll();
-  }
-
-  @Test
-  public void testRespondStatusResponse() throws IOException {
     StringWriter stringWriter = new StringWriter();
     PrintWriter printWriter = new PrintWriter(stringWriter);
 
     expect(httpServletResponse.getWriter()).andReturn(printWriter);
-    httpServletResponse.setStatus(123);
-    request.setHandled(true);
-
-    replayAll();
-
-    HttpRequest httpRequest = createHttpRequest("/foo");
-    httpRequest.respond(123, "bar");
-    
-    verifyAll();
-
-    assertThat(stringWriter.toString()).isEqualTo("bar");
-  }
-
-  @Test
-  public void testRespondStatus() throws IOException {
-    httpServletResponse.setStatus(123);
-    request.setHandled(true);
-
-    replayAll();
-
-    HttpRequest httpRequest = createHttpRequest("/foo");
-    httpRequest.respond(123);
-    
-    verifyAll();
-  }
-
-  @Test
-  public void testRespondStatusResponseLogMessage() throws IOException {
-    StringWriter stringWriter = new StringWriter();
-    PrintWriter printWriter = new PrintWriter(stringWriter);
-
-    expect(httpServletResponse.getWriter()).andReturn(printWriter);
-    httpServletResponse.setStatus(123);
-    request.setHandled(true);
-
-    replayAll();
-
-    HttpRequest httpRequest = createHttpRequest("/foo");
-    httpRequest.respond(123, "bar", "baz");
-    
-    verifyAll();
-
-    assertThat(stringWriter.toString()).isEqualTo("bar");
-  }
-
-  @Test
-  public void testRespondStatusResponseLogMessageThrowable() throws IOException {
-    StringWriter stringWriter = new StringWriter();
-    PrintWriter printWriter = new PrintWriter(stringWriter);
-
-    expect(httpServletResponse.getWriter()).andReturn(printWriter);
-    httpServletResponse.setStatus(123);
-    request.setHandled(true);
-    Throwable e = new Exception("quux");
-    
-    replayAll();
-
-    HttpRequest httpRequest = createHttpRequest("/foo");
-    httpRequest.respond(123, "bar", "baz", e);
-    
-    verifyAll();
-
-    assertThat(stringWriter.toString()).isEqualTo("bar");
-  }
-
-  @Test
-  public void testRespondForbidden() throws IOException {
     httpServletResponse.setStatus(403);
+    httpServletResponse.setContentType(TEXT_PLAIN.toString());
     request.setHandled(true);
     
     replayAll();
 
     HttpRequest httpRequest = createHttpRequest("/foo");
-    httpRequest.respondForbidden();
+    UUID incidentId = httpRequest.respondForbidden();
     
     verifyAll();
+
+    String responseBody = stringWriter.toString(); 
+    assertThat(responseBody).contains("E_FORBIDDEN");
+    assertThat(responseBody).contains("/foo");
+    assertThat(responseBody).contains("00000000-0000-0000-0000-000000000001");
+
+    assertThat(incidentId.toString()).isEqualTo("00000000-0000-0000-0000-000000000001");
   }
 
   @Test
-  public void testRespondNotFound() throws IOException {
+  public void testRespondForbiddenHtml() throws IOException {
+    expect(escaper.html("E_FORBIDDEN")).andReturn("(escQUUX)").anyTimes();
+    expect(escaper.html("00000000-0000-0000-0000-000000000001")).andReturn("(escUUID)").anyTimes();
+    expect(escaper.html("You are not allowed to access this URL. URL: /foo")).andReturn("(escRsn)")
+      .anyTimes();
+
+    expect(httpServletRequest.getMethod()).andReturn("METHOD_FOO");
+    expect(httpServletRequest.getHeader("Accept")).andReturn("text/foo");
+
+    expect(contentTypeNegotiator.negotiate("text/foo", TEXT_PLAIN, TEXT_HTML, APPLICATION_JSON))
+      .andReturn(TEXT_HTML);
+
+    StringWriter stringWriter = new StringWriter();
+    PrintWriter printWriter = new PrintWriter(stringWriter);
+
+    expect(httpServletResponse.getWriter()).andReturn(printWriter);
+    httpServletResponse.setStatus(403);
+    httpServletResponse.setContentType(TEXT_HTML.toString());
+    request.setHandled(true);
+    
+    replayAll();
+
+    HttpRequest httpRequest = createHttpRequest("/foo");
+    UUID incidentId = httpRequest.respondForbidden();
+    
+    verifyAll();
+
+    String responseBody = stringWriter.toString(); 
+    assertThat(responseBody).contains("(escQUUX)");
+    assertThat(responseBody).doesNotContain("E_FORBIDDEN");
+    assertThat(responseBody).contains("(escUUID)");
+    assertThat(responseBody).doesNotContain("00000000-0000-0000-0000-000000000001");
+    assertThat(responseBody).contains("(escRsn)");
+    assertThat(responseBody).doesNotContain("The URL could not be found. URL: /foo");
+
+    assertThat(incidentId.toString()).isEqualTo("00000000-0000-0000-0000-000000000001");
+  }
+
+  @Test
+  public void testRespondForbiddenJson() throws IOException {
+    expect(httpServletRequest.getMethod()).andReturn("METHOD_FOO");
+    expect(httpServletRequest.getHeader("Accept")).andReturn("text/foo");
+
+    expect(contentTypeNegotiator.negotiate("text/foo", TEXT_PLAIN, TEXT_HTML, APPLICATION_JSON))
+      .andReturn(APPLICATION_JSON);
+
+    StringWriter stringWriter = new StringWriter();
+    PrintWriter printWriter = new PrintWriter(stringWriter);
+
+    expect(httpServletResponse.getWriter()).andReturn(printWriter);
+    httpServletResponse.setStatus(403);
+    httpServletResponse.setContentType(APPLICATION_JSON.toString());
+    request.setHandled(true);
+    
+    replayAll();
+
+    HttpRequest httpRequest = createHttpRequest("/foo");
+    UUID incidentId = httpRequest.respondForbidden();
+    
+    verifyAll();
+
+    String responseBody = stringWriter.toString(); 
+    assertThat(responseBody).contains("E_FORBIDDEN");
+    assertThat(responseBody).contains("/foo");
+    assertThat(responseBody).contains("00000000-0000-0000-0000-000000000001");
+
+    assertThat(incidentId.toString()).isEqualTo("00000000-0000-0000-0000-000000000001");
+  }
+
+  @Test
+  public void testRespondNotFoundText() throws IOException {
+    expect(httpServletRequest.getMethod()).andReturn("METHOD_FOO");
+    expect(httpServletRequest.getHeader("Accept")).andReturn("text/foo");
+
+    expect(contentTypeNegotiator.negotiate("text/foo", TEXT_PLAIN, TEXT_HTML, APPLICATION_JSON))
+      .andReturn(TEXT_PLAIN);
+
+    StringWriter stringWriter = new StringWriter();
+    PrintWriter printWriter = new PrintWriter(stringWriter);
+
+    expect(httpServletResponse.getWriter()).andReturn(printWriter);
     httpServletResponse.setStatus(404);
+    httpServletResponse.setContentType(TEXT_PLAIN.toString());
     request.setHandled(true);
     
     replayAll();
 
     HttpRequest httpRequest = createHttpRequest("/foo");
-    httpRequest.respondNotFound();
+    UUID incidentId = httpRequest.respondNotFound();
     
     verifyAll();
+
+    String responseBody = stringWriter.toString(); 
+    assertThat(responseBody).contains("E_NOT_FOUND");
+    assertThat(responseBody).contains("/foo");
+    assertThat(responseBody).contains("00000000-0000-0000-0000-000000000001");
+
+    assertThat(incidentId.toString()).isEqualTo("00000000-0000-0000-0000-000000000001");
   }
 
   @Test
-  public void testRespondBadRequest() throws IOException {
+  public void testRespondNotFoundHtml() throws IOException {
+    expect(escaper.html("E_NOT_FOUND")).andReturn("(escQUUX)").anyTimes();
+    expect(escaper.html("00000000-0000-0000-0000-000000000001")).andReturn("(escUUID)").anyTimes();
+    expect(escaper.html("The URL could not be found. URL: /foo")).andReturn("(escRsn)").anyTimes();
+
+    expect(httpServletRequest.getMethod()).andReturn("METHOD_FOO");
+    expect(httpServletRequest.getHeader("Accept")).andReturn("text/foo");
+
+    expect(contentTypeNegotiator.negotiate("text/foo", TEXT_PLAIN, TEXT_HTML, APPLICATION_JSON))
+      .andReturn(TEXT_HTML);
+
     StringWriter stringWriter = new StringWriter();
     PrintWriter printWriter = new PrintWriter(stringWriter);
 
     expect(httpServletResponse.getWriter()).andReturn(printWriter);
+    httpServletResponse.setStatus(404);
+    httpServletResponse.setContentType(TEXT_HTML.toString());
+    request.setHandled(true);
+    
+    replayAll();
+
+    HttpRequest httpRequest = createHttpRequest("/foo");
+    UUID incidentId = httpRequest.respondNotFound();
+    
+    verifyAll();
+
+    String responseBody = stringWriter.toString(); 
+    assertThat(responseBody).contains("(escQUUX)");
+    assertThat(responseBody).doesNotContain("E_NOT_FOUND");
+    assertThat(responseBody).contains("(escUUID)");
+    assertThat(responseBody).doesNotContain("00000000-0000-0000-0000-000000000001");
+    assertThat(responseBody).contains("(escRsn)");
+    assertThat(responseBody).doesNotContain("The URL could not be found. URL: /foo");
+
+    assertThat(incidentId.toString()).isEqualTo("00000000-0000-0000-0000-000000000001");
+  }
+
+  @Test
+  public void testRespondNotFoundJson() throws IOException {
+    expect(httpServletRequest.getMethod()).andReturn("METHOD_FOO");
+    expect(httpServletRequest.getHeader("Accept")).andReturn("text/foo");
+
+    expect(contentTypeNegotiator.negotiate("text/foo", TEXT_PLAIN, TEXT_HTML, APPLICATION_JSON))
+      .andReturn(APPLICATION_JSON);
+
+    StringWriter stringWriter = new StringWriter();
+    PrintWriter printWriter = new PrintWriter(stringWriter);
+
+    expect(httpServletResponse.getWriter()).andReturn(printWriter);
+    httpServletResponse.setStatus(404);
+    httpServletResponse.setContentType(APPLICATION_JSON.toString());
+    request.setHandled(true);
+    
+    replayAll();
+
+    HttpRequest httpRequest = createHttpRequest("/foo");
+    UUID incidentId = httpRequest.respondNotFound();
+    
+    verifyAll();
+
+    String responseBody = stringWriter.toString(); 
+    assertThat(responseBody).contains("E_NOT_FOUND");
+    assertThat(responseBody).contains("/foo");
+    assertThat(responseBody).contains("00000000-0000-0000-0000-000000000001");
+
+    assertThat(incidentId.toString()).isEqualTo("00000000-0000-0000-0000-000000000001");
+  }
+
+  @Test
+  public void testRespondBadRequest2ParamsText() throws IOException {
+    ErrorCode errorCode = createMock(ErrorCode.class);
+    expect(errorCode.getIdentifier()).andReturn("quux").anyTimes();
+
+    expect(httpServletRequest.getMethod()).andReturn("METHOD_FOO");
+    expect(httpServletRequest.getHeader("Accept")).andReturn("text/foo");
+
+    expect(contentTypeNegotiator.negotiate("text/foo", TEXT_PLAIN, TEXT_HTML, APPLICATION_JSON))
+      .andReturn(TEXT_PLAIN);
+
+    StringWriter stringWriter = new StringWriter();
+    PrintWriter printWriter = new PrintWriter(stringWriter);
+
+    expect(httpServletResponse.getWriter()).andReturn(printWriter);
+    httpServletResponse.setContentType(TEXT_PLAIN.toString());
     httpServletResponse.setStatus(400);
     request.setHandled(true);
     
     replayAll();
 
     HttpRequest httpRequest = createHttpRequest("/foo");
-    httpRequest.respondBadRequest("bar");
+    UUID incidentId = httpRequest.respondBadRequest(errorCode, "bar");
     
     verifyAll();
 
-    assertThat(stringWriter.toString()).isEqualTo("bar");
+    String responseBody = stringWriter.toString(); 
+    assertThat(responseBody).contains("quux");
+    assertThat(responseBody).contains("bar");
+    assertThat(responseBody).contains("00000000-0000-0000-0000-000000000001");
+
+    assertThat(incidentId.toString()).isEqualTo("00000000-0000-0000-0000-000000000001");
   }
 
   @Test
-  public void testRespondBadRequestAndLogMessage() throws IOException {
+  public void testRespondBadRequest2ParamsHtml() throws IOException {
+    expect(escaper.html("bar")).andReturn("(escBAR)").anyTimes();
+    expect(escaper.html("quux")).andReturn("(escQUUX)").anyTimes();
+    expect(escaper.html("00000000-0000-0000-0000-000000000001")).andReturn("(escUUID)").anyTimes();
+
+    ErrorCode errorCode = createMock(ErrorCode.class);
+    expect(errorCode.getIdentifier()).andReturn("quux").anyTimes();
+
+    expect(httpServletRequest.getMethod()).andReturn("METHOD_FOO");
+    expect(httpServletRequest.getHeader("Accept")).andReturn("text/foo");
+
+    expect(contentTypeNegotiator.negotiate("text/foo", TEXT_PLAIN, TEXT_HTML, APPLICATION_JSON))
+      .andReturn(TEXT_HTML);
+
     StringWriter stringWriter = new StringWriter();
     PrintWriter printWriter = new PrintWriter(stringWriter);
 
     expect(httpServletResponse.getWriter()).andReturn(printWriter);
+    httpServletResponse.setContentType(TEXT_HTML.toString());
     httpServletResponse.setStatus(400);
     request.setHandled(true);
     
     replayAll();
 
     HttpRequest httpRequest = createHttpRequest("/foo");
-    httpRequest.respondBadRequest("bar", "baz");
+    UUID incidentId = httpRequest.respondBadRequest(errorCode, "bar");
     
     verifyAll();
 
-    assertThat(stringWriter.toString()).isEqualTo("bar");
+    String responseBody = stringWriter.toString(); 
+    assertThat(responseBody).contains("(escQUUX)");
+    assertThat(responseBody).doesNotContain("quux");
+    assertThat(responseBody).contains("(escBAR)");
+    assertThat(responseBody).doesNotContain("bar");
+    assertThat(responseBody).contains("(escUUID)");
+    assertThat(responseBody).doesNotContain("00000000-0000-0000-0000-000000000001");
+
+    assertThat(incidentId.toString()).isEqualTo("00000000-0000-0000-0000-000000000001");
   }
 
   @Test
-  public void testRespondBadRequestAndLogMessageAndThrowable() throws IOException {
+  public void testRespondBadRequest2ParamsJson() throws IOException {
+    ErrorCode errorCode = createMock(ErrorCode.class);
+    expect(errorCode.getIdentifier()).andReturn("quux").anyTimes();
+
+    expect(httpServletRequest.getMethod()).andReturn("METHOD_FOO");
+    expect(httpServletRequest.getHeader("Accept")).andReturn("text/foo");
+
+    expect(contentTypeNegotiator.negotiate("text/foo", TEXT_PLAIN, TEXT_HTML, APPLICATION_JSON))
+      .andReturn(APPLICATION_JSON);
+
     StringWriter stringWriter = new StringWriter();
     PrintWriter printWriter = new PrintWriter(stringWriter);
 
     expect(httpServletResponse.getWriter()).andReturn(printWriter);
+    httpServletResponse.setContentType(APPLICATION_JSON.toString());
     httpServletResponse.setStatus(400);
     request.setHandled(true);
-    Throwable e = new Exception("quux");
     
     replayAll();
 
     HttpRequest httpRequest = createHttpRequest("/foo");
-    httpRequest.respondBadRequest("bar", "baz", e);
+    UUID incidentId = httpRequest.respondBadRequest(errorCode, "bar");
     
     verifyAll();
 
-    assertThat(stringWriter.toString()).isEqualTo("bar");
+    String responseBody = stringWriter.toString(); 
+    assertThat(responseBody).contains("quux");
+    assertThat(responseBody).contains("bar");
+    assertThat(responseBody).contains("00000000-0000-0000-0000-000000000001");
+
+    assertThat(incidentId.toString()).isEqualTo("00000000-0000-0000-0000-000000000001");
   }
 
   @Test
-  public void testRespondBadRequestAndThrowable() throws IOException {
+  public void testRespondBadRequest2ParamsTextSecondNull() throws IOException {
+    ErrorCode errorCode = createMock(ErrorCode.class);
+    expect(errorCode.getIdentifier()).andReturn("quux").anyTimes();
+    expect(errorCode.getDefaultReason()).andReturn("bar").anyTimes();
+
+    expect(httpServletRequest.getMethod()).andReturn("METHOD_FOO");
+    expect(httpServletRequest.getHeader("Accept")).andReturn("text/foo");
+
+    expect(contentTypeNegotiator.negotiate("text/foo", TEXT_PLAIN, TEXT_HTML, APPLICATION_JSON))
+      .andReturn(TEXT_PLAIN);
+
     StringWriter stringWriter = new StringWriter();
     PrintWriter printWriter = new PrintWriter(stringWriter);
 
     expect(httpServletResponse.getWriter()).andReturn(printWriter);
+    httpServletResponse.setContentType(TEXT_PLAIN.toString());
     httpServletResponse.setStatus(400);
     request.setHandled(true);
-    Throwable e = new Exception("quux");
     
     replayAll();
 
     HttpRequest httpRequest = createHttpRequest("/foo");
-    httpRequest.respondBadRequest("bar", e);
+    UUID incidentId = httpRequest.respondBadRequest(errorCode, null);
     
     verifyAll();
 
-    assertThat(stringWriter.toString()).isEqualTo("bar");
+    String responseBody = stringWriter.toString(); 
+    assertThat(responseBody).contains("quux");
+    assertThat(responseBody).contains("bar");
+    assertThat(responseBody).contains("00000000-0000-0000-0000-000000000001");
+
+    assertThat(incidentId.toString()).isEqualTo("00000000-0000-0000-0000-000000000001");
+  }
+
+  @Test
+  public void testRespondBadRequest2ParamsHtmlSecondNull() throws IOException {
+    expect(escaper.html("bar")).andReturn("(escBAR)").anyTimes();
+    expect(escaper.html("quux")).andReturn("(escQUUX)").anyTimes();
+    expect(escaper.html("00000000-0000-0000-0000-000000000001")).andReturn("(escUUID)").anyTimes();
+
+    ErrorCode errorCode = createMock(ErrorCode.class);
+    expect(errorCode.getIdentifier()).andReturn("quux").anyTimes();
+    expect(errorCode.getDefaultReason()).andReturn("bar").anyTimes();
+
+    expect(httpServletRequest.getMethod()).andReturn("METHOD_FOO");
+    expect(httpServletRequest.getHeader("Accept")).andReturn("text/foo");
+
+    expect(contentTypeNegotiator.negotiate("text/foo", TEXT_PLAIN, TEXT_HTML, APPLICATION_JSON))
+      .andReturn(TEXT_HTML);
+
+    StringWriter stringWriter = new StringWriter();
+    PrintWriter printWriter = new PrintWriter(stringWriter);
+
+    expect(httpServletResponse.getWriter()).andReturn(printWriter);
+    httpServletResponse.setContentType(TEXT_HTML.toString());
+    httpServletResponse.setStatus(400);
+    request.setHandled(true);
+    
+    replayAll();
+
+    HttpRequest httpRequest = createHttpRequest("/foo");
+    UUID incidentId = httpRequest.respondBadRequest(errorCode, null);
+    
+    verifyAll();
+
+    String responseBody = stringWriter.toString(); 
+    assertThat(responseBody).contains("(escQUUX)");
+    assertThat(responseBody).doesNotContain("quux");
+    assertThat(responseBody).contains("(escBAR)");
+    assertThat(responseBody).doesNotContain("bar");
+    assertThat(responseBody).contains("(escUUID)");
+    assertThat(responseBody).doesNotContain("00000000-0000-0000-0000-000000000001");
+
+    assertThat(incidentId.toString()).isEqualTo("00000000-0000-0000-0000-000000000001");
+  }
+
+  @Test
+  public void testRespondBadRequest2ParamsJsonSecondNull() throws IOException {
+    ErrorCode errorCode = createMock(ErrorCode.class);
+    expect(errorCode.getIdentifier()).andReturn("quux").anyTimes();
+    expect(errorCode.getDefaultReason()).andReturn("bar").anyTimes();
+
+    expect(httpServletRequest.getMethod()).andReturn("METHOD_FOO");
+    expect(httpServletRequest.getHeader("Accept")).andReturn("text/foo");
+
+    expect(contentTypeNegotiator.negotiate("text/foo", TEXT_PLAIN, TEXT_HTML, APPLICATION_JSON))
+      .andReturn(APPLICATION_JSON);
+
+    StringWriter stringWriter = new StringWriter();
+    PrintWriter printWriter = new PrintWriter(stringWriter);
+
+    expect(httpServletResponse.getWriter()).andReturn(printWriter);
+    httpServletResponse.setContentType(APPLICATION_JSON.toString());
+    httpServletResponse.setStatus(400);
+    request.setHandled(true);
+    
+    replayAll();
+
+    HttpRequest httpRequest = createHttpRequest("/foo");
+    UUID incidentId = httpRequest.respondBadRequest(errorCode, null);
+    
+    verifyAll();
+
+    String responseBody = stringWriter.toString(); 
+    assertThat(responseBody).contains("quux");
+    assertThat(responseBody).contains("bar");
+    assertThat(responseBody).contains("00000000-0000-0000-0000-000000000001");
+
+    assertThat(incidentId.toString()).isEqualTo("00000000-0000-0000-0000-000000000001");
+  }
+
+  @Test
+  public void testRespondBadRequest1ParamText() throws IOException {
+    ErrorCode errorCode = createMock(ErrorCode.class);
+    expect(errorCode.getIdentifier()).andReturn("quux").anyTimes();
+    expect(errorCode.getDefaultReason()).andReturn("bar").anyTimes();
+
+    expect(httpServletRequest.getMethod()).andReturn("METHOD_FOO");
+    expect(httpServletRequest.getHeader("Accept")).andReturn("text/foo");
+
+    expect(contentTypeNegotiator.negotiate("text/foo", TEXT_PLAIN, TEXT_HTML, APPLICATION_JSON))
+      .andReturn(TEXT_PLAIN);
+
+    StringWriter stringWriter = new StringWriter();
+    PrintWriter printWriter = new PrintWriter(stringWriter);
+
+    expect(httpServletResponse.getWriter()).andReturn(printWriter);
+    httpServletResponse.setContentType(TEXT_PLAIN.toString());
+    httpServletResponse.setStatus(400);
+    request.setHandled(true);
+    
+    replayAll();
+
+    HttpRequest httpRequest = createHttpRequest("/foo");
+    UUID incidentId = httpRequest.respondBadRequest(errorCode, null);
+    
+    verifyAll();
+
+    String responseBody = stringWriter.toString(); 
+    assertThat(responseBody).contains("quux");
+    assertThat(responseBody).contains("bar");
+    assertThat(responseBody).contains("00000000-0000-0000-0000-000000000001");
+
+    assertThat(incidentId.toString()).isEqualTo("00000000-0000-0000-0000-000000000001");
+  }
+
+  @Test
+  public void testRespondBadRequest1ParamHtml() throws IOException {
+    expect(escaper.html("bar")).andReturn("(escBAR)").anyTimes();
+    expect(escaper.html("quux")).andReturn("(escQUUX)").anyTimes();
+    expect(escaper.html("00000000-0000-0000-0000-000000000001")).andReturn("(escUUID)").anyTimes();
+
+    ErrorCode errorCode = createMock(ErrorCode.class);
+    expect(errorCode.getIdentifier()).andReturn("quux").anyTimes();
+    expect(errorCode.getDefaultReason()).andReturn("bar").anyTimes();
+
+    expect(httpServletRequest.getMethod()).andReturn("METHOD_FOO");
+    expect(httpServletRequest.getHeader("Accept")).andReturn("text/foo");
+
+    expect(contentTypeNegotiator.negotiate("text/foo", TEXT_PLAIN, TEXT_HTML, APPLICATION_JSON))
+      .andReturn(TEXT_HTML);
+
+    StringWriter stringWriter = new StringWriter();
+    PrintWriter printWriter = new PrintWriter(stringWriter);
+
+    expect(httpServletResponse.getWriter()).andReturn(printWriter);
+    httpServletResponse.setContentType(TEXT_HTML.toString());
+    httpServletResponse.setStatus(400);
+    request.setHandled(true);
+    
+    replayAll();
+
+    HttpRequest httpRequest = createHttpRequest("/foo");
+    UUID incidentId = httpRequest.respondBadRequest(errorCode, null);
+    
+    verifyAll();
+
+    String responseBody = stringWriter.toString(); 
+    assertThat(responseBody).contains("(escQUUX)");
+    assertThat(responseBody).doesNotContain("quux");
+    assertThat(responseBody).contains("(escBAR)");
+    assertThat(responseBody).doesNotContain("bar");
+    assertThat(responseBody).contains("(escUUID)");
+    assertThat(responseBody).doesNotContain("00000000-0000-0000-0000-000000000001");
+
+    assertThat(incidentId.toString()).isEqualTo("00000000-0000-0000-0000-000000000001");
+  }
+
+  @Test
+  public void testRespondBadRequest1ParamJson() throws IOException {
+    ErrorCode errorCode = createMock(ErrorCode.class);
+    expect(errorCode.getIdentifier()).andReturn("quux").anyTimes();
+    expect(errorCode.getDefaultReason()).andReturn("bar").anyTimes();
+
+    expect(httpServletRequest.getMethod()).andReturn("METHOD_FOO");
+    expect(httpServletRequest.getHeader("Accept")).andReturn("text/foo");
+
+    expect(contentTypeNegotiator.negotiate("text/foo", TEXT_PLAIN, TEXT_HTML, APPLICATION_JSON))
+      .andReturn(APPLICATION_JSON);
+
+    StringWriter stringWriter = new StringWriter();
+    PrintWriter printWriter = new PrintWriter(stringWriter);
+
+    expect(httpServletResponse.getWriter()).andReturn(printWriter);
+    httpServletResponse.setContentType(APPLICATION_JSON.toString());
+    httpServletResponse.setStatus(400);
+    request.setHandled(true);
+    
+    replayAll();
+
+    HttpRequest httpRequest = createHttpRequest("/foo");
+    UUID incidentId = httpRequest.respondBadRequest(errorCode, null);
+    
+    verifyAll();
+
+    String responseBody = stringWriter.toString(); 
+    assertThat(responseBody).contains("quux");
+    assertThat(responseBody).contains("bar");
+    assertThat(responseBody).contains("00000000-0000-0000-0000-000000000001");
+
+    assertThat(incidentId.toString()).isEqualTo("00000000-0000-0000-0000-000000000001");
   }
 
   @Test
@@ -423,6 +770,30 @@ public class HttpRequestTest extends EasyMockSupport {
   }
 
   @Test
+  public void testGetMostSuitableResponseContentType() throws IOException {
+    reset(request);
+    expect(httpServletRequest.getHeader("Accept")).andReturn("bar");
+
+    Capture<ContentType> fallbackCapture = newCapture();
+    Capture<ContentType> candidatesCapture = newCapture();
+    
+    expect(contentTypeNegotiator.negotiate(eq("bar"), capture(fallbackCapture),
+        capture(candidatesCapture))).andReturn(ContentType.IMAGE_PNG);
+
+    replayAll();
+
+    HttpRequest httpRequest = createHttpRequest("/foo");
+    ContentType actual = httpRequest.getMostSuitableResponseContentType(
+        ContentType.APPLICATION_JSON, ContentType.TEXT_HTML);
+
+    verifyAll();
+
+    assertThat(actual).isEqualTo(ContentType.IMAGE_PNG);
+    assertThat(fallbackCapture.getValue()).isEqualTo(ContentType.APPLICATION_JSON);
+    assertThat(candidatesCapture.getValue()).isEqualTo(ContentType.TEXT_HTML);
+  }
+
+  @Test
   public void testSetHandled() throws IOException {
     request.setHandled(true);
 
@@ -436,6 +807,6 @@ public class HttpRequestTest extends EasyMockSupport {
 
   private HttpRequest createHttpRequest(String target) {
     return new HttpRequest(target, request, httpServletRequest, httpServletResponse,
-        forwardedForResolver);
+        forwardedForResolver, contentTypeNegotiator, getUuidGenerator(), escaper);
   }
 }

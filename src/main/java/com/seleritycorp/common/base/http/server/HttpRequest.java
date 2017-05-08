@@ -16,19 +16,29 @@
 
 package com.seleritycorp.common.base.http.server;
 
+import static com.seleritycorp.common.base.http.common.ContentType.APPLICATION_JSON;
+import static com.seleritycorp.common.base.http.common.ContentType.TEXT_HTML;
+import static com.seleritycorp.common.base.http.common.ContentType.TEXT_PLAIN;
+
+import com.google.gson.JsonObject;
 import com.google.inject.assistedinject.Assisted;
 
+import com.seleritycorp.common.base.escape.Escaper;
+import com.seleritycorp.common.base.http.common.ContentType;
 import com.seleritycorp.common.base.logging.Log;
 import com.seleritycorp.common.base.logging.LogFactory;
+import com.seleritycorp.common.base.uuid.UuidGenerator;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
+import org.eclipse.jetty.http.HttpStatus;
 import org.eclipse.jetty.server.Request;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.UUID;
 
 import javax.inject.Inject;
 import javax.servlet.http.HttpServletRequest;
@@ -59,6 +69,9 @@ public class HttpRequest {
   private final HttpServletRequest httpServletRequest;
   private final HttpServletResponse httpServletResponse;
   private final ForwardedForResolver forwardedForResolver;
+  private final ContentTypeNegotiator contentTypeNegotiator;
+  private final UuidGenerator uuidGenerator;
+  private final Escaper escaper;
 
   /**
    * Create a HttpRequest.
@@ -68,17 +81,24 @@ public class HttpRequest {
    * @param httpServletRequest Http request for the handle request parameters
    * @param httpServletResponse Response for the handle request parameters
    * @param forwardedForResolver The resolver for IP addresses
+   * @param contentTypeNegotiator The negotiator for ContentType handling.
+   * @param uuidGenerator The generator for incident ids.
+   * @param escaper Escaping for formatting output.
    */
   @Inject
   public HttpRequest(@Assisted String target, @Assisted Request request,
       @Assisted HttpServletRequest httpServletRequest,
       @Assisted HttpServletResponse httpServletResponse,
-      ForwardedForResolver forwardedForResolver) {
+      ForwardedForResolver forwardedForResolver, ContentTypeNegotiator contentTypeNegotiator,
+      UuidGenerator uuidGenerator, Escaper escaper) {
     this.target = target;
     this.request = request;
     this.httpServletRequest = httpServletRequest;
     this.httpServletResponse = httpServletResponse;
     this.forwardedForResolver = forwardedForResolver;
+    this.contentTypeNegotiator = contentTypeNegotiator;
+    this.uuidGenerator = uuidGenerator;
+    this.escaper = escaper;
   }
 
   // -- Raw request objects ---------------------------------------------------
@@ -154,18 +174,44 @@ public class HttpRequest {
     return forwardedForResolver.resolve(remoteAddr,forwardedFor);
   }
 
+  /**
+   * Gets the most suitable ContentType for the response.
+   *
+   * <p>The client's preference is read from the request's headers, and it gets compared against
+   * the candidates offered by the server. The best match will get returned.
+   *
+   * @param fallback The fallback value to use if there is no match between the client's
+   *     preferences and the server's offerings.
+   * @param candidates The offerings from the server.
+   * @return The best match between the client's preferences and the server's offerings. If there
+   *     is no match at all, the fallback value will get returned.
+   */
+  public ContentType getMostSuitableResponseContentType(ContentType fallback,
+      ContentType... candidates) {
+    String acceptHeader = httpServletRequest.getHeader("Accept");
+    ContentType negotiated = contentTypeNegotiator.negotiate(acceptHeader, fallback, candidates);
+    return negotiated;
+  }
+
   // -- Response helpers  -----------------------------------------------------
   
   /**
-   * Sends a response to a request and marks it as handled.
-   * 
-   * @param response The response text. If null, no response gets written.
+   * Sends a response with status code to a request and marks it as handled.
+   *  
+   * @param status The status code to send
+   * @param contentType The ContentType for the response.
+   * @param response The response text
    * @throws java.io.UnsupportedEncodingException if the character encoding is unusable.
    * @throws IllegalStateException if a response was sent already.
    * @throws IOException if an input/output error occurs
    */
-  public void respond(String response) throws IOException {
+  private void respond(int status, ContentType contentType, String response) throws IOException {
+    httpServletResponse.setStatus(status);
+
     if (response != null) {
+      if (contentType != null) {
+        httpServletResponse.setContentType(contentType.toString());
+      }
       try (PrintWriter writer = httpServletResponse.getWriter()) {
         writer.print(response);
       }
@@ -173,160 +219,144 @@ public class HttpRequest {
     setHandled();
   }
 
-  /**
-   * Sends a response with status code to a request and marks it as handled.
-   *  
-   * @param status The status code to send
-   * @param response The response text
-   * @throws java.io.UnsupportedEncodingException if the character encoding is unusable.
-   * @throws IllegalStateException if a response was sent already.
-   * @throws IOException if an input/output error occurs
-   */
-  public void respond(int status, String response) throws IOException {
-    httpServletResponse.setStatus(status);
-    respond(response);
+  private UUID logRequest(int status, ErrorCode errorCode, String clientExplanation) {
+    final UUID incidentId = uuidGenerator.generate();
+    log.structuredInfo("http-server-incident", 1,
+        "incidentId", incidentId,
+        "method", httpServletRequest.getMethod(),
+        "target", getTarget(),
+        "status", status,
+        "errorCode", (errorCode != null) ? errorCode.getIdentifier() : null,
+        "clientExplanation", clientExplanation,    
+        "devExplanation", null,    
+        "throwable", null);
+    return incidentId;
   }
-
-  /**
-   * Sends a response with status code to a request and marks it as handled.
-   *  
-   * @param status The status code to send
-   * @throws java.io.UnsupportedEncodingException if the character encoding is unusable.
-   * @throws IllegalStateException if a response was sent already.
-   * @throws IOException if an input/output error occurs
-   */
-  public void respond(int status)
+  
+  private UUID respondGenericIssue(int status, ErrorCode errorCode, String clientExplanation)
       throws IOException {
-    respond(status, null);
-  }
+    final UUID incidentId = logRequest(status, errorCode, clientExplanation);
 
-  /**
-   * Sends a response with status code to a request and marks it as handled.
-   *  
-   * @param status The status code to send
-   * @param response The response text
-   * @param logMessage A message to log for the request
-   * @throws java.io.UnsupportedEncodingException if the character encoding is unusable.
-   * @throws IllegalStateException if a response was sent already.
-   * @throws IOException if an input/output error occurs
-   */
-  public void respond(int status, String response, String logMessage) throws IOException {
-    respond(status, response, logMessage, null);
-  }
-
-  /**
-   * Sends a response with status code to a request and marks it as handled.
-   *  
-   * @param status The status code to send
-   * @param response The response text
-   * @param logMessage A message to log for the request
-   * @param logThrowable A throwable to log for the request
-   * @throws java.io.UnsupportedEncodingException if the character encoding is unusable.
-   * @throws IllegalStateException if a response was sent already.
-   * @throws IOException if an input/output error occurs
-   */
-  public void respond(int status, String response, String logMessage, Throwable logThrowable)
-      throws IOException {
-    httpServletResponse.setStatus(status);
-    respond(response);
-
-    String msg = "Status " + status + " for request to " + getTarget() + ".";
-    if (logMessage != null) {
-      msg += " " + logMessage;
-    }
-    if (logThrowable == null) {
-      log.info(msg);
+    ContentType responseContentType = getMostSuitableResponseContentType(TEXT_PLAIN, TEXT_HTML,
+        APPLICATION_JSON);
+    String errorCodeIdentifier = (errorCode != null) ? errorCode.getIdentifier() : null;
+    String msg = "";
+    if (TEXT_PLAIN.equals(responseContentType)) {
+      msg += "Error code: " + errorCodeIdentifier + "\n";
+      msg += "Explanation: " + clientExplanation + "\n";
+      msg += "Incident id: " + incidentId + "\n";
+    } else if (TEXT_HTML.equals(responseContentType)) {
+      msg += "<html>\n";
+      msg += "  <body>\n";
+      msg += "    <p>An error occurred</p>\n";
+      msg += "    <p>" + escaper.html(clientExplanation) + "</p>\n";
+      msg += "    <table>\n";
+      msg += "      <tr><th style=\"text-align:left;\">Error code</th><td><pre>"
+          + escaper.html(errorCodeIdentifier) + "</pre></td></tr>\n";
+      msg += "      <tr><th style=\"text-align:left;\">Explanation</th><td>" 
+          + escaper.html(clientExplanation) + "</td></tr>\n";
+      msg += "      <tr><th style=\"text-align:left;\">Incident id</th><td><pre>"
+          + escaper.html(incidentId.toString()) + "</pre></td></tr>\n";
+      msg += "    </table>\n";
+      msg += "  </body>\n";
+      msg += "<html>\n";
+    } else if (APPLICATION_JSON.equals(responseContentType)) {
+      JsonObject object = new JsonObject();
+      object.addProperty("errorCode", errorCodeIdentifier);
+      object.addProperty("explanation", clientExplanation);
+      object.addProperty("incidentId", incidentId.toString());
+      msg = object.toString();
     } else {
-      log.info(msg, logThrowable);
+      // This branch should never be reached. It's only hear for extra safety. 
+      msg = "Unkonwn ContentType " + responseContentType;
     }
+    respond(status, responseContentType, msg);
+    return incidentId;
   }
 
   /**
-   * Sends a '204 Bad Request' response to a request and marks it as handled.
+   * Sends a '200 OK' response with a plain text response.
+   *  
+   * @param response The text response to send
+   * @throws java.io.UnsupportedEncodingException if the character encoding is unusable.
+   * @throws IllegalStateException if a response was sent already.
+   * @throws IOException if an input/output error occurs
+   */
+  public void respondOkText(String response) throws IOException {
+    respond(HttpStatus.OK_200, ContentType.TEXT_PLAIN, response);
+  }
+
+  /**
+   * Sends a '204 No Content' response to a request and marks it as handled.
    *  
    * @throws java.io.UnsupportedEncodingException if the character encoding is unusable.
    * @throws IllegalStateException if a response was sent already.
    * @throws IOException if an input/output error occurs
    */
   public void respondNoContent() throws IOException {
-    respond(204);
+    respond(HttpStatus.NO_CONTENT_204, null, null);
   }
 
   /**
    * Sends a '400 Bad Request' response to a request and marks it as handled.
    *  
-   * @param response The response text
+   * @param errorCode The error describing why the client request is considered bad.
+   * @param clientExplanation An explanation of the issue to show to the client/user.
+   * @return The issue id associated with this response.
    * @throws java.io.UnsupportedEncodingException if the character encoding is unusable.
    * @throws IllegalStateException if a response was sent already.
    * @throws IOException if an input/output error occurs
    */
-  public void respondBadRequest(String response)
-      throws IOException {
-    respond(400, response);
+  public UUID respondBadRequest(ErrorCode errorCode, String clientExplanation) throws IOException {
+    if (clientExplanation == null) {
+      clientExplanation = errorCode.getDefaultReason();
+    }
+    final int status = HttpStatus.BAD_REQUEST_400;
+    return respondGenericIssue(status, errorCode, clientExplanation);
   }
 
   /**
    * Sends a '400 Bad Request' response to a request and marks it as handled.
    *  
-   * @param response The response text
-   * @param logMessage A message to log for the request
+   * @param errorCode The error describing why the client request is considered bad.
+   * @return The issue id associated with this response.
    * @throws java.io.UnsupportedEncodingException if the character encoding is unusable.
    * @throws IllegalStateException if a response was sent already.
    * @throws IOException if an input/output error occurs
    */
-  public void respondBadRequest(String response, String logMessage) throws IOException {
-    respond(400, response, logMessage);
-  }
-
-  /**
-   * Sends a '400 Bad Request' response to a request and marks it as handled.
-   *  
-   * @param response The response text
-   * @param logMessage A message to log for the request
-   * @param logThrowable A throwable to log for the request
-   * @throws java.io.UnsupportedEncodingException if the character encoding is unusable.
-   * @throws IllegalStateException if a response was sent already.
-   * @throws IOException if an input/output error occurs
-   */
-  public void respondBadRequest(String response, String logMessage, Throwable logThrowable)
-      throws IOException {
-    respond(400, response, logMessage, logThrowable);
-  }
-
-  /**
-   * Sends a '400 Bad Request' response to a request and marks it as handled.
-   *  
-   * @param response The response text
-   * @param logThrowable A throwable to log for the request
-   * @throws java.io.UnsupportedEncodingException if the character encoding is unusable.
-   * @throws IllegalStateException if a response was sent already.
-   * @throws IOException if an input/output error occurs
-   */
-  public void respondBadRequest(String response, Throwable logThrowable) throws IOException {
-    respond(400, response, null, logThrowable);
+  public UUID respondBadRequest(ErrorCode errorCode) throws IOException {
+    return respondBadRequest(errorCode, null);
   }
 
   /**
    * Sends a '403 Forbidden' response to a request and marks it as handled.
    *  
+   * @return The issue id associated with this response.
    * @throws java.io.UnsupportedEncodingException if the character encoding is unusable.
    * @throws IllegalStateException if a response was sent already.
    * @throws IOException if an input/output error occurs
    */
-  public void respondForbidden()
+  public UUID respondForbidden()
       throws IOException {
-    respond(403);
+    ErrorCode errorCode = BasicErrorCode.E_FORBIDDEN;
+    String clientExplanation = errorCode.getDefaultReason() + " URL: " + getTarget();
+    final int status = HttpStatus.FORBIDDEN_403;
+    return respondGenericIssue(status, errorCode, clientExplanation);
   }
 
   /**
    * Sends a '404 Not Found' response to a request and marks it as handled.
    *  
+   * @return The issue id associated with this response.
    * @throws java.io.UnsupportedEncodingException if the character encoding is unusable.
    * @throws IllegalStateException if a response was sent already.
    * @throws IOException if an input/output error occurs
    */
-  public void respondNotFound() throws IOException {
-    respond(404);
+  public UUID respondNotFound() throws IOException {
+    ErrorCode errorCode = BasicErrorCode.E_NOT_FOUND;
+    String clientExplanation = errorCode.getDefaultReason() + " URL: " + getTarget();
+    final int status = HttpStatus.NOT_FOUND_404;
+    return respondGenericIssue(status, errorCode, clientExplanation);
   }
   
   /**
