@@ -571,6 +571,7 @@ public class HttpRequestTest extends InjectingTestCase {
     assertThat(responseBody).contains("quux");
     assertThat(responseBody).contains("bar");
     assertThat(responseBody).contains("00000000-0000-0000-0000-000000000001");
+    assertThat(responseBody).contains("TIMESTAMP");
     assertThat(responseBody).contains("serverFoo");
 
     assertThat(incidentId.toString()).isEqualTo("00000000-0000-0000-0000-000000000001");
