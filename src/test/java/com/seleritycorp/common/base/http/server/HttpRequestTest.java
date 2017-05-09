@@ -345,6 +345,7 @@ public class HttpRequestTest extends InjectingTestCase {
     verifyAll();
 
     String responseBody = stringWriter.toString(); 
+    assertThat(responseBody).contains("/foo");
     assertThat(responseBody).contains("quux");
     assertThat(responseBody).contains("bar");
     assertThat(responseBody).contains("00000000-0000-0000-0000-000000000001");
@@ -433,6 +434,7 @@ public class HttpRequestTest extends InjectingTestCase {
     verifyAll();
 
     String responseBody = stringWriter.toString(); 
+    assertThat(responseBody).contains("/foo");
     assertThat(responseBody).contains("quux");
     assertThat(responseBody).contains("bar");
     assertThat(responseBody).contains("00000000-0000-0000-0000-000000000001");
@@ -471,6 +473,7 @@ public class HttpRequestTest extends InjectingTestCase {
     verifyAll();
 
     String responseBody = stringWriter.toString(); 
+    assertThat(responseBody).contains("/foo");
     assertThat(responseBody).contains("quux");
     assertThat(responseBody).contains("bar");
     assertThat(responseBody).contains("00000000-0000-0000-0000-000000000001");
@@ -561,6 +564,7 @@ public class HttpRequestTest extends InjectingTestCase {
     verifyAll();
 
     String responseBody = stringWriter.toString(); 
+    assertThat(responseBody).contains("/foo");
     assertThat(responseBody).contains("quux");
     assertThat(responseBody).contains("bar");
     assertThat(responseBody).contains("00000000-0000-0000-0000-000000000001");
@@ -599,6 +603,7 @@ public class HttpRequestTest extends InjectingTestCase {
     verifyAll();
 
     String responseBody = stringWriter.toString(); 
+    assertThat(responseBody).contains("/foo");
     assertThat(responseBody).contains("quux");
     assertThat(responseBody).contains("bar");
     assertThat(responseBody).contains("00000000-0000-0000-0000-000000000001");
@@ -689,6 +694,7 @@ public class HttpRequestTest extends InjectingTestCase {
     verifyAll();
 
     String responseBody = stringWriter.toString(); 
+    assertThat(responseBody).contains("/foo");
     assertThat(responseBody).contains("quux");
     assertThat(responseBody).contains("bar");
     assertThat(responseBody).contains("00000000-0000-0000-0000-000000000001");

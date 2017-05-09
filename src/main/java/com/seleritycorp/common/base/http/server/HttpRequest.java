@@ -254,6 +254,10 @@ public class HttpRequest {
     String errorCodeIdentifier = (errorCode != null) ? errorCode.getIdentifier() : null;
     String msg = "";
     if (TEXT_PLAIN.equals(responseContentType)) {
+      msg += "An error occurred for your request to " + getTarget() + "\n";
+      msg += "\n";
+      msg += clientExplanation + "\n";
+      msg += "\n";
       msg += "Error code: " + errorCodeIdentifier + "\n";
       msg += "Explanation: " + clientExplanation + "\n";
       msg += "Incident id: " + incidentId + "\n";
@@ -308,6 +312,7 @@ public class HttpRequest {
       JsonObject object = new JsonObject();
       object.addProperty("errorCode", errorCodeIdentifier);
       object.addProperty("explanation", clientExplanation);
+      object.addProperty("target", getTarget());
       object.addProperty("incidentId", incidentId.toString());
       object.addProperty("serverId", serverId);
       object.addProperty("serverTimestamp", timeUtils.formatTimeNanos());
