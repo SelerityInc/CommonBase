@@ -77,6 +77,7 @@ public class HttpRequest {
   private final Escaper escaper;
   private final TimeUtils timeUtils;
   private final String serverId;
+  private final String supportEmailAddress;
 
   /**
    * Create a HttpRequest.
@@ -109,6 +110,7 @@ public class HttpRequest {
     this.escaper = escaper;
     this.timeUtils = timeUtils;
     this.serverId = config.get("server.id", "<anonymous>");    
+    this.supportEmailAddress = config.get("server.support.email", "support@selerityinc.com");    
   }
 
   // -- Raw request objects ---------------------------------------------------
@@ -257,6 +259,9 @@ public class HttpRequest {
       msg += "Incident id: " + incidentId + "\n";
       msg += "Server id: " + serverId + "\n";
       msg += "Server timestamp: " + timeUtils.formatTimeNanos() + "\n";
+      msg += "\n";
+      msg += "If the above is unexpected or you have questions, please let us know at "
+          + supportEmailAddress + " and attach the above data.\n";
     } else if (TEXT_HTML.equals(responseContentType)) {
       msg += "<html>\n";
       msg += "  <body>\n";
@@ -274,6 +279,9 @@ public class HttpRequest {
       msg += "      <tr><th style=\"text-align:left;\">Server time</th><td><pre>"
           + timeUtils.formatTimeNanos() + "</pre></td></tr>\n";
       msg += "    </table>\n";
+      msg += "    <p>If the above is unexpected or you have questions, please let us know at "
+          + "<a href=\"" + escaper.html(supportEmailAddress) + "\">"
+          + escaper.html(supportEmailAddress) + "</a> and attach the above data.</p>\n";
       msg += "  </body>\n";
       msg += "<html>\n";
     } else if (APPLICATION_JSON.equals(responseContentType)) {
@@ -283,6 +291,8 @@ public class HttpRequest {
       object.addProperty("incidentId", incidentId.toString());
       object.addProperty("serverId", serverId);
       object.addProperty("serverTimestamp", timeUtils.formatTimeNanos());
+      object.addProperty("support", "If the above is unexpected or you have questions, please let "
+          + "us know at " + supportEmailAddress + " and attach this JSON blob.");
       msg = object.toString();
     } else {
       // This branch should never be reached. It's only hear for extra safety. 
