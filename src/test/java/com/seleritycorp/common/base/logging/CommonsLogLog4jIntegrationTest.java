@@ -23,7 +23,6 @@ import static org.easymock.EasyMock.newCapture;
 
 import org.apache.commons.logging.impl.Log4JLogger;
 import org.apache.log4j.Appender;
-import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.apache.log4j.spi.LoggingEvent;
 import org.easymock.Capture;
@@ -65,7 +64,7 @@ public class CommonsLogLog4jIntegrationTest extends EasyMockSupport {
     //
     // See {@code #STACK_TRACE_INDEX_FOR_LINE_NUMBER} above.
 
-    assertThat(getLineNumber()).isEqualTo("68");
+    assertThat(getLineNumber()).isEqualTo("67");
   }
 
   @Test
@@ -85,7 +84,7 @@ public class CommonsLogLog4jIntegrationTest extends EasyMockSupport {
 
     LoggingEvent event = loggingEventCapture.getValue();
     assertThat(event.getMessage()).isEqualTo("foo");
-    assertThat(event.getLevel()).isEqualTo(Level.TRACE);
+    assertThat(event.getLevel()).isEqualTo(org.apache.log4j.Level.TRACE);
     assertThat(event.getLocationInformation().getLineNumber()).isEqualTo(lineNumber);
   }
   
@@ -107,7 +106,7 @@ public class CommonsLogLog4jIntegrationTest extends EasyMockSupport {
 
     LoggingEvent event = loggingEventCapture.getValue();
     assertThat(event.getMessage()).isEqualTo("foo");
-    assertThat(event.getLevel()).isEqualTo(Level.TRACE);
+    assertThat(event.getLevel()).isEqualTo(org.apache.log4j.Level.TRACE);
     assertThat(event.getThrowableInformation().getThrowable()).isEqualTo(e);
     assertThat(event.getLocationInformation().getLineNumber()).isEqualTo(lineNumber);
   }
@@ -129,7 +128,7 @@ public class CommonsLogLog4jIntegrationTest extends EasyMockSupport {
 
     LoggingEvent event = loggingEventCapture.getValue();
     assertThat(event.getMessage()).isEqualTo("foo");
-    assertThat(event.getLevel()).isEqualTo(Level.DEBUG);
+    assertThat(event.getLevel()).isEqualTo(org.apache.log4j.Level.DEBUG);
     assertThat(event.getLocationInformation().getLineNumber()).isEqualTo(lineNumber);
   }
   
@@ -152,7 +151,7 @@ public class CommonsLogLog4jIntegrationTest extends EasyMockSupport {
     LoggingEvent event = loggingEventCapture.getValue();
     assertThat(event.getMessage()).isEqualTo("foo");
     assertThat(event.getThrowableInformation().getThrowable()).isEqualTo(e);
-    assertThat(event.getLevel()).isEqualTo(Level.DEBUG);
+    assertThat(event.getLevel()).isEqualTo(org.apache.log4j.Level.DEBUG);
     assertThat(event.getLocationInformation().getLineNumber()).isEqualTo(lineNumber);
   }
   
@@ -173,7 +172,7 @@ public class CommonsLogLog4jIntegrationTest extends EasyMockSupport {
 
     LoggingEvent event = loggingEventCapture.getValue();
     assertThat(event.getMessage()).isEqualTo("foo");
-    assertThat(event.getLevel()).isEqualTo(Level.INFO);
+    assertThat(event.getLevel()).isEqualTo(org.apache.log4j.Level.INFO);
     assertThat(event.getLocationInformation().getLineNumber()).isEqualTo(lineNumber);
   }
   
@@ -196,7 +195,7 @@ public class CommonsLogLog4jIntegrationTest extends EasyMockSupport {
     LoggingEvent event = loggingEventCapture.getValue();
     assertThat(event.getMessage()).isEqualTo("foo");
     assertThat(event.getThrowableInformation().getThrowable()).isEqualTo(e);
-    assertThat(event.getLevel()).isEqualTo(Level.INFO);
+    assertThat(event.getLevel()).isEqualTo(org.apache.log4j.Level.INFO);
     assertThat(event.getLocationInformation().getLineNumber()).isEqualTo(lineNumber);
   }
   
@@ -217,7 +216,7 @@ public class CommonsLogLog4jIntegrationTest extends EasyMockSupport {
 
     LoggingEvent event = loggingEventCapture.getValue();
     assertThat(event.getMessage()).isEqualTo("foo");
-    assertThat(event.getLevel()).isEqualTo(Level.WARN);
+    assertThat(event.getLevel()).isEqualTo(org.apache.log4j.Level.WARN);
     assertThat(event.getLocationInformation().getLineNumber()).isEqualTo(lineNumber);
   }
   
@@ -240,7 +239,7 @@ public class CommonsLogLog4jIntegrationTest extends EasyMockSupport {
     LoggingEvent event = loggingEventCapture.getValue();
     assertThat(event.getMessage()).isEqualTo("foo");
     assertThat(event.getThrowableInformation().getThrowable()).isEqualTo(e);
-    assertThat(event.getLevel()).isEqualTo(Level.WARN);
+    assertThat(event.getLevel()).isEqualTo(org.apache.log4j.Level.WARN);
     assertThat(event.getLocationInformation().getLineNumber()).isEqualTo(lineNumber);
   }
   
@@ -261,7 +260,7 @@ public class CommonsLogLog4jIntegrationTest extends EasyMockSupport {
 
     LoggingEvent event = loggingEventCapture.getValue();
     assertThat(event.getMessage()).isEqualTo("foo");
-    assertThat(event.getLevel()).isEqualTo(Level.ERROR);
+    assertThat(event.getLevel()).isEqualTo(org.apache.log4j.Level.ERROR);
     assertThat(event.getLocationInformation().getLineNumber()).isEqualTo(lineNumber);
   }
   
@@ -284,7 +283,7 @@ public class CommonsLogLog4jIntegrationTest extends EasyMockSupport {
     LoggingEvent event = loggingEventCapture.getValue();
     assertThat(event.getMessage()).isEqualTo("foo");
     assertThat(event.getThrowableInformation().getThrowable()).isEqualTo(e);
-    assertThat(event.getLevel()).isEqualTo(Level.ERROR);
+    assertThat(event.getLevel()).isEqualTo(org.apache.log4j.Level.ERROR);
     assertThat(event.getLocationInformation().getLineNumber()).isEqualTo(lineNumber);
   }
   
@@ -305,7 +304,7 @@ public class CommonsLogLog4jIntegrationTest extends EasyMockSupport {
 
     LoggingEvent event = loggingEventCapture.getValue();
     assertThat(event.getMessage()).isEqualTo("foo");
-    assertThat(event.getLevel()).isEqualTo(Level.FATAL);
+    assertThat(event.getLevel()).isEqualTo(org.apache.log4j.Level.FATAL);
     assertThat(event.getLocationInformation().getLineNumber()).isEqualTo(lineNumber);
   }
   
@@ -328,7 +327,271 @@ public class CommonsLogLog4jIntegrationTest extends EasyMockSupport {
     LoggingEvent event = loggingEventCapture.getValue();
     assertThat(event.getMessage()).isEqualTo("foo");
     assertThat(event.getThrowableInformation().getThrowable()).isEqualTo(e);
-    assertThat(event.getLevel()).isEqualTo(Level.FATAL);
+    assertThat(event.getLevel()).isEqualTo(org.apache.log4j.Level.FATAL);
+    assertThat(event.getLocationInformation().getLineNumber()).isEqualTo(lineNumber);
+  }
+
+  @Test
+  public void testLogFatal1Param() {
+    Appender appender = createMock(Appender.class);
+
+    CommonsLog log = createCommonsLog("LogFatal1Param", appender);
+
+    Capture<LoggingEvent> loggingEventCapture = newCapture();
+    appender.doAppend(capture(loggingEventCapture));
+    
+    replayAll();
+
+    log.log(Level.FATAL, "foo"); String lineNumber = getLineNumber();
+
+    verifyAll();
+
+    LoggingEvent event = loggingEventCapture.getValue();
+    assertThat(event.getMessage()).isEqualTo("foo");
+    assertThat(event.getLevel()).isEqualTo(org.apache.log4j.Level.FATAL);
+    assertThat(event.getLocationInformation().getLineNumber()).isEqualTo(lineNumber);
+  }
+  
+  @Test
+  public void testLogFatal2Param() {
+    Appender appender = createMock(Appender.class);
+
+    CommonsLog log = createCommonsLog("LogFatal2Param", appender);
+
+    Capture<LoggingEvent> loggingEventCapture = newCapture();
+    appender.doAppend(capture(loggingEventCapture));
+    
+    replayAll();
+
+    Exception e = new Exception("catch me");
+    log.log(Level.FATAL, "foo", e); String lineNumber = getLineNumber();
+
+    verifyAll();
+
+    LoggingEvent event = loggingEventCapture.getValue();
+    assertThat(event.getMessage()).isEqualTo("foo");
+    assertThat(event.getLevel()).isEqualTo(org.apache.log4j.Level.FATAL);
+    assertThat(event.getThrowableInformation().getThrowable()).isEqualTo(e);
+    assertThat(event.getLocationInformation().getLineNumber()).isEqualTo(lineNumber);
+  }
+
+  @Test
+  public void testLogWarn1Param() {
+    Appender appender = createMock(Appender.class);
+
+    CommonsLog log = createCommonsLog("LogWarn1Param", appender);
+
+    Capture<LoggingEvent> loggingEventCapture = newCapture();
+    appender.doAppend(capture(loggingEventCapture));
+    
+    replayAll();
+
+    log.log(Level.WARN, "foo"); String lineNumber = getLineNumber();
+
+    verifyAll();
+
+    LoggingEvent event = loggingEventCapture.getValue();
+    assertThat(event.getMessage()).isEqualTo("foo");
+    assertThat(event.getLevel()).isEqualTo(org.apache.log4j.Level.WARN);
+    assertThat(event.getLocationInformation().getLineNumber()).isEqualTo(lineNumber);
+  }
+  
+  @Test
+  public void testLogWarn2Param() {
+    Appender appender = createMock(Appender.class);
+
+    CommonsLog log = createCommonsLog("LogWarn2Param", appender);
+
+    Capture<LoggingEvent> loggingEventCapture = newCapture();
+    appender.doAppend(capture(loggingEventCapture));
+    
+    replayAll();
+
+    Exception e = new Exception("catch me");
+    log.log(Level.WARN, "foo", e); String lineNumber = getLineNumber();
+
+    verifyAll();
+
+    LoggingEvent event = loggingEventCapture.getValue();
+    assertThat(event.getMessage()).isEqualTo("foo");
+    assertThat(event.getLevel()).isEqualTo(org.apache.log4j.Level.WARN);
+    assertThat(event.getThrowableInformation().getThrowable()).isEqualTo(e);
+    assertThat(event.getLocationInformation().getLineNumber()).isEqualTo(lineNumber);
+  }
+
+  @Test
+  public void testLogError1Param() {
+    Appender appender = createMock(Appender.class);
+
+    CommonsLog log = createCommonsLog("LogError1Param", appender);
+
+    Capture<LoggingEvent> loggingEventCapture = newCapture();
+    appender.doAppend(capture(loggingEventCapture));
+    
+    replayAll();
+
+    log.log(Level.ERROR, "foo"); String lineNumber = getLineNumber();
+
+    verifyAll();
+
+    LoggingEvent event = loggingEventCapture.getValue();
+    assertThat(event.getMessage()).isEqualTo("foo");
+    assertThat(event.getLevel()).isEqualTo(org.apache.log4j.Level.ERROR);
+    assertThat(event.getLocationInformation().getLineNumber()).isEqualTo(lineNumber);
+  }
+  
+  @Test
+  public void testLogError2Param() {
+    Appender appender = createMock(Appender.class);
+
+    CommonsLog log = createCommonsLog("LogError2Param", appender);
+
+    Capture<LoggingEvent> loggingEventCapture = newCapture();
+    appender.doAppend(capture(loggingEventCapture));
+    
+    replayAll();
+
+    Exception e = new Exception("catch me");
+    log.log(Level.ERROR, "foo", e); String lineNumber = getLineNumber();
+
+    verifyAll();
+
+    LoggingEvent event = loggingEventCapture.getValue();
+    assertThat(event.getMessage()).isEqualTo("foo");
+    assertThat(event.getLevel()).isEqualTo(org.apache.log4j.Level.ERROR);
+    assertThat(event.getThrowableInformation().getThrowable()).isEqualTo(e);
+    assertThat(event.getLocationInformation().getLineNumber()).isEqualTo(lineNumber);
+  }
+
+  @Test
+  public void testLogInfo1Param() {
+    Appender appender = createMock(Appender.class);
+
+    CommonsLog log = createCommonsLog("LogInfo1Param", appender);
+
+    Capture<LoggingEvent> loggingEventCapture = newCapture();
+    appender.doAppend(capture(loggingEventCapture));
+    
+    replayAll();
+
+    log.log(Level.INFO, "foo"); String lineNumber = getLineNumber();
+
+    verifyAll();
+
+    LoggingEvent event = loggingEventCapture.getValue();
+    assertThat(event.getMessage()).isEqualTo("foo");
+    assertThat(event.getLevel()).isEqualTo(org.apache.log4j.Level.INFO);
+    assertThat(event.getLocationInformation().getLineNumber()).isEqualTo(lineNumber);
+  }
+  
+  @Test
+  public void testLogInfo2Param() {
+    Appender appender = createMock(Appender.class);
+
+    CommonsLog log = createCommonsLog("LogInfo2Param", appender);
+
+    Capture<LoggingEvent> loggingEventCapture = newCapture();
+    appender.doAppend(capture(loggingEventCapture));
+    
+    replayAll();
+
+    Exception e = new Exception("catch me");
+    log.log(Level.INFO, "foo", e); String lineNumber = getLineNumber();
+
+    verifyAll();
+
+    LoggingEvent event = loggingEventCapture.getValue();
+    assertThat(event.getMessage()).isEqualTo("foo");
+    assertThat(event.getLevel()).isEqualTo(org.apache.log4j.Level.INFO);
+    assertThat(event.getThrowableInformation().getThrowable()).isEqualTo(e);
+    assertThat(event.getLocationInformation().getLineNumber()).isEqualTo(lineNumber);
+  }
+
+  @Test
+  public void testLogDebug1Param() {
+    Appender appender = createMock(Appender.class);
+
+    CommonsLog log = createCommonsLog("LogDebug1Param", appender);
+
+    Capture<LoggingEvent> loggingEventCapture = newCapture();
+    appender.doAppend(capture(loggingEventCapture));
+    
+    replayAll();
+
+    log.log(Level.DEBUG, "foo"); String lineNumber = getLineNumber();
+
+    verifyAll();
+
+    LoggingEvent event = loggingEventCapture.getValue();
+    assertThat(event.getMessage()).isEqualTo("foo");
+    assertThat(event.getLevel()).isEqualTo(org.apache.log4j.Level.DEBUG);
+    assertThat(event.getLocationInformation().getLineNumber()).isEqualTo(lineNumber);
+  }
+  
+  @Test
+  public void testLogDebug2Param() {
+    Appender appender = createMock(Appender.class);
+
+    CommonsLog log = createCommonsLog("LogDebug2Param", appender);
+
+    Capture<LoggingEvent> loggingEventCapture = newCapture();
+    appender.doAppend(capture(loggingEventCapture));
+    
+    replayAll();
+
+    Exception e = new Exception("catch me");
+    log.log(Level.DEBUG, "foo", e); String lineNumber = getLineNumber();
+
+    verifyAll();
+
+    LoggingEvent event = loggingEventCapture.getValue();
+    assertThat(event.getMessage()).isEqualTo("foo");
+    assertThat(event.getLevel()).isEqualTo(org.apache.log4j.Level.DEBUG);
+    assertThat(event.getThrowableInformation().getThrowable()).isEqualTo(e);
+    assertThat(event.getLocationInformation().getLineNumber()).isEqualTo(lineNumber);
+  }
+
+  @Test
+  public void testLogTrace1Param() {
+    Appender appender = createMock(Appender.class);
+
+    CommonsLog log = createCommonsLog("LogTrace1Param", appender);
+
+    Capture<LoggingEvent> loggingEventCapture = newCapture();
+    appender.doAppend(capture(loggingEventCapture));
+    
+    replayAll();
+
+    log.log(Level.TRACE, "foo"); String lineNumber = getLineNumber();
+
+    verifyAll();
+
+    LoggingEvent event = loggingEventCapture.getValue();
+    assertThat(event.getMessage()).isEqualTo("foo");
+    assertThat(event.getLevel()).isEqualTo(org.apache.log4j.Level.TRACE);
+    assertThat(event.getLocationInformation().getLineNumber()).isEqualTo(lineNumber);
+  }
+  
+  @Test
+  public void testLogTrace2Param() {
+    Appender appender = createMock(Appender.class);
+
+    CommonsLog log = createCommonsLog("LogTrace2Param", appender);
+
+    Capture<LoggingEvent> loggingEventCapture = newCapture();
+    appender.doAppend(capture(loggingEventCapture));
+    
+    replayAll();
+
+    Exception e = new Exception("catch me");
+    log.log(Level.TRACE, "foo", e); String lineNumber = getLineNumber();
+
+    verifyAll();
+
+    LoggingEvent event = loggingEventCapture.getValue();
+    assertThat(event.getMessage()).isEqualTo("foo");
+    assertThat(event.getLevel()).isEqualTo(org.apache.log4j.Level.TRACE);
+    assertThat(event.getThrowableInformation().getThrowable()).isEqualTo(e);
     assertThat(event.getLocationInformation().getLineNumber()).isEqualTo(lineNumber);
   }
 
@@ -350,7 +613,7 @@ public class CommonsLogLog4jIntegrationTest extends EasyMockSupport {
 
     LoggingEvent event = loggingEventCapture.getValue();
     assertThat(event.getMessage()).isEqualTo("quux");
-    assertThat(event.getLevel()).isEqualTo(Level.INFO);
+    assertThat(event.getLevel()).isEqualTo(org.apache.log4j.Level.INFO);
     assertThat(event.getLocationInformation().getLineNumber()).isEqualTo(lineNumber);
   }
   
@@ -372,7 +635,7 @@ public class CommonsLogLog4jIntegrationTest extends EasyMockSupport {
     Log4JLogger log4jLogger = (Log4JLogger) wrappedLogCommons;
     Logger logger = log4jLogger.getLogger();
     logger.addAppender(appender);
-    logger.setLevel(Level.TRACE);
+    logger.setLevel(org.apache.log4j.Level.TRACE);
 
     // created the CommonsLog
     Log wrappedLog = LogFactory.getLog(CommonsLogLog4jIntegrationTest.class.getName() + ":" + testName);

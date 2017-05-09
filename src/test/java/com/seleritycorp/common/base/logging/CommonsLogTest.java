@@ -674,6 +674,179 @@ public class CommonsLogTest extends EasyMockSupport {
   }
 
   @Test
+  public void testLogFatal1Param() {
+    wrappedLog.fatal("foo, bar");
+
+    replayAll();
+
+    Log log = new CommonsLog(wrappedLog, formatter);
+    log.log(Level.FATAL, "foo, bar");
+
+    verifyAll();
+  }
+
+  @Test
+  public void testLogFatal2Param() {
+    Throwable t = createMock(Throwable.class);
+    wrappedLog.fatal("foo, bar", t);
+
+    replayAll();
+
+    Log log = new CommonsLog(wrappedLog, formatter);
+    log.log(Level.FATAL, "foo, bar", t);
+
+    verifyAll();
+  }
+
+  @Test
+  public void testLogError1Param() {
+    wrappedLog.error("foo, bar");
+
+    replayAll();
+
+    Log log = new CommonsLog(wrappedLog, formatter);
+    log.log(Level.ERROR, "foo, bar");
+
+    verifyAll();
+  }
+
+  @Test
+  public void testLogError2Param() {
+    Throwable t = createMock(Throwable.class);
+    wrappedLog.error("foo, bar", t);
+
+    replayAll();
+
+    Log log = new CommonsLog(wrappedLog, formatter);
+    log.log(Level.ERROR, "foo, bar", t);
+
+    verifyAll();
+  }
+
+  @Test
+  public void testLogWarn1Param() {
+    wrappedLog.warn("foo, bar");
+
+    replayAll();
+
+    Log log = new CommonsLog(wrappedLog, formatter);
+    log.log(Level.WARN, "foo, bar");
+
+    verifyAll();
+  }
+
+  @Test
+  public void testLogWarn2Param() {
+    Throwable t = createMock(Throwable.class);
+    wrappedLog.warn("foo, bar", t);
+
+    replayAll();
+
+    Log log = new CommonsLog(wrappedLog, formatter);
+    log.log(Level.WARN, "foo, bar", t);
+
+    verifyAll();
+  }
+
+  @Test
+  public void testLogInfo1Param() {
+    wrappedLog.info("foo, bar");
+
+    replayAll();
+
+    Log log = new CommonsLog(wrappedLog, formatter);
+    log.log(Level.INFO, "foo, bar");
+
+    verifyAll();
+  }
+
+  @Test
+  public void testLogInfo2Param() {
+    Throwable t = createMock(Throwable.class);
+    wrappedLog.info("foo, bar", t);
+
+    replayAll();
+
+    Log log = new CommonsLog(wrappedLog, formatter);
+    log.log(Level.INFO, "foo, bar", t);
+
+    verifyAll();
+  }
+
+  @Test
+  public void testLogDebug1Param() {
+    wrappedLog.debug("foo, bar");
+
+    replayAll();
+
+    Log log = new CommonsLog(wrappedLog, formatter);
+    log.log(Level.DEBUG, "foo, bar");
+
+    verifyAll();
+  }
+
+  @Test
+  public void testLogDebug2Param() {
+    Throwable t = createMock(Throwable.class);
+    wrappedLog.debug("foo, bar", t);
+
+    replayAll();
+
+    Log log = new CommonsLog(wrappedLog, formatter);
+    log.log(Level.DEBUG, "foo, bar", t);
+
+    verifyAll();
+  }
+
+  @Test
+  public void testLogTrace1Param() {
+    wrappedLog.trace("foo, bar");
+
+    replayAll();
+
+    Log log = new CommonsLog(wrappedLog, formatter);
+    log.log(Level.TRACE, "foo, bar");
+
+    verifyAll();
+  }
+
+  @Test
+  public void testLogTrace2Param() {
+    Throwable t = createMock(Throwable.class);
+    wrappedLog.trace("foo, bar", t);
+
+    replayAll();
+
+    Log log = new CommonsLog(wrappedLog, formatter);
+    log.log(Level.TRACE, "foo, bar", t);
+
+    verifyAll();
+  }
+
+  @Test
+  public void testLogOff1Param() {
+    replayAll();
+
+    Log log = new CommonsLog(wrappedLog, formatter);
+    log.log(Level.OFF, "foo, bar");
+
+    verifyAll();
+  }
+
+  @Test
+  public void testLogOff2Param() {
+    Throwable t = createMock(Throwable.class);
+
+    replayAll();
+
+    Log log = new CommonsLog(wrappedLog, formatter);
+    log.log(Level.OFF, "foo, bar", t);
+
+    verifyAll();
+  }
+
+
+  @Test
   public void testStructuredInfo() {
     wrappedLog.info("baz");
     expect(formatter.formatStructuredLine("foo", 42, "bar")).andReturn("baz");

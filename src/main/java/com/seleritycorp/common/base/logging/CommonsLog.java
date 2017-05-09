@@ -17,7 +17,6 @@
 package com.seleritycorp.common.base.logging;
 
 import org.apache.commons.logging.impl.Log4JLogger;
-import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 
 /**
@@ -162,7 +161,8 @@ public class CommonsLog implements Log {
     event = processEvent(event);
     if (wrappedLog4j != null) {
       // More specific wrappers get the line numbers wrong, so we resort to the most generic one :-/
-      wrappedLog4j.log(fqcn, Level.TRACE, event.getMessage(), event.getThrowable());
+      wrappedLog4j.log(fqcn, org.apache.log4j.Level.TRACE, event.getMessage(),
+          event.getThrowable());
     } else {
       if (event.hasThrowable()) {
         wrappedLog.trace(event.getMessage(), event.getThrowable());
@@ -178,7 +178,8 @@ public class CommonsLog implements Log {
     event = processEvent(event);
     if (wrappedLog4j != null) {
       // More specific wrappers get the line numbers wrong, so we resort to the most generic one :-/
-      wrappedLog4j.log(fqcn, Level.TRACE, event.getMessage(), event.getThrowable());
+      wrappedLog4j.log(fqcn, org.apache.log4j.Level.TRACE, event.getMessage(),
+          event.getThrowable());
     } else {
       if (event.hasThrowable()) {
         wrappedLog.trace(event.getMessage(), event.getThrowable());
@@ -194,7 +195,8 @@ public class CommonsLog implements Log {
     event = processEvent(event);
     if (wrappedLog4j != null) {
       // More specific wrappers get the line numbers wrong, so we resort to the most generic one :-/
-      wrappedLog4j.log(fqcn, Level.DEBUG, event.getMessage(), event.getThrowable());
+      wrappedLog4j.log(fqcn, org.apache.log4j.Level.DEBUG, event.getMessage(),
+          event.getThrowable());
     } else {
       if (event.hasThrowable()) {
         wrappedLog.debug(event.getMessage(), event.getThrowable());
@@ -210,7 +212,8 @@ public class CommonsLog implements Log {
     event = processEvent(event);
     if (wrappedLog4j != null) {
       // More specific wrappers get the line numbers wrong, so we resort to the most generic one :-/
-      wrappedLog4j.log(fqcn, Level.DEBUG, event.getMessage(), event.getThrowable());
+      wrappedLog4j.log(fqcn, org.apache.log4j.Level.DEBUG, event.getMessage(),
+          event.getThrowable());
     } else {
       if (event.hasThrowable()) {
         wrappedLog.debug(event.getMessage(), event.getThrowable());
@@ -226,7 +229,8 @@ public class CommonsLog implements Log {
     event = processEvent(event);
     if (wrappedLog4j != null) {
       // More specific wrappers get the line numbers wrong, so we resort to the most generic one :-/
-      wrappedLog4j.log(fqcn, Level.INFO, event.getMessage(), event.getThrowable());
+      wrappedLog4j.log(fqcn, org.apache.log4j.Level.INFO, event.getMessage(),
+          event.getThrowable());
     } else {
       if (event.hasThrowable()) {
         wrappedLog.info(event.getMessage(), event.getThrowable());
@@ -242,7 +246,8 @@ public class CommonsLog implements Log {
     event = processEvent(event);
     if (wrappedLog4j != null) {
       // More specific wrappers get the line numbers wrong, so we resort to the most generic one :-/
-      wrappedLog4j.log(fqcn, Level.INFO, event.getMessage(), event.getThrowable());
+      wrappedLog4j.log(fqcn, org.apache.log4j.Level.INFO, event.getMessage(),
+          event.getThrowable());
     } else {
       if (event.hasThrowable()) {
         wrappedLog.info(event.getMessage(), event.getThrowable());
@@ -258,7 +263,8 @@ public class CommonsLog implements Log {
     event = processEvent(event);
     if (wrappedLog4j != null) {
       // More specific wrappers get the line numbers wrong, so we resort to the most generic one :-/
-      wrappedLog4j.log(fqcn, Level.WARN, event.getMessage(), event.getThrowable());
+      wrappedLog4j.log(fqcn, org.apache.log4j.Level.WARN, event.getMessage(),
+          event.getThrowable());
     } else {
       if (event.hasThrowable()) {
         wrappedLog.warn(event.getMessage(), event.getThrowable());
@@ -274,7 +280,8 @@ public class CommonsLog implements Log {
     event = processEvent(event);
     if (wrappedLog4j != null) {
       // More specific wrappers get the line numbers wrong, so we resort to the most generic one :-/
-      wrappedLog4j.log(fqcn, Level.WARN, event.getMessage(), event.getThrowable());
+      wrappedLog4j.log(fqcn, org.apache.log4j.Level.WARN, event.getMessage(),
+          event.getThrowable());
     } else {
       if (event.hasThrowable()) {
         wrappedLog.warn(event.getMessage(), event.getThrowable());
@@ -290,7 +297,8 @@ public class CommonsLog implements Log {
     event = processEvent(event);
     if (wrappedLog4j != null) {
       // More specific wrappers get the line numbers wrong, so we resort to the most generic one :-/
-      wrappedLog4j.log(fqcn, Level.ERROR, event.getMessage(), event.getThrowable());
+      wrappedLog4j.log(fqcn, org.apache.log4j.Level.ERROR, event.getMessage(),
+          event.getThrowable());
     } else {
       if (event.hasThrowable()) {
         wrappedLog.error(event.getMessage(), event.getThrowable());
@@ -306,7 +314,8 @@ public class CommonsLog implements Log {
     event = processEvent(event);
     if (wrappedLog4j != null) {
       // More specific wrappers get the line numbers wrong, so we resort to the most generic one :-/
-      wrappedLog4j.log(fqcn, Level.ERROR, event.getMessage(), event.getThrowable());
+      wrappedLog4j.log(fqcn, org.apache.log4j.Level.ERROR, event.getMessage(),
+          event.getThrowable());
     } else {
       if (event.hasThrowable()) {
         wrappedLog.error(event.getMessage(), event.getThrowable());
@@ -322,7 +331,8 @@ public class CommonsLog implements Log {
     event = processEvent(event);
     if (wrappedLog4j != null) {
       // More specific wrappers get the line numbers wrong, so we resort to the most generic one :-/
-      wrappedLog4j.log(fqcn, Level.FATAL, event.getMessage(), event.getThrowable());
+      wrappedLog4j.log(fqcn, org.apache.log4j.Level.FATAL, event.getMessage(),
+          event.getThrowable());
     } else {
       if (event.hasThrowable()) {
         wrappedLog.fatal(event.getMessage(), event.getThrowable());
@@ -338,7 +348,8 @@ public class CommonsLog implements Log {
     event = processEvent(event);
     if (wrappedLog4j != null) {
       // More specific wrappers get the line numbers wrong, so we resort to the most generic one :-/
-      wrappedLog4j.log(fqcn, Level.FATAL, event.getMessage(), event.getThrowable());
+      wrappedLog4j.log(fqcn, org.apache.log4j.Level.FATAL, event.getMessage(),
+          event.getThrowable());
     } else {
       if (event.hasThrowable()) {
         wrappedLog.fatal(event.getMessage(), event.getThrowable());
@@ -349,11 +360,133 @@ public class CommonsLog implements Log {
   }
 
   @Override
+  public void log(Level level, Object message) {
+    if (level != null) {
+      Event event = new Event(message);
+      event = processEvent(event);
+      if (wrappedLog4j != null) {
+        // More specific wrappers get the line numbers wrong, so we resort to the most generic
+        // one :-/
+        wrappedLog4j.log(fqcn, level.toLog4jLevel(), event.getMessage(), event.getThrowable());
+      } else {
+        switch (level) {
+          case FATAL:
+            if (event.hasThrowable()) {
+              wrappedLog.fatal(event.getMessage(), event.getThrowable());
+            } else {
+              wrappedLog.fatal(event.getMessage());
+            }
+            break;
+          case ERROR:
+            if (event.hasThrowable()) {
+              wrappedLog.error(event.getMessage(), event.getThrowable());
+            } else {
+              wrappedLog.error(event.getMessage());
+            }
+            break;
+          case WARN:
+            if (event.hasThrowable()) {
+              wrappedLog.warn(event.getMessage(), event.getThrowable());
+            } else {
+              wrappedLog.warn(event.getMessage());
+            }
+            break;
+          case INFO:
+            if (event.hasThrowable()) {
+              wrappedLog.info(event.getMessage(), event.getThrowable());
+            } else {
+              wrappedLog.info(event.getMessage());
+            }
+            break;
+          case DEBUG:
+            if (event.hasThrowable()) {
+              wrappedLog.debug(event.getMessage(), event.getThrowable());
+            } else {
+              wrappedLog.debug(event.getMessage());
+            }
+            break;
+          case TRACE:
+            if (event.hasThrowable()) {
+              wrappedLog.trace(event.getMessage(), event.getThrowable());
+            } else {
+              wrappedLog.trace(event.getMessage());
+            }
+            break;
+          case OFF:
+          default:
+            break;
+        }
+      }
+    }
+  }
+
+  @Override
+  public void log(Level level, Object message, Throwable throwable) {
+    if (level != null) {
+      Event event = new Event(message, throwable);
+      event = processEvent(event);
+      if (wrappedLog4j != null) {
+        // More specific wrappers get the line numbers wrong, so we resort to the most generic
+        // one :-/
+        wrappedLog4j.log(fqcn, level.toLog4jLevel(), event.getMessage(), event.getThrowable());
+      } else {
+        switch (level) {
+          case FATAL:
+            if (event.hasThrowable()) {
+              wrappedLog.fatal(event.getMessage(), event.getThrowable());
+            } else {
+              wrappedLog.fatal(event.getMessage());
+            }
+            break;
+          case ERROR:
+            if (event.hasThrowable()) {
+              wrappedLog.error(event.getMessage(), event.getThrowable());
+            } else {
+              wrappedLog.error(event.getMessage());
+            }
+            break;
+          case WARN:
+            if (event.hasThrowable()) {
+              wrappedLog.warn(event.getMessage(), event.getThrowable());
+            } else {
+              wrappedLog.warn(event.getMessage());
+            }
+            break;
+          case INFO:
+            if (event.hasThrowable()) {
+              wrappedLog.info(event.getMessage(), event.getThrowable());
+            } else {
+              wrappedLog.info(event.getMessage());
+            }
+            break;
+          case DEBUG:
+            if (event.hasThrowable()) {
+              wrappedLog.debug(event.getMessage(), event.getThrowable());
+            } else {
+              wrappedLog.debug(event.getMessage());
+            }
+            break;
+          case TRACE:
+            if (event.hasThrowable()) {
+              wrappedLog.trace(event.getMessage(), event.getThrowable());
+            } else {
+              wrappedLog.trace(event.getMessage());
+            }
+            break;
+          case OFF:
+          default:
+            break;
+        }
+      }
+    }
+  }
+
+  @Override
   public void structuredInfo(String tag, int version, Object... objs) {
     String message = processStructuredData(tag, version, objs);
     if (wrappedLog4j != null) {
       // More specific wrappers get the line numbers wrong, so we resort to the most generic one :-/
-      wrappedLog4j.log(fqcn, Level.INFO, message, null);
+      wrappedLog4j.log(fqcn, org.apache.log4j.Level.INFO, message, null);
     } else {
       wrappedLog.info(message);
     }

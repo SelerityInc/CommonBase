@@ -27,6 +27,23 @@ import org.apache.log4j.Logger;
     justification = "This Log should act as drop-in replacement for commons' Log")
 public interface Log extends org.apache.commons.logging.Log {
   /**
+   * Logs an error at a given level.
+   *
+   * @param level the level to log at.
+   * @param message message to log.
+   */
+  void log(Level level, Object message);
+
+  /**
+   * Logs an error at a given level.
+   *
+   * @param level the level to log at.
+   * @param message message to log.
+   * @param throwable cause for the log.
+   */
+  void log(Level level, Object message, Throwable throwable);
+
+  /**
    * Gets the raw Log4j logger behind this Log, if there is any
    *
    * <p>Log4j gets the line numbers wrong when wrapping the loggers directly. To allow
