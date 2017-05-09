@@ -392,7 +392,7 @@ public class HttpRequest {
   public UUID respondForbidden()
       throws IOException {
     ErrorCode errorCode = BasicErrorCode.E_FORBIDDEN;
-    String clientExplanation = errorCode.getDefaultReason() + " URL: " + getTarget();
+    String clientExplanation = errorCode.getDefaultReason();
     final int status = HttpStatus.FORBIDDEN_403;
     return respondGenericIssue(status, errorCode, clientExplanation);
   }
@@ -407,7 +407,7 @@ public class HttpRequest {
    */
   public UUID respondNotFound() throws IOException {
     ErrorCode errorCode = BasicErrorCode.E_NOT_FOUND;
-    String clientExplanation = errorCode.getDefaultReason() + " URL: " + getTarget();
+    String clientExplanation = errorCode.getDefaultReason();
     final int status = HttpStatus.NOT_FOUND_404;
     return respondGenericIssue(status, errorCode, clientExplanation);
   }

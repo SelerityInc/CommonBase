@@ -125,7 +125,7 @@ public class HttpRequestTest extends InjectingTestCase {
   public void testRespondForbiddenHtml() throws IOException {
     expect(escaper.html("E_FORBIDDEN")).andReturn("(escQUUX)").anyTimes();
     expect(escaper.html("00000000-0000-0000-0000-000000000001")).andReturn("(escUUID)").anyTimes();
-    expect(escaper.html("You are not allowed to access this URL. URL: /foo")).andReturn("(escRsn)")
+    expect(escaper.html("You are not allowed to access this URL.")).andReturn("(escRsn)")
       .anyTimes();
     expect(escaper.html("serverFoo")).andReturn("(escServerId)").anyTimes();
     expect(escaper.html("foo@example.org")).andReturn("(escSupport)").anyTimes();
@@ -240,7 +240,7 @@ public class HttpRequestTest extends InjectingTestCase {
   public void testRespondNotFoundHtml() throws IOException {
     expect(escaper.html("E_NOT_FOUND")).andReturn("(escQUUX)").anyTimes();
     expect(escaper.html("00000000-0000-0000-0000-000000000001")).andReturn("(escUUID)").anyTimes();
-    expect(escaper.html("The URL could not be found. URL: /foo")).andReturn("(escRsn)").anyTimes();
+    expect(escaper.html("The URL could not be found.")).andReturn("(escRsn)").anyTimes();
     expect(escaper.html("serverFoo")).andReturn("(escServerId)").anyTimes();
     expect(escaper.html("foo@example.org")).andReturn("(escSupport)").anyTimes();
     expect(escaper.html("/foo")).andReturn("(escTarget)").anyTimes();
