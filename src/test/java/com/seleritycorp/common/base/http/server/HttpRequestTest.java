@@ -48,6 +48,7 @@ import com.seleritycorp.common.base.http.common.ContentType;
 import com.seleritycorp.common.base.http.server.ForwardedForResolver;
 import com.seleritycorp.common.base.http.server.HttpRequest;
 import com.seleritycorp.common.base.test.InjectingTestCase;
+import com.seleritycorp.common.base.test.SettableConfig;
 import com.seleritycorp.common.base.time.TimeUtils;
 
 public class HttpRequestTest extends InjectingTestCase {
@@ -58,6 +59,7 @@ public class HttpRequestTest extends InjectingTestCase {
   private ContentTypeNegotiator contentTypeNegotiator;
   private Escaper escaper;
   private TimeUtils timeUtils;
+  private SettableConfig config;
   
   @Before
   public void setUp() {
@@ -69,6 +71,8 @@ public class HttpRequestTest extends InjectingTestCase {
     escaper = createMock(Escaper.class);
     timeUtils = createMock(TimeUtils.class);
     expect(timeUtils.formatTimeNanos()).andReturn("TIMESTAMP").anyTimes();
+    config = new SettableConfig();
+    config.set("server.id", "serverFoo");
   }
 
   @Test
@@ -110,6 +114,7 @@ public class HttpRequestTest extends InjectingTestCase {
     assertThat(responseBody).contains("/foo");
     assertThat(responseBody).contains("00000000-0000-0000-0000-000000000001");
     assertThat(responseBody).contains("TIMESTAMP");
+    assertThat(responseBody).contains("serverFoo");
 
     assertThat(incidentId.toString()).isEqualTo("00000000-0000-0000-0000-000000000001");
   }
@@ -120,6 +125,7 @@ public class HttpRequestTest extends InjectingTestCase {
     expect(escaper.html("00000000-0000-0000-0000-000000000001")).andReturn("(escUUID)").anyTimes();
     expect(escaper.html("You are not allowed to access this URL. URL: /foo")).andReturn("(escRsn)")
       .anyTimes();
+    expect(escaper.html("serverFoo")).andReturn("(escServerId)").anyTimes();
 
     expect(httpServletRequest.getMethod()).andReturn("METHOD_FOO");
     expect(httpServletRequest.getHeader("Accept")).andReturn("text/foo");
@@ -150,6 +156,8 @@ public class HttpRequestTest extends InjectingTestCase {
     assertThat(responseBody).contains("(escRsn)");
     assertThat(responseBody).doesNotContain("The URL could not be found. URL: /foo");
     assertThat(responseBody).contains("TIMESTAMP");
+    assertThat(responseBody).contains("(escServerId)");
+    assertThat(responseBody).doesNotContain("serverFoo");
 
     assertThat(incidentId.toString()).isEqualTo("00000000-0000-0000-0000-000000000001");
   }
@@ -182,6 +190,7 @@ public class HttpRequestTest extends InjectingTestCase {
     assertThat(responseBody).contains("/foo");
     assertThat(responseBody).contains("00000000-0000-0000-0000-000000000001");
     assertThat(responseBody).contains("TIMESTAMP");
+    assertThat(responseBody).contains("serverFoo");
 
     assertThat(incidentId.toString()).isEqualTo("00000000-0000-0000-0000-000000000001");
   }
@@ -214,6 +223,7 @@ public class HttpRequestTest extends InjectingTestCase {
     assertThat(responseBody).contains("/foo");
     assertThat(responseBody).contains("00000000-0000-0000-0000-000000000001");
     assertThat(responseBody).contains("TIMESTAMP");
+    assertThat(responseBody).contains("serverFoo");
 
     assertThat(incidentId.toString()).isEqualTo("00000000-0000-0000-0000-000000000001");
   }
@@ -223,6 +233,7 @@ public class HttpRequestTest extends InjectingTestCase {
     expect(escaper.html("E_NOT_FOUND")).andReturn("(escQUUX)").anyTimes();
     expect(escaper.html("00000000-0000-0000-0000-000000000001")).andReturn("(escUUID)").anyTimes();
     expect(escaper.html("The URL could not be found. URL: /foo")).andReturn("(escRsn)").anyTimes();
+    expect(escaper.html("serverFoo")).andReturn("(escServerId)").anyTimes();
 
     expect(httpServletRequest.getMethod()).andReturn("METHOD_FOO");
     expect(httpServletRequest.getHeader("Accept")).andReturn("text/foo");
@@ -253,6 +264,8 @@ public class HttpRequestTest extends InjectingTestCase {
     assertThat(responseBody).contains("(escRsn)");
     assertThat(responseBody).doesNotContain("The URL could not be found. URL: /foo");
     assertThat(responseBody).contains("TIMESTAMP");
+    assertThat(responseBody).contains("(escServerId)");
+    assertThat(responseBody).doesNotContain("serverFoo");
 
     assertThat(incidentId.toString()).isEqualTo("00000000-0000-0000-0000-000000000001");
   }
@@ -285,6 +298,7 @@ public class HttpRequestTest extends InjectingTestCase {
     assertThat(responseBody).contains("/foo");
     assertThat(responseBody).contains("00000000-0000-0000-0000-000000000001");
     assertThat(responseBody).contains("TIMESTAMP");
+    assertThat(responseBody).contains("serverFoo");
 
     assertThat(incidentId.toString()).isEqualTo("00000000-0000-0000-0000-000000000001");
   }
@@ -320,6 +334,7 @@ public class HttpRequestTest extends InjectingTestCase {
     assertThat(responseBody).contains("bar");
     assertThat(responseBody).contains("00000000-0000-0000-0000-000000000001");
     assertThat(responseBody).contains("TIMESTAMP");
+    assertThat(responseBody).contains("serverFoo");
 
     assertThat(incidentId.toString()).isEqualTo("00000000-0000-0000-0000-000000000001");
   }
@@ -329,6 +344,7 @@ public class HttpRequestTest extends InjectingTestCase {
     expect(escaper.html("bar")).andReturn("(escBAR)").anyTimes();
     expect(escaper.html("quux")).andReturn("(escQUUX)").anyTimes();
     expect(escaper.html("00000000-0000-0000-0000-000000000001")).andReturn("(escUUID)").anyTimes();
+    expect(escaper.html("serverFoo")).andReturn("(escServerId)").anyTimes();
 
     ErrorCode errorCode = createMock(ErrorCode.class);
     expect(errorCode.getIdentifier()).andReturn("quux").anyTimes();
@@ -362,6 +378,8 @@ public class HttpRequestTest extends InjectingTestCase {
     assertThat(responseBody).contains("(escUUID)");
     assertThat(responseBody).doesNotContain("00000000-0000-0000-0000-000000000001");
     assertThat(responseBody).contains("TIMESTAMP");
+    assertThat(responseBody).contains("(escServerId)");
+    assertThat(responseBody).doesNotContain("serverFoo");
 
     assertThat(incidentId.toString()).isEqualTo("00000000-0000-0000-0000-000000000001");
   }
@@ -397,6 +415,7 @@ public class HttpRequestTest extends InjectingTestCase {
     assertThat(responseBody).contains("bar");
     assertThat(responseBody).contains("00000000-0000-0000-0000-000000000001");
     assertThat(responseBody).contains("TIMESTAMP");
+    assertThat(responseBody).contains("serverFoo");
 
     assertThat(incidentId.toString()).isEqualTo("00000000-0000-0000-0000-000000000001");
   }
@@ -433,6 +452,7 @@ public class HttpRequestTest extends InjectingTestCase {
     assertThat(responseBody).contains("bar");
     assertThat(responseBody).contains("00000000-0000-0000-0000-000000000001");
     assertThat(responseBody).contains("TIMESTAMP");
+    assertThat(responseBody).contains("serverFoo");
 
     assertThat(incidentId.toString()).isEqualTo("00000000-0000-0000-0000-000000000001");
   }
@@ -442,6 +462,7 @@ public class HttpRequestTest extends InjectingTestCase {
     expect(escaper.html("bar")).andReturn("(escBAR)").anyTimes();
     expect(escaper.html("quux")).andReturn("(escQUUX)").anyTimes();
     expect(escaper.html("00000000-0000-0000-0000-000000000001")).andReturn("(escUUID)").anyTimes();
+    expect(escaper.html("serverFoo")).andReturn("(escServerId)").anyTimes();
 
     ErrorCode errorCode = createMock(ErrorCode.class);
     expect(errorCode.getIdentifier()).andReturn("quux").anyTimes();
@@ -476,6 +497,8 @@ public class HttpRequestTest extends InjectingTestCase {
     assertThat(responseBody).contains("(escUUID)");
     assertThat(responseBody).doesNotContain("00000000-0000-0000-0000-000000000001");
     assertThat(responseBody).contains("TIMESTAMP");
+    assertThat(responseBody).contains("(escServerId)");
+    assertThat(responseBody).doesNotContain("serverFoo");
 
     assertThat(incidentId.toString()).isEqualTo("00000000-0000-0000-0000-000000000001");
   }
@@ -512,6 +535,7 @@ public class HttpRequestTest extends InjectingTestCase {
     assertThat(responseBody).contains("bar");
     assertThat(responseBody).contains("00000000-0000-0000-0000-000000000001");
     assertThat(responseBody).contains("TIMESTAMP");
+    assertThat(responseBody).contains("serverFoo");
 
     assertThat(incidentId.toString()).isEqualTo("00000000-0000-0000-0000-000000000001");
   }
@@ -547,6 +571,7 @@ public class HttpRequestTest extends InjectingTestCase {
     assertThat(responseBody).contains("quux");
     assertThat(responseBody).contains("bar");
     assertThat(responseBody).contains("00000000-0000-0000-0000-000000000001");
+    assertThat(responseBody).contains("serverFoo");
 
     assertThat(incidentId.toString()).isEqualTo("00000000-0000-0000-0000-000000000001");
   }
@@ -556,6 +581,7 @@ public class HttpRequestTest extends InjectingTestCase {
     expect(escaper.html("bar")).andReturn("(escBAR)").anyTimes();
     expect(escaper.html("quux")).andReturn("(escQUUX)").anyTimes();
     expect(escaper.html("00000000-0000-0000-0000-000000000001")).andReturn("(escUUID)").anyTimes();
+    expect(escaper.html("serverFoo")).andReturn("(escServerId)").anyTimes();
 
     ErrorCode errorCode = createMock(ErrorCode.class);
     expect(errorCode.getIdentifier()).andReturn("quux").anyTimes();
@@ -590,6 +616,8 @@ public class HttpRequestTest extends InjectingTestCase {
     assertThat(responseBody).contains("(escUUID)");
     assertThat(responseBody).doesNotContain("00000000-0000-0000-0000-000000000001");
     assertThat(responseBody).contains("TIMESTAMP");
+    assertThat(responseBody).contains("(escServerId)");
+    assertThat(responseBody).doesNotContain("serverFoo");
 
     assertThat(incidentId.toString()).isEqualTo("00000000-0000-0000-0000-000000000001");
   }
@@ -626,6 +654,7 @@ public class HttpRequestTest extends InjectingTestCase {
     assertThat(responseBody).contains("bar");
     assertThat(responseBody).contains("00000000-0000-0000-0000-000000000001");
     assertThat(responseBody).contains("TIMESTAMP");
+    assertThat(responseBody).contains("serverFoo");
 
     assertThat(incidentId.toString()).isEqualTo("00000000-0000-0000-0000-000000000001");
   }
@@ -825,6 +854,6 @@ public class HttpRequestTest extends InjectingTestCase {
 
   private HttpRequest createHttpRequest(String target) {
     return new HttpRequest(target, request, httpServletRequest, httpServletResponse,
-        forwardedForResolver, contentTypeNegotiator, getUuidGenerator(), escaper, timeUtils);
+        forwardedForResolver, contentTypeNegotiator, getUuidGenerator(), escaper, timeUtils, config);
   }
 }
