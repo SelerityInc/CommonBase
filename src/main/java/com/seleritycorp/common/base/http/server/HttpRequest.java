@@ -27,6 +27,7 @@ import com.seleritycorp.common.base.escape.Escaper;
 import com.seleritycorp.common.base.http.common.ContentType;
 import com.seleritycorp.common.base.logging.Log;
 import com.seleritycorp.common.base.logging.LogFactory;
+import com.seleritycorp.common.base.time.TimeUtils;
 import com.seleritycorp.common.base.uuid.UuidGenerator;
 
 import org.apache.commons.io.IOUtils;
@@ -72,6 +73,7 @@ public class HttpRequest {
   private final ContentTypeNegotiator contentTypeNegotiator;
   private final UuidGenerator uuidGenerator;
   private final Escaper escaper;
+  private final TimeUtils timeUtils;
 
   /**
    * Create a HttpRequest.
@@ -84,13 +86,14 @@ public class HttpRequest {
    * @param contentTypeNegotiator The negotiator for ContentType handling.
    * @param uuidGenerator The generator for incident ids.
    * @param escaper Escaping for formatting output.
+   * @param timeUtils utils for formatting times.
    */
   @Inject
   public HttpRequest(@Assisted String target, @Assisted Request request,
       @Assisted HttpServletRequest httpServletRequest,
       @Assisted HttpServletResponse httpServletResponse,
       ForwardedForResolver forwardedForResolver, ContentTypeNegotiator contentTypeNegotiator,
-      UuidGenerator uuidGenerator, Escaper escaper) {
+      UuidGenerator uuidGenerator, Escaper escaper, TimeUtils timeUtils) {
     this.target = target;
     this.request = request;
     this.httpServletRequest = httpServletRequest;
@@ -99,6 +102,7 @@ public class HttpRequest {
     this.contentTypeNegotiator = contentTypeNegotiator;
     this.uuidGenerator = uuidGenerator;
     this.escaper = escaper;
+    this.timeUtils = timeUtils;
   }
 
   // -- Raw request objects ---------------------------------------------------
@@ -245,6 +249,7 @@ public class HttpRequest {
       msg += "Error code: " + errorCodeIdentifier + "\n";
       msg += "Explanation: " + clientExplanation + "\n";
       msg += "Incident id: " + incidentId + "\n";
+      msg += "Server timestamp: " + timeUtils.formatTimeNanos() + "\n";
     } else if (TEXT_HTML.equals(responseContentType)) {
       msg += "<html>\n";
       msg += "  <body>\n";
@@ -257,6 +262,8 @@ public class HttpRequest {
           + escaper.html(clientExplanation) + "</td></tr>\n";
       msg += "      <tr><th style=\"text-align:left;\">Incident id</th><td><pre>"
           + escaper.html(incidentId.toString()) + "</pre></td></tr>\n";
+      msg += "      <tr><th style=\"text-align:left;\">Server time</th><td><pre>"
+          + timeUtils.formatTimeNanos() + "</pre></td></tr>\n";
       msg += "    </table>\n";
       msg += "  </body>\n";
       msg += "<html>\n";
@@ -265,6 +272,7 @@ public class HttpRequest {
       object.addProperty("errorCode", errorCodeIdentifier);
       object.addProperty("explanation", clientExplanation);
       object.addProperty("incidentId", incidentId.toString());
+      object.addProperty("serverTimestamp", timeUtils.formatTimeNanos());
       msg = object.toString();
     } else {
       // This branch should never be reached. It's only hear for extra safety. 

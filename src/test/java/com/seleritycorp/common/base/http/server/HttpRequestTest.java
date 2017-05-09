@@ -48,6 +48,7 @@ import com.seleritycorp.common.base.http.common.ContentType;
 import com.seleritycorp.common.base.http.server.ForwardedForResolver;
 import com.seleritycorp.common.base.http.server.HttpRequest;
 import com.seleritycorp.common.base.test.InjectingTestCase;
+import com.seleritycorp.common.base.time.TimeUtils;
 
 public class HttpRequestTest extends InjectingTestCase {
   private Request request;
@@ -56,6 +57,7 @@ public class HttpRequestTest extends InjectingTestCase {
   private ForwardedForResolver forwardedForResolver;
   private ContentTypeNegotiator contentTypeNegotiator;
   private Escaper escaper;
+  private TimeUtils timeUtils;
   
   @Before
   public void setUp() {
@@ -65,6 +67,8 @@ public class HttpRequestTest extends InjectingTestCase {
     forwardedForResolver = createMock(ForwardedForResolver.class);
     contentTypeNegotiator = createMock(ContentTypeNegotiator.class);
     escaper = createMock(Escaper.class);
+    timeUtils = createMock(TimeUtils.class);
+    expect(timeUtils.formatTimeNanos()).andReturn("TIMESTAMP").anyTimes();
   }
 
   @Test
@@ -105,6 +109,7 @@ public class HttpRequestTest extends InjectingTestCase {
     assertThat(responseBody).contains("E_FORBIDDEN");
     assertThat(responseBody).contains("/foo");
     assertThat(responseBody).contains("00000000-0000-0000-0000-000000000001");
+    assertThat(responseBody).contains("TIMESTAMP");
 
     assertThat(incidentId.toString()).isEqualTo("00000000-0000-0000-0000-000000000001");
   }
@@ -144,6 +149,7 @@ public class HttpRequestTest extends InjectingTestCase {
     assertThat(responseBody).doesNotContain("00000000-0000-0000-0000-000000000001");
     assertThat(responseBody).contains("(escRsn)");
     assertThat(responseBody).doesNotContain("The URL could not be found. URL: /foo");
+    assertThat(responseBody).contains("TIMESTAMP");
 
     assertThat(incidentId.toString()).isEqualTo("00000000-0000-0000-0000-000000000001");
   }
@@ -175,6 +181,7 @@ public class HttpRequestTest extends InjectingTestCase {
     assertThat(responseBody).contains("E_FORBIDDEN");
     assertThat(responseBody).contains("/foo");
     assertThat(responseBody).contains("00000000-0000-0000-0000-000000000001");
+    assertThat(responseBody).contains("TIMESTAMP");
 
     assertThat(incidentId.toString()).isEqualTo("00000000-0000-0000-0000-000000000001");
   }
@@ -206,6 +213,7 @@ public class HttpRequestTest extends InjectingTestCase {
     assertThat(responseBody).contains("E_NOT_FOUND");
     assertThat(responseBody).contains("/foo");
     assertThat(responseBody).contains("00000000-0000-0000-0000-000000000001");
+    assertThat(responseBody).contains("TIMESTAMP");
 
     assertThat(incidentId.toString()).isEqualTo("00000000-0000-0000-0000-000000000001");
   }
@@ -244,6 +252,7 @@ public class HttpRequestTest extends InjectingTestCase {
     assertThat(responseBody).doesNotContain("00000000-0000-0000-0000-000000000001");
     assertThat(responseBody).contains("(escRsn)");
     assertThat(responseBody).doesNotContain("The URL could not be found. URL: /foo");
+    assertThat(responseBody).contains("TIMESTAMP");
 
     assertThat(incidentId.toString()).isEqualTo("00000000-0000-0000-0000-000000000001");
   }
@@ -275,6 +284,7 @@ public class HttpRequestTest extends InjectingTestCase {
     assertThat(responseBody).contains("E_NOT_FOUND");
     assertThat(responseBody).contains("/foo");
     assertThat(responseBody).contains("00000000-0000-0000-0000-000000000001");
+    assertThat(responseBody).contains("TIMESTAMP");
 
     assertThat(incidentId.toString()).isEqualTo("00000000-0000-0000-0000-000000000001");
   }
@@ -309,6 +319,7 @@ public class HttpRequestTest extends InjectingTestCase {
     assertThat(responseBody).contains("quux");
     assertThat(responseBody).contains("bar");
     assertThat(responseBody).contains("00000000-0000-0000-0000-000000000001");
+    assertThat(responseBody).contains("TIMESTAMP");
 
     assertThat(incidentId.toString()).isEqualTo("00000000-0000-0000-0000-000000000001");
   }
@@ -350,6 +361,7 @@ public class HttpRequestTest extends InjectingTestCase {
     assertThat(responseBody).doesNotContain("bar");
     assertThat(responseBody).contains("(escUUID)");
     assertThat(responseBody).doesNotContain("00000000-0000-0000-0000-000000000001");
+    assertThat(responseBody).contains("TIMESTAMP");
 
     assertThat(incidentId.toString()).isEqualTo("00000000-0000-0000-0000-000000000001");
   }
@@ -384,6 +396,7 @@ public class HttpRequestTest extends InjectingTestCase {
     assertThat(responseBody).contains("quux");
     assertThat(responseBody).contains("bar");
     assertThat(responseBody).contains("00000000-0000-0000-0000-000000000001");
+    assertThat(responseBody).contains("TIMESTAMP");
 
     assertThat(incidentId.toString()).isEqualTo("00000000-0000-0000-0000-000000000001");
   }
@@ -419,6 +432,7 @@ public class HttpRequestTest extends InjectingTestCase {
     assertThat(responseBody).contains("quux");
     assertThat(responseBody).contains("bar");
     assertThat(responseBody).contains("00000000-0000-0000-0000-000000000001");
+    assertThat(responseBody).contains("TIMESTAMP");
 
     assertThat(incidentId.toString()).isEqualTo("00000000-0000-0000-0000-000000000001");
   }
@@ -461,6 +475,7 @@ public class HttpRequestTest extends InjectingTestCase {
     assertThat(responseBody).doesNotContain("bar");
     assertThat(responseBody).contains("(escUUID)");
     assertThat(responseBody).doesNotContain("00000000-0000-0000-0000-000000000001");
+    assertThat(responseBody).contains("TIMESTAMP");
 
     assertThat(incidentId.toString()).isEqualTo("00000000-0000-0000-0000-000000000001");
   }
@@ -496,6 +511,7 @@ public class HttpRequestTest extends InjectingTestCase {
     assertThat(responseBody).contains("quux");
     assertThat(responseBody).contains("bar");
     assertThat(responseBody).contains("00000000-0000-0000-0000-000000000001");
+    assertThat(responseBody).contains("TIMESTAMP");
 
     assertThat(incidentId.toString()).isEqualTo("00000000-0000-0000-0000-000000000001");
   }
@@ -573,6 +589,7 @@ public class HttpRequestTest extends InjectingTestCase {
     assertThat(responseBody).doesNotContain("bar");
     assertThat(responseBody).contains("(escUUID)");
     assertThat(responseBody).doesNotContain("00000000-0000-0000-0000-000000000001");
+    assertThat(responseBody).contains("TIMESTAMP");
 
     assertThat(incidentId.toString()).isEqualTo("00000000-0000-0000-0000-000000000001");
   }
@@ -608,6 +625,7 @@ public class HttpRequestTest extends InjectingTestCase {
     assertThat(responseBody).contains("quux");
     assertThat(responseBody).contains("bar");
     assertThat(responseBody).contains("00000000-0000-0000-0000-000000000001");
+    assertThat(responseBody).contains("TIMESTAMP");
 
     assertThat(incidentId.toString()).isEqualTo("00000000-0000-0000-0000-000000000001");
   }
@@ -807,6 +825,6 @@ public class HttpRequestTest extends InjectingTestCase {
 
   private HttpRequest createHttpRequest(String target) {
     return new HttpRequest(target, request, httpServletRequest, httpServletResponse,
-        forwardedForResolver, contentTypeNegotiator, getUuidGenerator(), escaper);
+        forwardedForResolver, contentTypeNegotiator, getUuidGenerator(), escaper, timeUtils);
   }
 }
