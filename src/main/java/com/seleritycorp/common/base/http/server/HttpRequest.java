@@ -263,27 +263,47 @@ public class HttpRequest {
       msg += "If the above is unexpected or you have questions, please let us know at "
           + supportEmailAddress + " and attach the above data.\n";
     } else if (TEXT_HTML.equals(responseContentType)) {
-      msg += "<html>\n";
+      msg += "<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Strict//EN\"\n";
+      msg += "  \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd\">\n";
+      msg += "<html xmlns=\"http://www.w3.org/1999/xhtml\" lang=\"en\" xml:lang=\"en\">\n";
+      msg += "  <head>\n";
+      msg += "    <title>Error while accessing " + escaper.html(getTarget()) + "</title>\n";
+      msg += "    <meta http-equiv=\"Content-Type\" content=\"text/html;charset=UTF-8\" />\n";
+      msg += "    <style type=\"text/css\">\n";
+      msg += "      table, tr, th, td {\n";
+      msg += "        border: 1px solid black;\n";
+      msg += "      }\n";
+      msg += "      th, td {\n";
+      msg += "        padding: 0.2em 0.5em 0.2em 0.5em;\n";
+      msg += "      }\n";
+      msg += "      table {\n";
+      msg += "        border-collapse: collapse;\n";
+      msg += "      }\n";
+      msg += "      th {\n";
+      msg += "        text-align: left;\n";
+      msg += "      }\n";
+      msg += "    </style>\n";
+      msg += "  </head>\n";
       msg += "  <body>\n";
-      msg += "    <p>An error occurred</p>\n";
+      msg += "    <p>An error occurred for your request to " + escaper.html(getTarget()) + "</p>\n";
       msg += "    <p>" + escaper.html(clientExplanation) + "</p>\n";
       msg += "    <table>\n";
-      msg += "      <tr><th style=\"text-align:left;\">Error code</th><td><pre>"
-          + escaper.html(errorCodeIdentifier) + "</pre></td></tr>\n";
-      msg += "      <tr><th style=\"text-align:left;\">Explanation</th><td>" 
+      msg += "      <tr><th>Error code</th><td>" + escaper.html(errorCodeIdentifier)
+          + "</td></tr>\n";
+      msg += "      <tr><th style=\"text-align:left;\">Explanation</th><td>"
           + escaper.html(clientExplanation) + "</td></tr>\n";
-      msg += "      <tr><th style=\"text-align:left;\">Incident id</th><td><pre>"
-          + escaper.html(incidentId.toString()) + "</pre></td></tr>\n";
-      msg += "      <tr><th style=\"text-align:left;\">Server id</th><td><pre>"
-          + escaper.html(serverId) + "</pre></td></tr>\n";
-      msg += "      <tr><th style=\"text-align:left;\">Server time</th><td><pre>"
-          + timeUtils.formatTimeNanos() + "</pre></td></tr>\n";
+      msg += "      <tr><th style=\"text-align:left;\">Incident id</th><td>"
+          + escaper.html(incidentId.toString()) + "</td></tr>\n";
+      msg += "      <tr><th style=\"text-align:left;\">Server id</th><td>"
+          + escaper.html(serverId) + "</td></tr>\n";
+      msg += "      <tr><th style=\"text-align:left;\">Server time</th><td>"
+          + timeUtils.formatTimeNanos() + "</td></tr>\n";
       msg += "    </table>\n";
       msg += "    <p>If the above is unexpected or you have questions, please let us know at "
           + "<a href=\"" + escaper.html(supportEmailAddress) + "\">"
           + escaper.html(supportEmailAddress) + "</a> and attach the above data.</p>\n";
       msg += "  </body>\n";
-      msg += "<html>\n";
+      msg += "</html>\n";
     } else if (APPLICATION_JSON.equals(responseContentType)) {
       JsonObject object = new JsonObject();
       object.addProperty("errorCode", errorCodeIdentifier);

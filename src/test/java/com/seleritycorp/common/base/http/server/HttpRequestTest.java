@@ -129,6 +129,7 @@ public class HttpRequestTest extends InjectingTestCase {
       .anyTimes();
     expect(escaper.html("serverFoo")).andReturn("(escServerId)").anyTimes();
     expect(escaper.html("foo@example.org")).andReturn("(escSupport)").anyTimes();
+    expect(escaper.html("/foo")).andReturn("(escTarget)").anyTimes();
 
     expect(httpServletRequest.getMethod()).andReturn("METHOD_FOO");
     expect(httpServletRequest.getHeader("Accept")).andReturn("text/foo");
@@ -152,6 +153,8 @@ public class HttpRequestTest extends InjectingTestCase {
     verifyAll();
 
     String responseBody = stringWriter.toString(); 
+    assertThat(responseBody).contains("(escTarget)");
+    assertThat(responseBody).doesNotContain("/foo");
     assertThat(responseBody).contains("(escQUUX)");
     assertThat(responseBody).doesNotContain("E_FORBIDDEN");
     assertThat(responseBody).contains("(escUUID)");
@@ -240,6 +243,7 @@ public class HttpRequestTest extends InjectingTestCase {
     expect(escaper.html("The URL could not be found. URL: /foo")).andReturn("(escRsn)").anyTimes();
     expect(escaper.html("serverFoo")).andReturn("(escServerId)").anyTimes();
     expect(escaper.html("foo@example.org")).andReturn("(escSupport)").anyTimes();
+    expect(escaper.html("/foo")).andReturn("(escTarget)").anyTimes();
 
     expect(httpServletRequest.getMethod()).andReturn("METHOD_FOO");
     expect(httpServletRequest.getHeader("Accept")).andReturn("text/foo");
@@ -263,6 +267,8 @@ public class HttpRequestTest extends InjectingTestCase {
     verifyAll();
 
     String responseBody = stringWriter.toString(); 
+    assertThat(responseBody).contains("(escTarget)");
+    assertThat(responseBody).doesNotContain("/foo");
     assertThat(responseBody).contains("(escQUUX)");
     assertThat(responseBody).doesNotContain("E_NOT_FOUND");
     assertThat(responseBody).contains("(escUUID)");
@@ -356,6 +362,7 @@ public class HttpRequestTest extends InjectingTestCase {
     expect(escaper.html("00000000-0000-0000-0000-000000000001")).andReturn("(escUUID)").anyTimes();
     expect(escaper.html("serverFoo")).andReturn("(escServerId)").anyTimes();
     expect(escaper.html("foo@example.org")).andReturn("(escSupport)").anyTimes();
+    expect(escaper.html("/foo")).andReturn("(escTarget)").anyTimes();
 
     ErrorCode errorCode = createMock(ErrorCode.class);
     expect(errorCode.getIdentifier()).andReturn("quux").anyTimes();
@@ -382,6 +389,8 @@ public class HttpRequestTest extends InjectingTestCase {
     verifyAll();
 
     String responseBody = stringWriter.toString(); 
+    assertThat(responseBody).contains("(escTarget)");
+    assertThat(responseBody).doesNotContain("/foo");
     assertThat(responseBody).contains("(escQUUX)");
     assertThat(responseBody).doesNotContain("quux");
     assertThat(responseBody).contains("(escBAR)");
@@ -479,6 +488,7 @@ public class HttpRequestTest extends InjectingTestCase {
     expect(escaper.html("00000000-0000-0000-0000-000000000001")).andReturn("(escUUID)").anyTimes();
     expect(escaper.html("serverFoo")).andReturn("(escServerId)").anyTimes();
     expect(escaper.html("foo@example.org")).andReturn("(escSupport)").anyTimes();
+    expect(escaper.html("/foo")).andReturn("(escTarget)").anyTimes();
 
     ErrorCode errorCode = createMock(ErrorCode.class);
     expect(errorCode.getIdentifier()).andReturn("quux").anyTimes();
@@ -506,6 +516,8 @@ public class HttpRequestTest extends InjectingTestCase {
     verifyAll();
 
     String responseBody = stringWriter.toString(); 
+    assertThat(responseBody).contains("(escTarget)");
+    assertThat(responseBody).doesNotContain("/foo");
     assertThat(responseBody).contains("(escQUUX)");
     assertThat(responseBody).doesNotContain("quux");
     assertThat(responseBody).contains("(escBAR)");
@@ -604,6 +616,7 @@ public class HttpRequestTest extends InjectingTestCase {
     expect(escaper.html("00000000-0000-0000-0000-000000000001")).andReturn("(escUUID)").anyTimes();
     expect(escaper.html("serverFoo")).andReturn("(escServerId)").anyTimes();
     expect(escaper.html("foo@example.org")).andReturn("(escSupport)").anyTimes();
+    expect(escaper.html("/foo")).andReturn("(escTarget)").anyTimes();
 
     ErrorCode errorCode = createMock(ErrorCode.class);
     expect(errorCode.getIdentifier()).andReturn("quux").anyTimes();
@@ -631,6 +644,8 @@ public class HttpRequestTest extends InjectingTestCase {
     verifyAll();
 
     String responseBody = stringWriter.toString(); 
+    assertThat(responseBody).contains("(escTarget)");
+    assertThat(responseBody).doesNotContain("/foo");
     assertThat(responseBody).contains("(escQUUX)");
     assertThat(responseBody).doesNotContain("quux");
     assertThat(responseBody).contains("(escBAR)");
