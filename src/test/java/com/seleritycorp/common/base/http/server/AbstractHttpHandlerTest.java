@@ -56,10 +56,31 @@ public class AbstractHttpHandlerTest extends InjectingTestCase {
   }
 
   @Test
-  public void testHandlePassdown() throws Exception {
+  public void testHandleDelegateHandled() throws Exception {
     expect(httpRequestFactory.create("/foo", request, httpServletRequest, httpServletResponse))
       .andReturn(httpRequest);
     httpServletResponse.setHeader("Server", "n/a");
+    expect(httpRequest.hasBeenHandled()).andReturn(true);
+
+    replayAll();
+
+    HttpHandlerShim handler = createHandler();
+    handler.setHttpRequestFactory(httpRequestFactory);
+
+    handler.handle("/foo", request, httpServletRequest, httpServletResponse);
+    
+    verifyAll();
+
+    assertThat(handler.getRequest()).isSameAs(httpRequest);
+  }
+
+  @Test
+  public void testHandleDelegateUnhandled() throws Exception {
+    expect(httpRequestFactory.create("/foo", request, httpServletRequest, httpServletResponse))
+      .andReturn(httpRequest);
+    httpServletResponse.setHeader("Server", "n/a");
+    expect(httpRequest.hasBeenHandled()).andReturn(false);
+    expect(httpRequest.respondNotFound()).andReturn(null);
 
     replayAll();
 

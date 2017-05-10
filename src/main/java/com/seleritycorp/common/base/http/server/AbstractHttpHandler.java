@@ -73,7 +73,12 @@ public abstract class AbstractHttpHandler extends AbstractHandler {
         httpServletResponse.setHeader("Server", "n/a");
         httpRequest = httpRequestFactory.create(target, request, httpServletRequest,
             httpServletResponse);
+
         handle(httpRequest);
+        
+        if (!httpRequest.hasBeenHandled()) {
+          httpRequest.respondNotFound();
+        }
       } catch (Exception exception) {
         // The handle method threw an uncaught exception.
         // We try sending a 503 gracefully. If that fails the outer try/catch block will try
