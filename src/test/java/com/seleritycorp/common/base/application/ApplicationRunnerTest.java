@@ -102,6 +102,7 @@ public class ApplicationRunnerTest extends EasyMockSupport {
         assertThat(actualArgs).isSameAs(args);
       }      
     });
+    InjectorFactory.forceInjector(null);
     ApplicationRunner.run(args, module1, module2);
   }
 
