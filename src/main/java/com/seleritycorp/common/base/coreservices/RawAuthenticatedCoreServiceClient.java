@@ -72,6 +72,22 @@ public class RawAuthenticatedCoreServiceClient {
    */
   public JsonElement authenticatedCall(String method, JsonElement params)
       throws HttpException, CallErrorException {
+    return authenticatedCall(method, params, -1);
+  }
+
+  /**
+   * Call a CoreServices method with passing the authentication token.
+   * 
+   * @param method The CoreServices method to call
+   * @param params The parameters to the method
+   * @param timeoutMillis The read timeout for new data on the connection. Use -1 for the default
+   *     timeout.
+   * @return The methods result object
+   * @throws HttpException for network or other IO issues occur..
+   * @throws CallErrorException for server and semantics errors.
+   */
+  public JsonElement authenticatedCall(String method, JsonElement params, int timeoutMillis)
+      throws HttpException, CallErrorException {
     if (token == null || tokenTimeoutTimestamp < clock.getSecondsEpoch()) {
       // Resetting the token, so in case things go wrong from here, we have a well resetted
       // environment.
@@ -83,7 +99,7 @@ public class RawAuthenticatedCoreServiceClient {
 
     final JsonElement ret;
     try {
-      ret = client.call(method, params, token, -1);
+      ret = client.call(method, params, token, timeoutMillis);
     } catch (Exception e) {
       // Some error on the connection. Better reset the token to avoid issues with session
       // timeouts or server switches.

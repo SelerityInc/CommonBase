@@ -19,7 +19,11 @@ package com.seleritycorp.common.base.coreservices;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 
+import com.seleritycorp.common.base.config.ApplicationConfig;
+import com.seleritycorp.common.base.config.Config;
 import com.seleritycorp.common.base.http.client.HttpException;
+
+import java.util.concurrent.TimeUnit;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -30,10 +34,20 @@ import javax.inject.Singleton;
 @Singleton
 public class RefDataClient {
   private final RawAuthenticatedCoreServiceClient client;
+  private final int timeoutMillis;
 
+  /**
+   * Creates a client for fetching reference data.
+   *
+   * @param client The client to call the methods on.
+   * @param config The config to use for this instance. 
+   */
   @Inject
-  public RefDataClient(RawAuthenticatedCoreServiceClient client) {
+  public RefDataClient(RawAuthenticatedCoreServiceClient client,
+      @ApplicationConfig Config config) {
     this.client = client;
+    this.timeoutMillis = (int) config.getDurationMillis("RefDataClient.timeout",
+        1200, TimeUnit.SECONDS);
   }
 
   /**
@@ -49,6 +63,7 @@ public class RefDataClient {
     JsonArray params = new JsonArray();
     params.add(enumType);
 
-    return client.authenticatedCall("RefDataHandler.getIdentifiersForEnumType", params);
+    return client.authenticatedCall("RefDataHandler.getIdentifiersForEnumType", params,
+        timeoutMillis);
   }
 }

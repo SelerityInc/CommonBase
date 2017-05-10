@@ -20,6 +20,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import static org.easymock.EasyMock.capture;
 import static org.easymock.EasyMock.expect;
+import static org.easymock.EasyMock.eq;
 import static org.easymock.EasyMock.newCapture;
 
 import java.io.IOException;
@@ -41,8 +42,7 @@ public class RefDataClientTest extends EasyMockSupport {
   @Before
   public void setUp() throws IOException {
     config = new SettableConfig();
-    config.set("CoreServices.user", "userFoo");
-    config.set("CoreServices.password", "passwordFoo");
+    config.set("RefDataClient.timeout", "42");
 
     rawClient = createMock(RawAuthenticatedCoreServiceClient.class);
   }
@@ -55,7 +55,7 @@ public class RefDataClientTest extends EasyMockSupport {
     JsonObject expected = new JsonObject();
     expected.addProperty("bar", "baz");
 
-    expect(rawClient.authenticatedCall(capture(methodCapture), capture(paramCapture)))
+    expect(rawClient.authenticatedCall(capture(methodCapture), capture(paramCapture), eq(42000)))
         .andReturn(expected);
 
     replayAll();
@@ -75,6 +75,6 @@ public class RefDataClientTest extends EasyMockSupport {
   }
 
   private RefDataClient createClient() {
-    return new RefDataClient(rawClient);
+    return new RefDataClient(rawClient, config);
   }
 }

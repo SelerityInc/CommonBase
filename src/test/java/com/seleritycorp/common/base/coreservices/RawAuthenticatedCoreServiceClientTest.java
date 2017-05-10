@@ -22,7 +22,7 @@ import static org.assertj.core.api.Assertions.failBecauseExceptionWasNotThrown;
 import static org.easymock.EasyMock.capture;
 import static org.easymock.EasyMock.expect;
 import static org.easymock.EasyMock.newCapture;
-import static org.easymock.EasyMock.anyInt;
+import static org.easymock.EasyMock.eq;
 
 import java.io.IOException;
 
@@ -70,13 +70,41 @@ public class RawAuthenticatedCoreServiceClientTest extends InjectingTestCase {
     Capture<JsonElement> paramCapture = newCapture();
     Capture<String> tokenCapture = newCapture();
     expect(rawClient.call(capture(methodCapture), capture(paramCapture), capture(tokenCapture),
-        anyInt())).andReturn(expected);
+        eq(-1))).andReturn(expected);
 
     replayAll();
 
     RawAuthenticatedCoreServiceClient client = createClient();
 
     JsonElement actual = client.authenticatedCall("foo", params);
+
+    verifyAll();
+
+    assertThat(methodCapture.getValue()).isEqualTo("foo");
+    assertThat(paramCapture.getValue()).isEqualTo(params);
+    assertThat(actual).isEqualTo(expected);
+  }
+
+  @Test
+  public void testAuthenticatedCallExplicitTimeout() throws Exception {
+    JsonObject params = new JsonObject();
+    params.addProperty("bar", "baz");
+
+    JsonElement expected = new JsonObject();
+
+    expect(authenticationClient.getAuthThoken()).andReturn("quux");
+
+    Capture<String> methodCapture = newCapture();
+    Capture<JsonElement> paramCapture = newCapture();
+    Capture<String> tokenCapture = newCapture();
+    expect(rawClient.call(capture(methodCapture), capture(paramCapture), capture(tokenCapture),
+        eq(4711))).andReturn(expected);
+
+    replayAll();
+
+    RawAuthenticatedCoreServiceClient client = createClient();
+
+    JsonElement actual = client.authenticatedCall("foo", params, 4711);
 
     verifyAll();
 
@@ -98,13 +126,13 @@ public class RawAuthenticatedCoreServiceClientTest extends InjectingTestCase {
     Capture<JsonElement> paramCapture1 = newCapture();
     Capture<String> tokenCapture1 = newCapture();
     expect(rawClient.call(capture(methodCapture1), capture(paramCapture1), capture(tokenCapture1),
-        anyInt())).andReturn(expected);
+        eq(-1))).andReturn(expected);
 
     Capture<String> methodCapture2 = newCapture();
     Capture<JsonElement> paramCapture2 = newCapture();
     Capture<String> tokenCapture2 = newCapture();
     expect(rawClient.call(capture(methodCapture2), capture(paramCapture2), capture(tokenCapture2),
-        anyInt())).andReturn(expected);
+        eq(-1))).andReturn(expected);
 
     replayAll();
 
@@ -137,13 +165,13 @@ public class RawAuthenticatedCoreServiceClientTest extends InjectingTestCase {
     Capture<JsonElement> paramCapture1 = newCapture();
     Capture<String> tokenCapture1 = newCapture();
     expect(rawClient.call(capture(methodCapture1), capture(paramCapture1), capture(tokenCapture1),
-        anyInt())).andReturn(expected);
+        eq(-1))).andReturn(expected);
 
     Capture<String> methodCapture2 = newCapture();
     Capture<JsonElement> paramCapture2 = newCapture();
     Capture<String> tokenCapture2 = newCapture();
     expect(rawClient.call(capture(methodCapture2), capture(paramCapture2), capture(tokenCapture2),
-        anyInt())).andReturn(expected);
+        eq(-1))).andReturn(expected);
 
     replayAll();
 
@@ -179,13 +207,13 @@ public class RawAuthenticatedCoreServiceClientTest extends InjectingTestCase {
     Capture<JsonElement> paramCapture1 = newCapture();
     Capture<String> tokenCapture1 = newCapture();
     expect(rawClient.call(capture(methodCapture1), capture(paramCapture1), capture(tokenCapture1),
-        anyInt())).andReturn(expected);
+        eq(-1))).andReturn(expected);
 
     Capture<String> methodCapture2 = newCapture();
     Capture<JsonElement> paramCapture2 = newCapture();
     Capture<String> tokenCapture2 = newCapture();
     expect(rawClient.call(capture(methodCapture2), capture(paramCapture2), capture(tokenCapture2),
-        anyInt())).andReturn(expected);
+        eq(-1))).andReturn(expected);
 
     replayAll();
 
@@ -222,13 +250,13 @@ public class RawAuthenticatedCoreServiceClientTest extends InjectingTestCase {
     Capture<JsonElement> paramCapture1 = newCapture();
     Capture<String> tokenCapture1 = newCapture();
     expect(rawClient.call(capture(methodCapture1), capture(paramCapture1), capture(tokenCapture1),
-        anyInt())).andThrow(thrownE);
+        eq(-1))).andThrow(thrownE);
 
     Capture<String> methodCapture2 = newCapture();
     Capture<JsonElement> paramCapture2 = newCapture();
     Capture<String> tokenCapture2 = newCapture();
     expect(rawClient.call(capture(methodCapture2), capture(paramCapture2), capture(tokenCapture2),
-        anyInt())).andReturn(expected);
+        eq(-1))).andReturn(expected);
 
     replayAll();
 
