@@ -22,6 +22,8 @@ import com.google.gson.JsonElement;
 import com.seleritycorp.common.base.config.ApplicationConfig;
 import com.seleritycorp.common.base.config.Config;
 import com.seleritycorp.common.base.http.client.HttpException;
+import com.seleritycorp.common.base.logging.Log;
+import com.seleritycorp.common.base.logging.LogFactory;
 
 import java.util.concurrent.TimeUnit;
 
@@ -33,6 +35,8 @@ import javax.inject.Singleton;
  */
 @Singleton
 public class RefDataClient {
+  private static final Log log = LogFactory.getLog(RefDataClient.class);
+
   private final RawAuthenticatedCoreServiceClient client;
   private final int timeoutMillis;
 
@@ -63,7 +67,14 @@ public class RefDataClient {
     JsonArray params = new JsonArray();
     params.add(enumType);
 
-    return client.authenticatedCall("RefDataHandler.getIdentifiersForEnumType", params,
+    log.debug("Getting identifiers for enum type " + enumType + " (timeout: "
+        + timeoutMillis + "ms)");
+
+    JsonElement ret = client.authenticatedCall("RefDataHandler.getIdentifiersForEnumType", params,
         timeoutMillis);
+
+    log.debug("Getting identifiers for enum type " + enumType + " done");
+    
+    return ret;
   }
 }
