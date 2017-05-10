@@ -40,6 +40,10 @@ public class Escaper {
    * @return The escaped raw string.
    */
   public String html(String rawString) {
-    return htmlEscaper.escape(rawString);
+    String ret = "";
+    if (rawString != null) {
+      ret = htmlEscaper.escape(rawString);
+    }
+    return ret;
   }
 }

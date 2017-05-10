@@ -22,6 +22,18 @@ import org.junit.Test;
 
 public class EscaperTest {
   @Test
+  public void testHtmlEscapeEmpty() {
+    Escaper escaper = createEscaper();
+    assertThat(escaper.html("")).isEqualTo("");
+  }
+  
+  @Test
+  public void testHtmlEscapeNull() {
+    Escaper escaper = createEscaper();
+    assertThat(escaper.html(null)).isEqualTo("");
+  }
+  
+  @Test
   public void testHtmlEscapeLtSingle() {
     Escaper escaper = createEscaper();
     assertThat(escaper.html("<")).isEqualTo("&lt;");
