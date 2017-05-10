@@ -24,6 +24,8 @@ public enum BasicErrorCode implements ErrorCode {
 
   E_FORBIDDEN("You are not allowed to access this URL."),
 
+  E_INTERNAL_SERVER_ERROR("An internal server error occurred."),
+
   E_WRONG_METHOD("The URL was called with an unexcepted HTTP method. Please check the docs "
       + "on the allowed methods for this endpoint.");
 

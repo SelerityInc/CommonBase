@@ -903,6 +903,147 @@ public class HttpRequestTest extends InjectingTestCase {
   }
 
   @Test
+  public void testRespondInternalServerErrorHtml() throws IOException {
+    Exception exception = new RuntimeException("catch me");
+    expect(escaper.html("E_INTERNAL_SERVER_ERROR")).andReturn("(escQUUX)").anyTimes();
+    expect(escaper.html("00000000-0000-0000-0000-000000000001")).andReturn("(escUUID)").anyTimes();
+    expect(escaper.html("An internal server error occurred.")).andReturn("(escRsn)")
+      .anyTimes();
+    expect(escaper.html("serverFoo")).andReturn("(escServerId)").anyTimes();
+    expect(escaper.html("foo@example.org")).andReturn("(escSupport)").anyTimes();
+    expect(escaper.html("/foo")).andReturn("(escTarget)").anyTimes();
+
+    expect(httpServletRequest.getMethod()).andReturn("METHOD_FOO");
+    expect(httpServletRequest.getHeader("Accept")).andReturn("text/foo");
+
+    expect(contentTypeNegotiator.negotiate("text/foo", TEXT_PLAIN, TEXT_HTML, APPLICATION_JSON))
+      .andReturn(TEXT_HTML);
+
+    StringWriter stringWriter = new StringWriter();
+    PrintWriter printWriter = new PrintWriter(stringWriter);
+
+    httpServletResponse.setHeader("Server", "serverFoo");
+    expect(httpServletResponse.getWriter()).andReturn(printWriter);
+    httpServletResponse.setStatus(500);
+    httpServletResponse.setContentType(TEXT_HTML.toString());
+    request.setHandled(true);
+    
+    replayAll();
+
+    HttpRequest httpRequest = createHttpRequest("/foo");
+    UUID incidentId = httpRequest.respondInternalServerError("msgQuux", exception);
+    
+    verifyAll();
+
+    String responseBody = stringWriter.toString(); 
+    assertThat(responseBody).contains("(escTarget)");
+    assertThat(responseBody).doesNotContain("/foo");
+    assertThat(responseBody).contains("(escQUUX)");
+    assertThat(responseBody).doesNotContain("E_FORBIDDEN");
+    assertThat(responseBody).contains("(escUUID)");
+    assertThat(responseBody).doesNotContain("00000000-0000-0000-0000-000000000001");
+    assertThat(responseBody).contains("(escRsn)");
+    assertThat(responseBody).doesNotContain("The URL could not be found. URL: /foo");
+    assertThat(responseBody).contains("TIMESTAMP");
+    assertThat(responseBody).contains("(escServerId)");
+    assertThat(responseBody).doesNotContain("serverFoo");
+    assertThat(responseBody).doesNotContain("msgQuux");
+    assertThat(responseBody).doesNotContain("catch me");
+
+    assertThat(incidentId.toString()).isEqualTo("00000000-0000-0000-0000-000000000001");
+  }
+
+  @Test
+  public void testRespondInternalServerErrorJson() throws IOException {
+    Exception exception = new RuntimeException("catch me");
+    expect(escaper.html("E_INTERNAL_SERVER_ERROR")).andReturn("(escQUUX)").anyTimes();
+    expect(escaper.html("00000000-0000-0000-0000-000000000001")).andReturn("(escUUID)").anyTimes();
+    expect(escaper.html("An internal server error occurred.")).andReturn("(escRsn)")
+      .anyTimes();
+    expect(escaper.html("serverFoo")).andReturn("(escServerId)").anyTimes();
+    expect(escaper.html("foo@example.org")).andReturn("(escSupport)").anyTimes();
+    expect(escaper.html("/foo")).andReturn("(escTarget)").anyTimes();
+
+    expect(httpServletRequest.getMethod()).andReturn("METHOD_FOO");
+    expect(httpServletRequest.getHeader("Accept")).andReturn("text/foo");
+
+    expect(contentTypeNegotiator.negotiate("text/foo", TEXT_PLAIN, TEXT_HTML, APPLICATION_JSON))
+      .andReturn(APPLICATION_JSON);
+
+    StringWriter stringWriter = new StringWriter();
+    PrintWriter printWriter = new PrintWriter(stringWriter);
+
+    httpServletResponse.setHeader("Server", "serverFoo");
+    expect(httpServletResponse.getWriter()).andReturn(printWriter);
+    httpServletResponse.setStatus(500);
+    httpServletResponse.setContentType(APPLICATION_JSON.toString());
+    request.setHandled(true);
+    
+    replayAll();
+
+    HttpRequest httpRequest = createHttpRequest("/foo");
+    UUID incidentId = httpRequest.respondInternalServerError("msgQuux", exception);
+    
+    verifyAll();
+
+    String responseBody = stringWriter.toString(); 
+    assertThat(responseBody).contains("/foo");
+    assertThat(responseBody).contains("00000000-0000-0000-0000-000000000001");
+    assertThat(responseBody).contains("TIMESTAMP");
+    assertThat(responseBody).contains("serverFoo");
+    assertThat(responseBody).contains("foo@example.org");
+    assertThat(responseBody).doesNotContain("msgQuux");
+    assertThat(responseBody).doesNotContain("catch me");
+
+    assertThat(incidentId.toString()).isEqualTo("00000000-0000-0000-0000-000000000001");
+  }
+
+  @Test
+  public void testRespondInternalServerErrorText() throws IOException {
+    Exception exception = new RuntimeException("catch me");
+    expect(escaper.html("E_INTERNAL_SERVER_ERROR")).andReturn("(escQUUX)").anyTimes();
+    expect(escaper.html("00000000-0000-0000-0000-000000000001")).andReturn("(escUUID)").anyTimes();
+    expect(escaper.html("An internal server error occurred.")).andReturn("(escRsn)")
+      .anyTimes();
+    expect(escaper.html("serverFoo")).andReturn("(escServerId)").anyTimes();
+    expect(escaper.html("foo@example.org")).andReturn("(escSupport)").anyTimes();
+    expect(escaper.html("/foo")).andReturn("(escTarget)").anyTimes();
+
+    expect(httpServletRequest.getMethod()).andReturn("METHOD_FOO");
+    expect(httpServletRequest.getHeader("Accept")).andReturn("text/foo");
+
+    expect(contentTypeNegotiator.negotiate("text/foo", TEXT_PLAIN, TEXT_HTML, APPLICATION_JSON))
+      .andReturn(TEXT_PLAIN);
+
+    StringWriter stringWriter = new StringWriter();
+    PrintWriter printWriter = new PrintWriter(stringWriter);
+
+    httpServletResponse.setHeader("Server", "serverFoo");
+    expect(httpServletResponse.getWriter()).andReturn(printWriter);
+    httpServletResponse.setStatus(500);
+    httpServletResponse.setContentType(TEXT_PLAIN.toString());
+    request.setHandled(true);
+    
+    replayAll();
+
+    HttpRequest httpRequest = createHttpRequest("/foo");
+    UUID incidentId = httpRequest.respondInternalServerError("msgQuux", exception);
+    
+    verifyAll();
+
+    String responseBody = stringWriter.toString(); 
+    assertThat(responseBody).contains("/foo");
+    assertThat(responseBody).contains("00000000-0000-0000-0000-000000000001");
+    assertThat(responseBody).contains("TIMESTAMP");
+    assertThat(responseBody).contains("serverFoo");
+    assertThat(responseBody).contains("foo@example.org");
+    assertThat(responseBody).doesNotContain("msgQuux");
+    assertThat(responseBody).doesNotContain("catch me");
+
+    assertThat(incidentId.toString()).isEqualTo("00000000-0000-0000-0000-000000000001");
+  }
+
+  @Test
   public void testSetHandled() throws IOException {
     request.setHandled(true);
 

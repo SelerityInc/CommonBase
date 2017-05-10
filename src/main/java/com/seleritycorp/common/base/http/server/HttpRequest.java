@@ -27,6 +27,7 @@ import com.seleritycorp.common.base.config.ApplicationConfig;
 import com.seleritycorp.common.base.config.Config;
 import com.seleritycorp.common.base.escape.Escaper;
 import com.seleritycorp.common.base.http.common.ContentType;
+import com.seleritycorp.common.base.logging.Level;
 import com.seleritycorp.common.base.logging.Log;
 import com.seleritycorp.common.base.logging.LogFactory;
 import com.seleritycorp.common.base.time.TimeUtils;
@@ -248,8 +249,22 @@ public class HttpRequest {
   
   private UUID respondGenericIssue(int status, ErrorCode errorCode, String clientExplanation)
       throws IOException {
+    return respondGenericIssue(status, errorCode, clientExplanation, Level.OFF, null, null);
+  }
+
+  private UUID respondGenericIssue(int status, ErrorCode errorCode, String clientExplanation,
+      Level logLevel, String logMessage, Throwable logException) throws IOException {
     final UUID incidentId = logRequest(status, errorCode, clientExplanation);
 
+    if (logLevel != Level.OFF) {
+      logMessage = "(IncidentId: " + incidentId.toString() + ") " + logMessage;
+      if (logException == null) {
+        log.log(logLevel, logMessage);
+      } else {
+        log.log(logLevel, logMessage, logException);
+      }
+    }
+    
     ContentType responseContentType = getMostSuitableResponseContentType(TEXT_PLAIN, TEXT_HTML,
         APPLICATION_JSON);
     String errorCodeIdentifier = (errorCode != null) ? errorCode.getIdentifier() : null;
@@ -411,6 +426,27 @@ public class HttpRequest {
     String clientExplanation = errorCode.getDefaultReason();
     final int status = HttpStatus.NOT_FOUND_404;
     return respondGenericIssue(status, errorCode, clientExplanation);
+  }
+
+  /**
+   * Sends a '500 Internal Server Error' response to a request and marks it as handled.
+   *  
+   * @param logMessage The message to log at error level. This message is only meant for internal
+   *     consumption and will not be visible to the client. The client will see a generic error
+   *     message.
+   * @param logException The exception to log. If null, no exception will get logged.
+   * @return The issue id associated with this response.
+   * @throws java.io.UnsupportedEncodingException if the character encoding is unusable.
+   * @throws IllegalStateException if a response was sent already.
+   * @throws IOException if an input/output error occurs
+   */
+  public UUID respondInternalServerError(String logMessage, Throwable logException)
+      throws IOException {
+    ErrorCode errorCode = BasicErrorCode.E_INTERNAL_SERVER_ERROR;
+    String clientExplanation = errorCode.getDefaultReason();
+    final int status = HttpStatus.INTERNAL_SERVER_ERROR_500;
+    return respondGenericIssue(status, errorCode, clientExplanation, Level.ERROR, logMessage,
+        logException);
   }
   
   /**
