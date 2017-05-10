@@ -109,7 +109,7 @@ public class HttpRequest {
     this.uuidGenerator = uuidGenerator;
     this.escaper = escaper;
     this.timeUtils = timeUtils;
-    this.serverId = config.get("server.id", "<anonymous>");    
+    this.serverId = config.get("server.id", "n/a");    
     this.supportEmailAddress = config.get("server.support.email", "support@selerityinc.com");    
   }
 
@@ -219,6 +219,7 @@ public class HttpRequest {
    */
   private void respond(int status, ContentType contentType, String response) throws IOException {
     httpServletResponse.setStatus(status);
+    httpServletResponse.setHeader("Server", serverId);
 
     if (response != null) {
       if (contentType != null) {

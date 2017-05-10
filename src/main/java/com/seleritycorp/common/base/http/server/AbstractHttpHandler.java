@@ -63,6 +63,7 @@ public abstract class AbstractHttpHandler extends AbstractHandler {
   @Override
   public void handle(String target, Request request, HttpServletRequest httpServletRequest,
       HttpServletResponse httpServletResponse) throws IOException, ServletException {
+    httpServletResponse.setHeader("Server", "n/a");
     HttpRequest httpRequest = httpRequestFactory.create(target, request, httpServletRequest,
         httpServletResponse);
     handle(httpRequest);

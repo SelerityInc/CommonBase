@@ -51,6 +51,7 @@ public class AbstractHttpHandlerTest extends EasyMockSupport {
   public void testHandlePassdown() throws Exception {
     expect(httpRequestFactory.create("/foo", request, httpServletRequest, httpServletResponse))
       .andReturn(httpRequest);
+    httpServletResponse.setHeader("Server", "n/a");
 
     replayAll();
 

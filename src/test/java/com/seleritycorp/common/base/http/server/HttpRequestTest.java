@@ -98,6 +98,7 @@ public class HttpRequestTest extends InjectingTestCase {
     StringWriter stringWriter = new StringWriter();
     PrintWriter printWriter = new PrintWriter(stringWriter);
 
+    httpServletResponse.setHeader("Server", "serverFoo");
     expect(httpServletResponse.getWriter()).andReturn(printWriter);
     httpServletResponse.setStatus(403);
     httpServletResponse.setContentType(TEXT_PLAIN.toString());
@@ -140,6 +141,7 @@ public class HttpRequestTest extends InjectingTestCase {
     StringWriter stringWriter = new StringWriter();
     PrintWriter printWriter = new PrintWriter(stringWriter);
 
+    httpServletResponse.setHeader("Server", "serverFoo");
     expect(httpServletResponse.getWriter()).andReturn(printWriter);
     httpServletResponse.setStatus(403);
     httpServletResponse.setContentType(TEXT_HTML.toString());
@@ -179,6 +181,7 @@ public class HttpRequestTest extends InjectingTestCase {
     StringWriter stringWriter = new StringWriter();
     PrintWriter printWriter = new PrintWriter(stringWriter);
 
+    httpServletResponse.setHeader("Server", "serverFoo");
     expect(httpServletResponse.getWriter()).andReturn(printWriter);
     httpServletResponse.setStatus(403);
     httpServletResponse.setContentType(APPLICATION_JSON.toString());
@@ -213,6 +216,7 @@ public class HttpRequestTest extends InjectingTestCase {
     StringWriter stringWriter = new StringWriter();
     PrintWriter printWriter = new PrintWriter(stringWriter);
 
+    httpServletResponse.setHeader("Server", "serverFoo");
     expect(httpServletResponse.getWriter()).andReturn(printWriter);
     httpServletResponse.setStatus(404);
     httpServletResponse.setContentType(TEXT_PLAIN.toString());
@@ -254,6 +258,7 @@ public class HttpRequestTest extends InjectingTestCase {
     StringWriter stringWriter = new StringWriter();
     PrintWriter printWriter = new PrintWriter(stringWriter);
 
+    httpServletResponse.setHeader("Server", "serverFoo");
     expect(httpServletResponse.getWriter()).andReturn(printWriter);
     httpServletResponse.setStatus(404);
     httpServletResponse.setContentType(TEXT_HTML.toString());
@@ -295,6 +300,7 @@ public class HttpRequestTest extends InjectingTestCase {
     StringWriter stringWriter = new StringWriter();
     PrintWriter printWriter = new PrintWriter(stringWriter);
 
+    httpServletResponse.setHeader("Server", "serverFoo");
     expect(httpServletResponse.getWriter()).andReturn(printWriter);
     httpServletResponse.setStatus(404);
     httpServletResponse.setContentType(APPLICATION_JSON.toString());
@@ -332,6 +338,7 @@ public class HttpRequestTest extends InjectingTestCase {
     StringWriter stringWriter = new StringWriter();
     PrintWriter printWriter = new PrintWriter(stringWriter);
 
+    httpServletResponse.setHeader("Server", "serverFoo");
     expect(httpServletResponse.getWriter()).andReturn(printWriter);
     httpServletResponse.setContentType(TEXT_PLAIN.toString());
     httpServletResponse.setStatus(400);
@@ -377,6 +384,7 @@ public class HttpRequestTest extends InjectingTestCase {
     StringWriter stringWriter = new StringWriter();
     PrintWriter printWriter = new PrintWriter(stringWriter);
 
+    httpServletResponse.setHeader("Server", "serverFoo");
     expect(httpServletResponse.getWriter()).andReturn(printWriter);
     httpServletResponse.setContentType(TEXT_HTML.toString());
     httpServletResponse.setStatus(400);
@@ -421,6 +429,7 @@ public class HttpRequestTest extends InjectingTestCase {
     StringWriter stringWriter = new StringWriter();
     PrintWriter printWriter = new PrintWriter(stringWriter);
 
+    httpServletResponse.setHeader("Server", "serverFoo");
     expect(httpServletResponse.getWriter()).andReturn(printWriter);
     httpServletResponse.setContentType(APPLICATION_JSON.toString());
     httpServletResponse.setStatus(400);
@@ -460,6 +469,7 @@ public class HttpRequestTest extends InjectingTestCase {
     StringWriter stringWriter = new StringWriter();
     PrintWriter printWriter = new PrintWriter(stringWriter);
 
+    httpServletResponse.setHeader("Server", "serverFoo");
     expect(httpServletResponse.getWriter()).andReturn(printWriter);
     httpServletResponse.setContentType(TEXT_PLAIN.toString());
     httpServletResponse.setStatus(400);
@@ -506,6 +516,7 @@ public class HttpRequestTest extends InjectingTestCase {
     StringWriter stringWriter = new StringWriter();
     PrintWriter printWriter = new PrintWriter(stringWriter);
 
+    httpServletResponse.setHeader("Server", "serverFoo");
     expect(httpServletResponse.getWriter()).andReturn(printWriter);
     httpServletResponse.setContentType(TEXT_HTML.toString());
     httpServletResponse.setStatus(400);
@@ -551,6 +562,7 @@ public class HttpRequestTest extends InjectingTestCase {
     StringWriter stringWriter = new StringWriter();
     PrintWriter printWriter = new PrintWriter(stringWriter);
 
+    httpServletResponse.setHeader("Server", "serverFoo");
     expect(httpServletResponse.getWriter()).andReturn(printWriter);
     httpServletResponse.setContentType(APPLICATION_JSON.toString());
     httpServletResponse.setStatus(400);
@@ -590,6 +602,7 @@ public class HttpRequestTest extends InjectingTestCase {
     StringWriter stringWriter = new StringWriter();
     PrintWriter printWriter = new PrintWriter(stringWriter);
 
+    httpServletResponse.setHeader("Server", "serverFoo");
     expect(httpServletResponse.getWriter()).andReturn(printWriter);
     httpServletResponse.setContentType(TEXT_PLAIN.toString());
     httpServletResponse.setStatus(400);
@@ -636,6 +649,7 @@ public class HttpRequestTest extends InjectingTestCase {
     StringWriter stringWriter = new StringWriter();
     PrintWriter printWriter = new PrintWriter(stringWriter);
 
+    httpServletResponse.setHeader("Server", "serverFoo");
     expect(httpServletResponse.getWriter()).andReturn(printWriter);
     httpServletResponse.setContentType(TEXT_HTML.toString());
     httpServletResponse.setStatus(400);
@@ -681,6 +695,7 @@ public class HttpRequestTest extends InjectingTestCase {
     StringWriter stringWriter = new StringWriter();
     PrintWriter printWriter = new PrintWriter(stringWriter);
 
+    httpServletResponse.setHeader("Server", "serverFoo");
     expect(httpServletResponse.getWriter()).andReturn(printWriter);
     httpServletResponse.setContentType(APPLICATION_JSON.toString());
     httpServletResponse.setStatus(400);
@@ -707,6 +722,7 @@ public class HttpRequestTest extends InjectingTestCase {
 
   @Test
   public void testRespondNoContent() throws IOException {
+    httpServletResponse.setHeader("Server", "serverFoo");
     httpServletResponse.setStatus(204);
     request.setHandled(true);
     
