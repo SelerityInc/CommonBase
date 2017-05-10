@@ -24,6 +24,8 @@ import com.seleritycorp.common.base.config.Config;
 import com.seleritycorp.common.base.config.ConfigUtils;
 import com.seleritycorp.common.base.http.client.HttpException;
 import com.seleritycorp.common.base.http.client.HttpRequestFactory;
+import com.seleritycorp.common.base.logging.Log;
+import com.seleritycorp.common.base.logging.LogFactory;
 import com.seleritycorp.common.base.meta.MetaDataFormatter;
 import com.seleritycorp.common.base.uuid.UuidGenerator;
 
@@ -37,6 +39,8 @@ import javax.inject.Singleton;
  */
 @Singleton
 public class RawCoreServiceClient {
+  private static final Log log = LogFactory.getLog(RawCoreServiceClient.class);
+
   private final UuidGenerator uuidGenerator;
   private final String apiUrl;
   private final int timeoutMillis;
@@ -94,10 +98,14 @@ public class RawCoreServiceClient {
 
     final int effectiveTimeoutMillis = (timeoutMillis > 0) ? timeoutMillis : this.timeoutMillis;
 
+    log.debug("Calling method " + method + " (user: " + user + ")");
+
     JsonObject responseObj = requestFactory.createPostJson(apiUrl, request)
           .setReadTimeoutMillis(effectiveTimeoutMillis)
           .execute()
           .getBodyAsJsonObject();
+
+    log.debug("Method " + method + " done (user: " + user + ")");
 
     final JsonElement error = responseObj.get("error");
     if (error != null && !error.isJsonNull()) {
