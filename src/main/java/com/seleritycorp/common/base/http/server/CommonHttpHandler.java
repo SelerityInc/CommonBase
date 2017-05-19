@@ -17,6 +17,7 @@
 package com.seleritycorp.common.base.http.server;
 
 import com.google.inject.Inject;
+import com.google.inject.assistedinject.Assisted;
 
 import com.seleritycorp.common.base.state.AppStateManager;
 
@@ -28,13 +29,17 @@ import javax.servlet.ServletException;
  * Http Handler for pages and tasks on all applications. 
  */
 public class CommonHttpHandler extends AbstractHttpHandler {
+  interface Factory {
+    CommonHttpHandler create(AbstractHttpHandler delegate);
+  }
+
   private final AbstractHttpHandler delegateHttpHandler;
   private final AppStateManager appStateManager;
   
   @Inject
-  CommonHttpHandler(AbstractHttpHandlerHolder delegateHttpHandlerHolder,
+  CommonHttpHandler(@Assisted AbstractHttpHandler delegateHttpHandler,
       AppStateManager appStateManager) {
-    this.delegateHttpHandler = delegateHttpHandlerHolder.value;
+    this.delegateHttpHandler = delegateHttpHandler;
     this.appStateManager = appStateManager;
   }
 
@@ -64,15 +69,4 @@ public class CommonHttpHandler extends AbstractHttpHandler {
       request.respondNotFound();
     }
   }  
-
-  static class AbstractHttpHandlerHolder {
-    @Inject(optional = true)
-    AbstractHttpHandler value = new AbstractHttpHandler() {
-      @Override
-      public void handle(HttpRequest request)
-          throws IOException, ServletException {
-        // Intentionally doing nothing, as it's only the fallback AbstractHttpHandler.
-      }
-    };
-  }
 }

@@ -16,7 +16,11 @@
 
 package com.seleritycorp.common.base.http.server;
 
+import com.google.inject.Injector;
+import com.google.inject.Provides;
+
 import com.seleritycorp.common.base.inject.FactoryModule;
+import com.seleritycorp.common.base.inject.InjectorFactory;
 
 /**
  * Configures injection for http server classes.
@@ -25,7 +29,21 @@ public class HttpServerModule extends FactoryModule {
   @Override
   protected void configure() {
     installFactory(HttpRequest.Factory.class);
-    bind(AbstractHttpHandler.class).annotatedWith(BaseHttpHandler.class).to(
-        CommonHttpHandler.class);
+    // We'd like to bind CommonHttpHandler to the @BaseHttpHandler AbstractHttpHandler directly.
+    // But we need to pass another AbstractHttpHandler for constructing. This other
+    // AbstractHttpHandler only gets configured in a later module (or maybe not at all). We could
+    // not find a simpler working solution than adding a factory to CommonHttpHandler and
+    // injecting the other AbstractHttpHandler manually at runtime.
+    // But that at least works reliably.
+    installFactory(CommonHttpHandler.Factory.class);
+  }
+
+  @Provides
+  @BaseHttpHandler
+  AbstractHttpHandler provideBaseHttpHandler(CommonHttpHandler.Factory factory) {
+    Injector injector = InjectorFactory.getInjector();
+
+    AbstractHttpHandler delegate = injector.getInstance(AbstractHttpHandler.class);
+    return factory.create(delegate);
   }
 }

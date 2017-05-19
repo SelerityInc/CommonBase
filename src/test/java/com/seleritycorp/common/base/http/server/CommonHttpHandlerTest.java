@@ -137,10 +137,7 @@ public class CommonHttpHandlerTest extends InjectingTestCase {
   }
 
   private CommonHttpHandler createCommonHttpHandler() {
-    CommonHttpHandler.AbstractHttpHandlerHolder holder =
-        new CommonHttpHandler.AbstractHttpHandlerHolder();
-    holder.value = delegateHttpHandler;
-    CommonHttpHandler ret = new CommonHttpHandler(holder, appStateManager);
+    CommonHttpHandler ret = new CommonHttpHandler(delegateHttpHandler, appStateManager);
     ret.setHttpRequestFactory(httpRequestFactory);
     return ret;
   }
