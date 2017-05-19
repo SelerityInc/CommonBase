@@ -65,7 +65,10 @@ public class InjectorFactory {
    */
   public static synchronized Injector getInjector() {
     if (injector == null) {
-      injector = Guice.createInjector(modules);
+      injector = Guice.createInjector();
+      for (AbstractModule module : modules) {
+        register(module);
+      }
     }
     return injector;
   }

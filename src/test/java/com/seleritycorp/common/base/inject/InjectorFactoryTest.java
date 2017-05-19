@@ -152,6 +152,28 @@ public class InjectorFactoryTest extends InjectingTestCase {
     assertThat(module.hasBeenConfigured()).isTrue();
   }
 
+  @Test
+  public void testDependentModules() {
+    InjectorFactory.forceInjector(null);
+
+    final Foo foo = new Foo();
+    InjectorFactory.register(new AbstractModule() {
+      @Override
+      protected void configure() {
+        bind(Foo.class).toInstance(foo);
+      }
+    });
+
+    InjectorFactory.register(new AbstractModule() {
+      @Override
+      protected void configure() {
+        InjectorFactory.getInjector().getInstance(Quux.class);
+      }
+    });
+    
+    assertThat(InjectorFactory.getInjector()).isNotNull();
+  }
+
   static class Foo {
   }
 
@@ -160,6 +182,13 @@ public class InjectorFactoryTest extends InjectingTestCase {
   }
 
   static class Baz {
+  }
+
+  static class Quux {
+    @Inject
+    public Quux() {
+      InjectorFactory.getInjector().getInstance(Foo.class);
+    }
   }
 
   static class BasicEnvironmentAccessor {
