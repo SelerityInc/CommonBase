@@ -235,8 +235,10 @@ public class HttpRequest {
 
   private UUID logRequest(int status, ErrorCode errorCode, String clientExplanation) {
     final UUID incidentId = uuidGenerator.generate();
-    log.structuredInfo("http-server-incident", 1,
+    log.structuredInfo("http-server-incident", 2,
         "incidentId", incidentId,
+        "remoteAddress", httpServletRequest.getRemoteAddr(),
+        "resolvedRemoteAddress", getResolvedRemoteAddr(),
         "method", httpServletRequest.getMethod(),
         "target", getTarget(),
         "status", status,

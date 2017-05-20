@@ -89,8 +89,13 @@ public class HttpRequestTest extends InjectingTestCase {
 
   @Test
   public void testRespondForbiddenText() throws IOException {
+    expect(httpServletRequest.getRemoteAddr()).andReturn("REMOTE_ADDRESS").anyTimes();
+    expect(httpServletRequest.getHeader("X-Forwarded-For")).andReturn("FORWARDED_FOR_ADDRESS");
     expect(httpServletRequest.getMethod()).andReturn("METHOD_FOO");
     expect(httpServletRequest.getHeader("Accept")).andReturn("text/foo");
+
+    expect(forwardedForResolver.resolve("REMOTE_ADDRESS", "FORWARDED_FOR_ADDRESS"))
+      .andReturn("RESOLVED_ADDRESS");
 
     expect(contentTypeNegotiator.negotiate("text/foo", TEXT_PLAIN, TEXT_HTML, APPLICATION_JSON))
       .andReturn(TEXT_PLAIN);
@@ -132,8 +137,13 @@ public class HttpRequestTest extends InjectingTestCase {
     expect(escaper.html("foo@example.org")).andReturn("(escSupport)").anyTimes();
     expect(escaper.html("/foo")).andReturn("(escTarget)").anyTimes();
 
+    expect(httpServletRequest.getRemoteAddr()).andReturn("REMOTE_ADDRESS").anyTimes();
+    expect(httpServletRequest.getHeader("X-Forwarded-For")).andReturn("FORWARDED_FOR_ADDRESS");
     expect(httpServletRequest.getMethod()).andReturn("METHOD_FOO");
     expect(httpServletRequest.getHeader("Accept")).andReturn("text/foo");
+
+    expect(forwardedForResolver.resolve("REMOTE_ADDRESS", "FORWARDED_FOR_ADDRESS"))
+      .andReturn("RESOLVED_ADDRESS");
 
     expect(contentTypeNegotiator.negotiate("text/foo", TEXT_PLAIN, TEXT_HTML, APPLICATION_JSON))
       .andReturn(TEXT_HTML);
@@ -172,8 +182,13 @@ public class HttpRequestTest extends InjectingTestCase {
 
   @Test
   public void testRespondForbiddenJson() throws IOException {
+    expect(httpServletRequest.getRemoteAddr()).andReturn("REMOTE_ADDRESS").anyTimes();
+    expect(httpServletRequest.getHeader("X-Forwarded-For")).andReturn("FORWARDED_FOR_ADDRESS");
     expect(httpServletRequest.getMethod()).andReturn("METHOD_FOO");
     expect(httpServletRequest.getHeader("Accept")).andReturn("text/foo");
+
+    expect(forwardedForResolver.resolve("REMOTE_ADDRESS", "FORWARDED_FOR_ADDRESS"))
+      .andReturn("RESOLVED_ADDRESS");
 
     expect(contentTypeNegotiator.negotiate("text/foo", TEXT_PLAIN, TEXT_HTML, APPLICATION_JSON))
       .andReturn(APPLICATION_JSON);
@@ -207,8 +222,13 @@ public class HttpRequestTest extends InjectingTestCase {
 
   @Test
   public void testRespondNotFoundText() throws IOException {
+    expect(httpServletRequest.getRemoteAddr()).andReturn("REMOTE_ADDRESS").anyTimes();
+    expect(httpServletRequest.getHeader("X-Forwarded-For")).andReturn("FORWARDED_FOR_ADDRESS");
     expect(httpServletRequest.getMethod()).andReturn("METHOD_FOO");
     expect(httpServletRequest.getHeader("Accept")).andReturn("text/foo");
+
+    expect(forwardedForResolver.resolve("REMOTE_ADDRESS", "FORWARDED_FOR_ADDRESS"))
+      .andReturn("RESOLVED_ADDRESS");
 
     expect(contentTypeNegotiator.negotiate("text/foo", TEXT_PLAIN, TEXT_HTML, APPLICATION_JSON))
       .andReturn(TEXT_PLAIN);
@@ -249,8 +269,13 @@ public class HttpRequestTest extends InjectingTestCase {
     expect(escaper.html("foo@example.org")).andReturn("(escSupport)").anyTimes();
     expect(escaper.html("/foo")).andReturn("(escTarget)").anyTimes();
 
+    expect(httpServletRequest.getRemoteAddr()).andReturn("REMOTE_ADDRESS").anyTimes();
+    expect(httpServletRequest.getHeader("X-Forwarded-For")).andReturn("FORWARDED_FOR_ADDRESS");
     expect(httpServletRequest.getMethod()).andReturn("METHOD_FOO");
     expect(httpServletRequest.getHeader("Accept")).andReturn("text/foo");
+
+    expect(forwardedForResolver.resolve("REMOTE_ADDRESS", "FORWARDED_FOR_ADDRESS"))
+      .andReturn("RESOLVED_ADDRESS");
 
     expect(contentTypeNegotiator.negotiate("text/foo", TEXT_PLAIN, TEXT_HTML, APPLICATION_JSON))
       .andReturn(TEXT_HTML);
@@ -291,8 +316,13 @@ public class HttpRequestTest extends InjectingTestCase {
 
   @Test
   public void testRespondNotFoundJson() throws IOException {
+    expect(httpServletRequest.getRemoteAddr()).andReturn("REMOTE_ADDRESS").anyTimes();
+    expect(httpServletRequest.getHeader("X-Forwarded-For")).andReturn("FORWARDED_FOR_ADDRESS");
     expect(httpServletRequest.getMethod()).andReturn("METHOD_FOO");
     expect(httpServletRequest.getHeader("Accept")).andReturn("text/foo");
+
+    expect(forwardedForResolver.resolve("REMOTE_ADDRESS", "FORWARDED_FOR_ADDRESS"))
+      .andReturn("RESOLVED_ADDRESS");
 
     expect(contentTypeNegotiator.negotiate("text/foo", TEXT_PLAIN, TEXT_HTML, APPLICATION_JSON))
       .andReturn(APPLICATION_JSON);
@@ -329,8 +359,13 @@ public class HttpRequestTest extends InjectingTestCase {
     ErrorCode errorCode = createMock(ErrorCode.class);
     expect(errorCode.getIdentifier()).andReturn("quux").anyTimes();
 
+    expect(httpServletRequest.getRemoteAddr()).andReturn("REMOTE_ADDRESS").anyTimes();
+    expect(httpServletRequest.getHeader("X-Forwarded-For")).andReturn("FORWARDED_FOR_ADDRESS");
     expect(httpServletRequest.getMethod()).andReturn("METHOD_FOO");
     expect(httpServletRequest.getHeader("Accept")).andReturn("text/foo");
+
+    expect(forwardedForResolver.resolve("REMOTE_ADDRESS", "FORWARDED_FOR_ADDRESS"))
+      .andReturn("RESOLVED_ADDRESS");
 
     expect(contentTypeNegotiator.negotiate("text/foo", TEXT_PLAIN, TEXT_HTML, APPLICATION_JSON))
       .andReturn(TEXT_PLAIN);
@@ -375,8 +410,13 @@ public class HttpRequestTest extends InjectingTestCase {
     ErrorCode errorCode = createMock(ErrorCode.class);
     expect(errorCode.getIdentifier()).andReturn("quux").anyTimes();
 
+    expect(httpServletRequest.getRemoteAddr()).andReturn("REMOTE_ADDRESS").anyTimes();
+    expect(httpServletRequest.getHeader("X-Forwarded-For")).andReturn("FORWARDED_FOR_ADDRESS");
     expect(httpServletRequest.getMethod()).andReturn("METHOD_FOO");
     expect(httpServletRequest.getHeader("Accept")).andReturn("text/foo");
+
+    expect(forwardedForResolver.resolve("REMOTE_ADDRESS", "FORWARDED_FOR_ADDRESS"))
+      .andReturn("RESOLVED_ADDRESS");
 
     expect(contentTypeNegotiator.negotiate("text/foo", TEXT_PLAIN, TEXT_HTML, APPLICATION_JSON))
       .andReturn(TEXT_HTML);
@@ -420,8 +460,13 @@ public class HttpRequestTest extends InjectingTestCase {
     ErrorCode errorCode = createMock(ErrorCode.class);
     expect(errorCode.getIdentifier()).andReturn("quux").anyTimes();
 
+    expect(httpServletRequest.getRemoteAddr()).andReturn("REMOTE_ADDRESS").anyTimes();
+    expect(httpServletRequest.getHeader("X-Forwarded-For")).andReturn("FORWARDED_FOR_ADDRESS");
     expect(httpServletRequest.getMethod()).andReturn("METHOD_FOO");
     expect(httpServletRequest.getHeader("Accept")).andReturn("text/foo");
+
+    expect(forwardedForResolver.resolve("REMOTE_ADDRESS", "FORWARDED_FOR_ADDRESS"))
+      .andReturn("RESOLVED_ADDRESS");
 
     expect(contentTypeNegotiator.negotiate("text/foo", TEXT_PLAIN, TEXT_HTML, APPLICATION_JSON))
       .andReturn(APPLICATION_JSON);
@@ -460,9 +505,14 @@ public class HttpRequestTest extends InjectingTestCase {
     expect(errorCode.getIdentifier()).andReturn("quux").anyTimes();
     expect(errorCode.getDefaultReason()).andReturn("bar").anyTimes();
 
+    expect(httpServletRequest.getRemoteAddr()).andReturn("REMOTE_ADDRESS").anyTimes();
+    expect(httpServletRequest.getHeader("X-Forwarded-For")).andReturn("FORWARDED_FOR_ADDRESS");
     expect(httpServletRequest.getMethod()).andReturn("METHOD_FOO");
     expect(httpServletRequest.getHeader("Accept")).andReturn("text/foo");
 
+    expect(forwardedForResolver.resolve("REMOTE_ADDRESS", "FORWARDED_FOR_ADDRESS"))
+      .andReturn("RESOLVED_ADDRESS");
+    
     expect(contentTypeNegotiator.negotiate("text/foo", TEXT_PLAIN, TEXT_HTML, APPLICATION_JSON))
       .andReturn(TEXT_PLAIN);
 
@@ -507,8 +557,13 @@ public class HttpRequestTest extends InjectingTestCase {
     expect(errorCode.getIdentifier()).andReturn("quux").anyTimes();
     expect(errorCode.getDefaultReason()).andReturn("bar").anyTimes();
 
+    expect(httpServletRequest.getRemoteAddr()).andReturn("REMOTE_ADDRESS").anyTimes();
+    expect(httpServletRequest.getHeader("X-Forwarded-For")).andReturn("FORWARDED_FOR_ADDRESS");
     expect(httpServletRequest.getMethod()).andReturn("METHOD_FOO");
     expect(httpServletRequest.getHeader("Accept")).andReturn("text/foo");
+
+    expect(forwardedForResolver.resolve("REMOTE_ADDRESS", "FORWARDED_FOR_ADDRESS"))
+      .andReturn("RESOLVED_ADDRESS");
 
     expect(contentTypeNegotiator.negotiate("text/foo", TEXT_PLAIN, TEXT_HTML, APPLICATION_JSON))
       .andReturn(TEXT_HTML);
@@ -553,8 +608,13 @@ public class HttpRequestTest extends InjectingTestCase {
     expect(errorCode.getIdentifier()).andReturn("quux").anyTimes();
     expect(errorCode.getDefaultReason()).andReturn("bar").anyTimes();
 
+    expect(httpServletRequest.getRemoteAddr()).andReturn("REMOTE_ADDRESS").anyTimes();
+    expect(httpServletRequest.getHeader("X-Forwarded-For")).andReturn("FORWARDED_FOR_ADDRESS");
     expect(httpServletRequest.getMethod()).andReturn("METHOD_FOO");
     expect(httpServletRequest.getHeader("Accept")).andReturn("text/foo");
+
+    expect(forwardedForResolver.resolve("REMOTE_ADDRESS", "FORWARDED_FOR_ADDRESS"))
+      .andReturn("RESOLVED_ADDRESS");
 
     expect(contentTypeNegotiator.negotiate("text/foo", TEXT_PLAIN, TEXT_HTML, APPLICATION_JSON))
       .andReturn(APPLICATION_JSON);
@@ -593,8 +653,13 @@ public class HttpRequestTest extends InjectingTestCase {
     expect(errorCode.getIdentifier()).andReturn("quux").anyTimes();
     expect(errorCode.getDefaultReason()).andReturn("bar").anyTimes();
 
+    expect(httpServletRequest.getRemoteAddr()).andReturn("REMOTE_ADDRESS").anyTimes();
+    expect(httpServletRequest.getHeader("X-Forwarded-For")).andReturn("FORWARDED_FOR_ADDRESS");
     expect(httpServletRequest.getMethod()).andReturn("METHOD_FOO");
     expect(httpServletRequest.getHeader("Accept")).andReturn("text/foo");
+
+    expect(forwardedForResolver.resolve("REMOTE_ADDRESS", "FORWARDED_FOR_ADDRESS"))
+      .andReturn("RESOLVED_ADDRESS");
 
     expect(contentTypeNegotiator.negotiate("text/foo", TEXT_PLAIN, TEXT_HTML, APPLICATION_JSON))
       .andReturn(TEXT_PLAIN);
@@ -640,8 +705,13 @@ public class HttpRequestTest extends InjectingTestCase {
     expect(errorCode.getIdentifier()).andReturn("quux").anyTimes();
     expect(errorCode.getDefaultReason()).andReturn("bar").anyTimes();
 
+    expect(httpServletRequest.getRemoteAddr()).andReturn("REMOTE_ADDRESS").anyTimes();
+    expect(httpServletRequest.getHeader("X-Forwarded-For")).andReturn("FORWARDED_FOR_ADDRESS");
     expect(httpServletRequest.getMethod()).andReturn("METHOD_FOO");
     expect(httpServletRequest.getHeader("Accept")).andReturn("text/foo");
+
+    expect(forwardedForResolver.resolve("REMOTE_ADDRESS", "FORWARDED_FOR_ADDRESS"))
+      .andReturn("RESOLVED_ADDRESS");
 
     expect(contentTypeNegotiator.negotiate("text/foo", TEXT_PLAIN, TEXT_HTML, APPLICATION_JSON))
       .andReturn(TEXT_HTML);
@@ -686,8 +756,13 @@ public class HttpRequestTest extends InjectingTestCase {
     expect(errorCode.getIdentifier()).andReturn("quux").anyTimes();
     expect(errorCode.getDefaultReason()).andReturn("bar").anyTimes();
 
+    expect(httpServletRequest.getRemoteAddr()).andReturn("REMOTE_ADDRESS").anyTimes();
+    expect(httpServletRequest.getHeader("X-Forwarded-For")).andReturn("FORWARDED_FOR_ADDRESS");
     expect(httpServletRequest.getMethod()).andReturn("METHOD_FOO");
     expect(httpServletRequest.getHeader("Accept")).andReturn("text/foo");
+
+    expect(forwardedForResolver.resolve("REMOTE_ADDRESS", "FORWARDED_FOR_ADDRESS"))
+      .andReturn("RESOLVED_ADDRESS");
 
     expect(contentTypeNegotiator.negotiate("text/foo", TEXT_PLAIN, TEXT_HTML, APPLICATION_JSON))
       .andReturn(APPLICATION_JSON);
@@ -913,8 +988,13 @@ public class HttpRequestTest extends InjectingTestCase {
     expect(escaper.html("foo@example.org")).andReturn("(escSupport)").anyTimes();
     expect(escaper.html("/foo")).andReturn("(escTarget)").anyTimes();
 
+    expect(httpServletRequest.getRemoteAddr()).andReturn("REMOTE_ADDRESS").anyTimes();
+    expect(httpServletRequest.getHeader("X-Forwarded-For")).andReturn("FORWARDED_FOR_ADDRESS");
     expect(httpServletRequest.getMethod()).andReturn("METHOD_FOO");
     expect(httpServletRequest.getHeader("Accept")).andReturn("text/foo");
+
+    expect(forwardedForResolver.resolve("REMOTE_ADDRESS", "FORWARDED_FOR_ADDRESS"))
+      .andReturn("RESOLVED_ADDRESS");
 
     expect(contentTypeNegotiator.negotiate("text/foo", TEXT_PLAIN, TEXT_HTML, APPLICATION_JSON))
       .andReturn(TEXT_HTML);
@@ -964,8 +1044,13 @@ public class HttpRequestTest extends InjectingTestCase {
     expect(escaper.html("foo@example.org")).andReturn("(escSupport)").anyTimes();
     expect(escaper.html("/foo")).andReturn("(escTarget)").anyTimes();
 
+    expect(httpServletRequest.getRemoteAddr()).andReturn("REMOTE_ADDRESS").anyTimes();
+    expect(httpServletRequest.getHeader("X-Forwarded-For")).andReturn("FORWARDED_FOR_ADDRESS");
     expect(httpServletRequest.getMethod()).andReturn("METHOD_FOO");
     expect(httpServletRequest.getHeader("Accept")).andReturn("text/foo");
+
+    expect(forwardedForResolver.resolve("REMOTE_ADDRESS", "FORWARDED_FOR_ADDRESS"))
+      .andReturn("RESOLVED_ADDRESS");
 
     expect(contentTypeNegotiator.negotiate("text/foo", TEXT_PLAIN, TEXT_HTML, APPLICATION_JSON))
       .andReturn(APPLICATION_JSON);
@@ -1009,8 +1094,13 @@ public class HttpRequestTest extends InjectingTestCase {
     expect(escaper.html("foo@example.org")).andReturn("(escSupport)").anyTimes();
     expect(escaper.html("/foo")).andReturn("(escTarget)").anyTimes();
 
+    expect(httpServletRequest.getRemoteAddr()).andReturn("REMOTE_ADDRESS").anyTimes();
+    expect(httpServletRequest.getHeader("X-Forwarded-For")).andReturn("FORWARDED_FOR_ADDRESS");
     expect(httpServletRequest.getMethod()).andReturn("METHOD_FOO");
     expect(httpServletRequest.getHeader("Accept")).andReturn("text/foo");
+
+    expect(forwardedForResolver.resolve("REMOTE_ADDRESS", "FORWARDED_FOR_ADDRESS"))
+      .andReturn("RESOLVED_ADDRESS");
 
     expect(contentTypeNegotiator.negotiate("text/foo", TEXT_PLAIN, TEXT_HTML, APPLICATION_JSON))
       .andReturn(TEXT_PLAIN);
