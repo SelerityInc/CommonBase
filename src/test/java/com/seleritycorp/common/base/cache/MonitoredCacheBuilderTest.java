@@ -244,6 +244,17 @@ public class MonitoredCacheBuilderTest extends InjectingTestCase {
     assertThat(cache).isSameAs(monitoredCache);
   }
 
+  @Test
+  public void testBuildCacheMetricsFactoryNull() {
+    cacheMetricsFactory = null;
+
+    replayAll();
+    
+    createMonitoredCacheBuilder().build();
+
+    verifyAll();
+  }
+
   private MonitoredCacheBuilder<Object, Object> createMonitoredCacheBuilder() {
     return new MonitoredCacheBuilder<>("foo", clock, cacheMetricsFactory);
   }

@@ -59,7 +59,8 @@ public class MonitoredCacheBuilder<K, V> {
    * 
    * @param name Name to use when exposing the cache metrics
    * @param ticker The ticker to use for the cache.
-   * @param cacheMetricsFactory Factory to create metrics for the cache.
+   * @param cacheMetricsFactory Factory to create metrics for the cache. If null, no metrics well
+   *     get exported.
    */
   @Inject
   MonitoredCacheBuilder(@Assisted String name, Ticker ticker,
@@ -235,9 +236,11 @@ public class MonitoredCacheBuilder<K, V> {
     if (name == null) {
       name = "unnamed-" + count;
     }
-    CacheMetrics cacheMetrics = cacheMetricsFactory.create(cache);
-    String jmxName = "com.seleritycorp.common.base.cache:type=MonitoredCache,name=" + name;
-    MBeanUtils.register(jmxName, cacheMetrics);
+    if (cacheMetricsFactory != null) {
+      CacheMetrics cacheMetrics = cacheMetricsFactory.create(cache);
+      String jmxName = "com.seleritycorp.common.base.cache:type=MonitoredCache,name=" + name;
+      MBeanUtils.register(jmxName, cacheMetrics);
+    }
     name = null;
   }
 }
