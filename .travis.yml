@@ -1,6 +1,5 @@
 language: java
 jdk:
-  - oraclejdk7
   - oraclejdk8
 install:
   - rm -rf ~/.m2 # Travis CI's default settings setup messes with
