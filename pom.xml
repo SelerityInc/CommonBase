@@ -50,15 +50,6 @@
     <url>https://github.com/SelerityInc/${project.artifactId}</url>
   </scm>
 
-  <properties>
-    <!--
-    Some of our projects are still on Java 7, hence we cannot use
-    Java 8 for the common base library that's included in all
-    builds. Hence, falling back to Java 7.
-    -->
-    <java.version>1.7</java.version>
-  </properties>
-
   <dependencies>
     <dependency>
       <groupId>com.groupon</groupId>
