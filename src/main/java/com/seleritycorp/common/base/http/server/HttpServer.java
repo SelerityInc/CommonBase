@@ -80,6 +80,7 @@ public class HttpServer implements AutoCloseable {
       facet.setAppState(AppState.READY, "Started");
     } catch (Exception e) {
       facet.setAppState(AppState.FAULTY, "Starting failed. " + e.getMessage());
+      log.warn("Failed to start http server", e);
     }
   }
   
