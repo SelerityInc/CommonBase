@@ -18,6 +18,8 @@ package com.seleritycorp.common.base.http.server;
 
 import com.seleritycorp.common.base.config.ApplicationConfig;
 import com.seleritycorp.common.base.config.Config;
+import com.seleritycorp.common.base.logging.Log;
+import com.seleritycorp.common.base.logging.LogFactory;
 import com.seleritycorp.common.base.state.AppState;
 import com.seleritycorp.common.base.state.AppStateFacetFactory;
 import com.seleritycorp.common.base.state.AppStatePushFacet;
@@ -36,6 +38,8 @@ import javax.inject.Inject;
  * General purpose server responding to http requests.
  */
 public class HttpServer implements AutoCloseable {
+  private static final Log log = LogFactory.getLog(HttpServer.class);
+
   private Server server;
   private ServerConnector serverConnector;
   private AppStatePushFacet facet;
@@ -80,12 +84,22 @@ public class HttpServer implements AutoCloseable {
   }
   
   @Override
-  public void close() throws Exception {
+  public void close() {
     facet.setAppState(AppState.FAULTY, "Stopped");
     serverConnector.close();
-    server.stop();
-    if (isStarted) {
-      server.join();
+    try {
+      server.stop();
+      if (isStarted) {
+        try {
+          server.join();
+        } catch (InterruptedException e) {
+          facet.setAppState(AppState.FAULTY, "Joining failed. " + e.getMessage());
+          log.warn("Failed to join after stopping http server", e);
+        }
+      }
+    } catch (Exception e) {
+      facet.setAppState(AppState.FAULTY, "Stopping failed. " + e.getMessage());
+      log.warn("Failed to stop http server", e);
     }
   }
 }
