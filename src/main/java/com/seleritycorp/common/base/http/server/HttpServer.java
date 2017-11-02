@@ -68,11 +68,9 @@ public class HttpServer implements AutoCloseable {
   }
 
   /**
-   * Starts the Http server
-   * 
-   * @throws Exception If the server fails to start. 
+   * Starts the Http server.
    */
-  public void start() throws Exception {
+  public void start() {
     facet.setAppState(AppState.INITIALIZING, "Starting");
     try {
       server.start();
