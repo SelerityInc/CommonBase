@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2016-2017 Selerity, Inc. (support@seleritycorp.com)
+ * Copyright (C) 2016-2018 Selerity, Inc. (support@seleritycorp.com)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,6 @@
 
 package com.seleritycorp.common.base.cache;
 
-import com.google.common.base.Supplier;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheStats;
 import com.google.inject.assistedinject.Assisted;
@@ -35,7 +34,6 @@ public class CacheMetrics implements CacheMetricsMBean {
     CacheMetrics create(Cache<? extends Object, ? extends Object> cache);
   }
   
-  private final Supplier<CacheStats> rawCacheStatsSupplier;
   private final Clock clock;
   @SuppressFBWarnings(value = "IS2_INCONSISTENT_SYNC", justification = "Initial checks are "
       + "unsynchronized. But if they fail, they are repeated synchronized")
@@ -44,17 +42,11 @@ public class CacheMetrics implements CacheMetricsMBean {
   @SuppressFBWarnings(value = "IS2_INCONSISTENT_SYNC", justification = "Sync is only needed for"
       + "setting it.")
   private CacheStats stats;
-
+  private final Cache<? extends Object, ? extends Object> cache;
+  
   @Inject
   CacheMetrics(@Assisted final Cache<? extends Object, ? extends Object> cache, Clock clock) {
-    // The Functions framework got added only with Java 8, so we resort to Suppliers to keep
-    // Java 7 compatibility.
-    this.rawCacheStatsSupplier = new Supplier<CacheStats>() {
-      @Override
-      public CacheStats get() {
-        return cache.stats();
-      }
-    };
+    this.cache = cache;
     this.clock = clock;
   }
   
@@ -63,7 +55,7 @@ public class CacheMetrics implements CacheMetricsMBean {
     if (nextStatsUpdateMillis < nowMillis) {
       synchronized (this) {
         if (nextStatsUpdateMillis < nowMillis) {
-          stats = rawCacheStatsSupplier.get();
+          stats = cache.stats();
           nextStatsUpdateMillis = nowMillis + statsCacheIntervalMillis;
         }
       }
@@ -99,5 +91,10 @@ public class CacheMetrics implements CacheMetricsMBean {
   @Override
   public long getEvictionCount() {
     return getStats().evictionCount();
+  }
+
+  @Override
+  public long getSize() {
+    return cache.size();
   }
 }
