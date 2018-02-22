@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2016-2017 Selerity, Inc. (support@seleritycorp.com)
+ * Copyright (C) 2016-2018 Selerity, Inc. (support@seleritycorp.com)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -74,6 +74,34 @@ public class StateManagerTest extends EasyMockSupport {
     verifyAll();
 
     assertThat(actual).isSameAs(expected);
+  }
+
+  @Test
+  public void testGetHaStateNumberBackup() {
+    HaState expected = HaState.BACKUP;
+    expect(haStateManager.getHaState()).andReturn(expected).once();
+
+    replayAll();
+
+    int actual = stateManager.getHaStateNumber();
+
+    verifyAll();
+
+    assertThat(actual).isSameAs(2);
+  }
+
+  @Test
+  public void testGetHaStateNumberMaster() {
+    HaState expected = HaState.MASTER;
+    expect(haStateManager.getHaState()).andReturn(expected).once();
+
+    replayAll();
+
+    int actual = stateManager.getHaStateNumber();
+
+    verifyAll();
+
+    assertThat(actual).isSameAs(1);
   }
 
   @Test

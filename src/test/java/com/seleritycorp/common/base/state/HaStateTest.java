@@ -16,32 +16,26 @@
 
 package com.seleritycorp.common.base.state;
 
-/**
- * State signaled by high availability fencers.
- */
-public enum HaState {
-  /**
-   * Application is healthy and the master of the high availability group.
-   */
-  MASTER(1),
+import static org.assertj.core.api.Assertions.assertThat;
 
-  /**
-   * Application is healthy and a backup in the high availability group.
-   */
-  BACKUP(2),
+import org.junit.Test;
 
-  /**
-   * Application is unhealthy.
-   */
-  FAULT(3);
-  
-  private final int haStateNumber;
-  
-  HaState(int haStateNumber) {
-    this.haStateNumber = haStateNumber;
+public class HaStateTest {
+  @Test
+  public void testGetHaStateNumberMaster() {
+    HaState state = HaState.MASTER;
+    assertThat(state.getHaStateNumber()).isSameAs(1);
   }
-  
-  public int getHaStateNumber() {
-    return haStateNumber;
+
+  @Test
+  public void testGetHaStateNumberBackup() {
+    HaState state = HaState.BACKUP;
+    assertThat(state.getHaStateNumber()).isSameAs(2);
+  }
+
+  @Test
+  public void testGetHaStateNumberFault() {
+    HaState state = HaState.FAULT;
+    assertThat(state.getHaStateNumber()).isSameAs(3);
   }
 }

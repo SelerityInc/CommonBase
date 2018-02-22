@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2016-2017 Selerity, Inc. (support@seleritycorp.com)
+ * Copyright (C) 2016-2018 Selerity, Inc. (support@seleritycorp.com)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,4 +34,15 @@ public interface StateManagerMBean {
    * @return The weight of the application state.
    */
   public int getAppStateNumber();
+
+  /**
+   * Gets number for the high-availability state
+   *
+   * <p>This method is mostly useful for numeric timeseries data collection. If
+   * you want to check in code if the application is in a given high-availability
+   * state, see {@link StateManager#isHaMaster()} and its siblings.
+   * 
+   * @return The weight of the application state.
+   */
+  public int getHaStateNumber();
 }
