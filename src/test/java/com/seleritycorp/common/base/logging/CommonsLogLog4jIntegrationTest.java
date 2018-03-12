@@ -617,6 +617,28 @@ public class CommonsLogLog4jIntegrationTest extends EasyMockSupport {
     assertThat(event.getLocationInformation().getLineNumber()).isEqualTo(lineNumber);
   }
   
+  @Test
+  public void testStructuredDebug() {
+    Appender appender = createMock(Appender.class);
+    expect(formatter.formatStructuredLine("tagFoo", 42, "bar", "baz")).andReturn("quux");
+
+    CommonsLog log = createCommonsLog("StructuredDebug", appender);
+
+    Capture<LoggingEvent> loggingEventCapture = newCapture();
+    appender.doAppend(capture(loggingEventCapture));
+    
+    replayAll();
+
+    log.structuredDebug("tagFoo", 42, "bar", "baz"); String lineNumber = getLineNumber();
+
+    verifyAll();
+
+    LoggingEvent event = loggingEventCapture.getValue();
+    assertThat(event.getMessage()).isEqualTo("quux");
+    assertThat(event.getLevel()).isEqualTo(org.apache.log4j.Level.DEBUG);
+    assertThat(event.getLocationInformation().getLineNumber()).isEqualTo(lineNumber);
+  }
+  
   private CommonsLog createCommonsLog(String testName, Appender appender) {
     // Reset Commons Logging. Otherwise the setting won't be effective
     org.apache.commons.logging.LogFactory.releaseAll();

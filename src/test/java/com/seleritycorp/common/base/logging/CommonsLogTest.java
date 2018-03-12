@@ -872,6 +872,31 @@ public class CommonsLogTest extends EasyMockSupport {
   }
 
   @Test
+  public void testStructuredDebug() {
+    wrappedLog.debug("baz");
+    expect(formatter.formatStructuredLine("foo", 42, "bar")).andReturn("baz");
+
+    replayAll();
+
+    Log log = new CommonsLog(wrappedLog, formatter);
+    log.structuredDebug("foo", 42, "bar");
+
+    verifyAll();
+  }
+
+  @Test
+  public void testStructuredDebugChanger() {
+    wrappedLog.debug("baz");
+
+    replayAll();
+
+    Log log = new CommonsLogStructuredChanger(wrappedLog, formatter);
+    log.structuredDebug("foo", 42, "bar");
+
+    verifyAll();
+  }
+
+  @Test
   public void testGetLog4jLoggerWrappedNull() {
     replayAll();
 

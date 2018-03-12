@@ -76,4 +76,19 @@ public interface Log extends org.apache.commons.logging.Log {
    *        {@code structuredInfo("foo", 42, "bar", bar, "bar-size", bar.size());}
    */
   public void structuredInfo(String tag, int version, Object... objs);
+
+  /**
+   * Logs objects in structured format in a single DEBUG line
+   *
+   * <p>This method matches {@link #structuredInfo(String, int, Object...)} except that the log is
+   * at DEBUG level.
+   * 
+   * @param tag The tag to store the line at
+   * @param version The version of the tag
+   * @param objs The name and objects to log. objs is expected to hold an
+   *        even number of elements, with objs[2*n] holding the name for the
+   *        object at objs[2*n+1]. So an example of a call would be
+   *        {@code structuredInfo("foo", 42, "bar", bar, "bar-size", bar.size());}
+   */
+  public void structuredDebug(String tag, int version, Object... objs);
 }

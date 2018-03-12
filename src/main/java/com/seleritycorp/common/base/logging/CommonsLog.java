@@ -493,6 +493,17 @@ public class CommonsLog implements Log {
   }
 
   @Override
+  public void structuredDebug(String tag, int version, Object... objs) {
+    String message = processStructuredData(tag, version, objs);
+    if (wrappedLog4j != null) {
+      // More specific wrappers get the line numbers wrong, so we resort to the most generic one :-/
+      wrappedLog4j.log(fqcn, org.apache.log4j.Level.DEBUG, message, null);
+    } else {
+      wrappedLog.debug(message);
+    }
+  }
+
+  @Override
   public Logger getLog4jLogger() {
     return wrappedLog4j;
   }
