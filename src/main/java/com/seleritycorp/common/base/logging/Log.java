@@ -62,7 +62,7 @@ public interface Log extends org.apache.commons.logging.Log {
    *
    * <p>The following replacements take place:
    * <ol>
-   * <li>Backslashes get replaced by double backslashes.</li>
+   * <li>Backslashes get replaced by backslash, followed by the less-than sign.</li>
    * <li>Carriage-Returns get replaced by backslash, followed by r.</li>
    * <li>Linebreaks get replaced by backslash, followed by n.</li>
    * <li>Slashes get replaced by backslash, followed by a pipe.</li>

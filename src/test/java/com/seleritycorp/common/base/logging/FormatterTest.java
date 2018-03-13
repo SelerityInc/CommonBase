@@ -104,15 +104,15 @@ public class FormatterTest {
   }
 
   @Test
-  public void testFormatStructuredCsvLineSlashSingle() {
+  public void testFormatStructuredCsvLineBackslashSingle() {
     String actual = formatter.formatStructuredLine("foo", 42, "bar", "baz\\quux");
-    assertThat(actual).isEqualTo("/log-tag:foo/log-tag-version:42/bar:baz\\\\quux/");
+    assertThat(actual).isEqualTo("/log-tag:foo/log-tag-version:42/bar:baz\\<quux/");
   }
 
   @Test
   public void testFormatStructuredCsvLineBackslashMultiple() {
     String actual = formatter.formatStructuredLine("foo", 42, "bar", "baz\\quux\\quuux");
-    assertThat(actual).isEqualTo("/log-tag:foo/log-tag-version:42/bar:baz\\\\quux\\\\quuux/");
+    assertThat(actual).isEqualTo("/log-tag:foo/log-tag-version:42/bar:baz\\<quux\\<quuux/");
   }
 
   @Test
@@ -120,6 +120,6 @@ public class FormatterTest {
     String actual =
         formatter.formatStructuredLine("foo", 42, "foo\nbar", "bar/baz\\quux/\rquuux\nfoo");
     assertThat(actual).isEqualTo(
-        "/log-tag:foo/log-tag-version:42/foo\\nbar:bar\\|baz\\\\" + "quux\\|\\rquuux\\nfoo/");
+        "/log-tag:foo/log-tag-version:42/foo\\nbar:bar\\|baz\\<quux\\|\\rquuux\\nfoo/");
   }
 }

@@ -42,7 +42,7 @@ public class Formatter {
     ret += ":";
     ret += (value == null) ? "<null>" : value;
 
-    ret = ret.replaceAll("\\\\", "\\\\\\\\");
+    ret = ret.replaceAll("\\\\", "\\\\<");
     ret = ret.replaceAll("\r", "\\\\r");
     ret = ret.replaceAll("\n", "\\\\n");
     ret = ret.replaceAll("/", "\\\\|");
