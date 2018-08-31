@@ -19,13 +19,32 @@ package com.seleritycorp.common.base.config;
 import static com.google.inject.Scopes.SINGLETON;
 
 import com.google.inject.AbstractModule;
+import com.google.inject.Injector;
+import com.google.inject.Key;
+import com.google.inject.Provides;
+
+import com.seleritycorp.common.base.inject.InjectorFactory;
+
+import java.nio.file.Path;
+import javax.inject.Singleton;
 
 public class ConfigModule extends AbstractModule {
   @Override
   protected void configure() {
-    bind(Config.class).annotatedWith(ApplicationConfig.class)
-        .toProvider(ApplicationConfigProvider.class).in(SINGLETON);
     bind(Config.class).annotatedWith(EnvironmentConfig.class)
         .toProvider(EnvironmentConfigProvider.class).in(SINGLETON);
+  }
+
+  @Provides
+  @Singleton
+  @ApplicationConfig
+  Config provideApplicationConfig() {
+    Injector injector = InjectorFactory.getInjector();
+
+    if (injector.getExistingBinding(Key.get(Path.class, ConfigFile.class)) == null) {
+      return injector.getInstance(ApplicationConfigProvider.class).get();
+    } else {
+      return injector.getInstance(SingleFileConfig.class);
+    }
   }
 }

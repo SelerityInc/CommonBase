@@ -16,19 +16,21 @@
 
 package com.seleritycorp.common.base.config;
 
-/**
- * Default configs that are not overridden by user supplied files.
- */
-public class EnforcedDefaultConfig extends ConfigImpl {
-  EnforcedDefaultConfig() {
-    setupEnforcedDefaults();
-  }
+import static java.lang.annotation.ElementType.FIELD;
+import static java.lang.annotation.ElementType.METHOD;
+import static java.lang.annotation.ElementType.PARAMETER;
+import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
-  /**
-   * Sets an application's enforced defaults.
-   */
-  private void setupEnforcedDefaults() {
-    set("paths.conf", "conf");
-    set("paths.confAnsiblized", "conf-ansiblized");
-  }
+import com.google.inject.BindingAnnotation;
+
+import java.lang.annotation.Retention;
+import java.lang.annotation.Target;
+
+/**
+ * Marks a {@code Path} instance as the application Config file.
+ */
+@BindingAnnotation
+@Target({FIELD, PARAMETER, METHOD})
+@Retention(RUNTIME)
+public @interface ConfigFile {
 }

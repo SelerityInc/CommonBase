@@ -16,19 +16,28 @@
 
 package com.seleritycorp.common.base.config;
 
-/**
- * Default configs that are not overridden by user supplied files.
- */
-public class EnforcedDefaultConfig extends ConfigImpl {
-  EnforcedDefaultConfig() {
-    setupEnforcedDefaults();
-  }
+import java.nio.file.Path;
+import javax.inject.Inject;
 
-  /**
-   * Sets an application's enforced defaults.
-   */
-  private void setupEnforcedDefaults() {
-    set("paths.conf", "conf");
-    set("paths.confAnsiblized", "conf-ansiblized");
+
+/**
+ * Provider for an application's main Config.
+ */
+public class SingleFileConfig extends ConfigImpl {
+
+  @Inject
+  SingleFileConfig(@ConfigFile Path configFile) {
+    ConfigImpl configProps = ConfigUtils.load(configFile);
+
+    Path configDir = configFile.getParent();
+
+    if (configDir != null) {
+      Path absConfigDir = configDir.toAbsolutePath();
+
+      set("paths.conf", absConfigDir.toString());
+      set("paths.confAnsiblized", absConfigDir.toString());
+    }
+
+    setParent(configProps);
   }
 }
