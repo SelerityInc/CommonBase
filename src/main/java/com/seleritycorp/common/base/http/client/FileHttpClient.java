@@ -34,7 +34,9 @@ import org.apache.http.message.BasicHttpResponse;
 import org.apache.http.message.BasicStatusLine;
 import org.apache.http.protocol.HttpContext;
 
+import java.io.File;
 import java.io.IOException;
+import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -63,11 +65,11 @@ public class FileHttpClient extends CloseableHttpClient {
    */
   @Inject
   public FileHttpClient() {
-    httpParams = null; 
+    httpParams = null;
     connectionManager = null;
     protocolVersion = new ProtocolVersion("FILE", 0, 1);
   }
-  
+
   @Override
   @SuppressFBWarnings(value = "DC_DOUBLECHECK",
       justification = "Outer check is quick and unsynchronized. Inner check is synchronized")
@@ -127,7 +129,8 @@ public class FileHttpClient extends CloseableHttpClient {
 
     String uri = request.getRequestLine().getUri();
     if (uri.startsWith("file://")) {
-      uri = uri.substring(7);
+      File file = new File(URI.create(uri));
+      uri = file.getAbsolutePath();
     }
     Path path = Paths.get(uri);
 
@@ -154,7 +157,7 @@ public class FileHttpClient extends CloseableHttpClient {
       // client sent an illegal request.
       statusLine = createStatusLine(HttpStatus.SC_BAD_REQUEST, "Bad Request");
     }
-    
+
     response = new FileHttpClientResponse(statusLine);
     if (content != null) {
       response.setEntity(new ByteArrayEntity(content));
@@ -170,7 +173,7 @@ public class FileHttpClient extends CloseableHttpClient {
   /**
    * Basic Http Response that is closeable.
    */
-  private static class FileHttpClientResponse extends BasicHttpResponse 
+  private static class FileHttpClientResponse extends BasicHttpResponse
       implements CloseableHttpResponse {
     public FileHttpClientResponse(StatusLine statusline) {
       super(statusline);

@@ -91,6 +91,11 @@ public class ApplicationPathsTest extends FileTestCase {
 
   @Test
   public void testConstructorWithDataSymlink() throws IOException {
+    //If on Windows this test fails with an exception like the following:
+    //"java.nio.file.FileSystemException: [...] A required privilege is not held by the client."
+    //the try to grant to your current user the "Create symbolic links" permission.
+    //see https://stackoverflow.com/a/24353758
+
     Path source = base.resolve("pathData");
     Path target = base.resolve("pathDataTarget");
     Files.createDirectories(target);

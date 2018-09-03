@@ -26,7 +26,6 @@ import org.apache.log4j.rolling.helper.Action;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.seleritycorp.common.base.logging.RoverLikeRollingPolicy;
 import com.seleritycorp.common.base.test.InjectingTestCase;
 
 public class RoverLikeRollingPolicyTest extends InjectingTestCase {
@@ -98,7 +97,7 @@ public class RoverLikeRollingPolicyTest extends InjectingTestCase {
     assertThat(desc.getAsynchronous()).isNull();
 
     assertThat(path).hasContent("");
-    assertThat(tempDir.resolve("rotated.2004-11-09T11:33:20.log")).doesNotExist();
+    assertThat(tempDir.resolve("rotated.2004-11-09T11.33.20.log")).doesNotExist();
   }
 
   @Test
@@ -121,7 +120,7 @@ public class RoverLikeRollingPolicyTest extends InjectingTestCase {
 
     assertThat(path).doesNotExist();
 
-    Path rotatedPath = tempDir.resolve("rotated.2004-11-09T11:33:20.log");
+    Path rotatedPath = tempDir.resolve("rotated.2004-11-09T11.33.20.log");
     assertThat(rotatedPath).hasContent("bar");
   }
 
@@ -129,13 +128,13 @@ public class RoverLikeRollingPolicyTest extends InjectingTestCase {
   public void testInititializeProperNoAppendExistingClobber() throws IOException {
     policy = createRoverLikeRollingPolicy();
 
-    Path path = tempDir.resolve(tempDir).resolve("rotated.2016-02-03T12:34:56.log");
+    Path path = tempDir.resolve(tempDir).resolve("rotated.2016-02-03T12.34.56.log");
     writeFile(path, "bar");
 
     path = tempDir.resolve(tempDir).resolve("foo");
     writeFile(path, "baz");
 
-    writeFile(tempDir.resolve("rotated.2004-11-09T11:33:20.log"), "prefilled");
+    writeFile(tempDir.resolve("rotated.2004-11-09T11.33.20.log"), "prefilled");
 
     RolloverDescription desc = policy.initialize(path.toString(), false);
 
@@ -151,13 +150,13 @@ public class RoverLikeRollingPolicyTest extends InjectingTestCase {
 
     assertThat(path).doesNotExist();
 
-    assertThat(tempDir.resolve("rotated.2004-11-09T11:33:20.log")).hasContent("prefilled");
-    assertThat(tempDir.resolve("rotated.2004-11-09T11:33:20-2.log")).hasContent("baz");
+    assertThat(tempDir.resolve("rotated.2004-11-09T11.33.20.log")).hasContent("prefilled");
+    assertThat(tempDir.resolve("rotated.2004-11-09T11.33.20-2.log")).hasContent("baz");
   }
 
   private RoverLikeRollingPolicy createRoverLikeRollingPolicy() {
     policy = new RoverLikeRollingPolicy();
-    policy.setRotateFormat(tempDir.resolve("rotated.%1$tFT%1$tT%2$s.log").toString());
+    policy.setRotateFormat(tempDir.resolve("rotated.%1$tFT%1$tH.%1$tM.%1$tS%2$s.log").toString());
     policy.activateOptions();
     return policy;
   }

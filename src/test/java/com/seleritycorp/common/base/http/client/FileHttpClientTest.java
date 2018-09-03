@@ -29,22 +29,23 @@ import org.apache.http.util.EntityUtils;
 import org.junit.Test;
 
 import com.seleritycorp.common.base.test.InjectingTestCase;
+import org.junit.Assume;
 
 public class FileHttpClientTest extends InjectingTestCase {
   @Test
   public void testExecuteGetOk() throws Exception {
     Path tmpFile = this.createTempFile();
     this.writeFile(tmpFile, "foo\nbar");
-    
+
     replayAll();
 
     HttpClient httpClient = createFileHttpClient();
-    HttpGet method = new HttpGet("file://" + tmpFile);
+    HttpGet method = new HttpGet(tmpFile.toUri());
     org.apache.http.HttpResponse response = httpClient.execute(method);
     HttpEntity entity = response.getEntity();
 
     verifyAll();
-    
+
     assertThat(response.getStatusLine().getProtocolVersion().getProtocol()).isEqualTo("FILE");
     assertThat(response.getStatusLine().getStatusCode()).isEqualTo(200);
     assertThat(response.getStatusLine().getReasonPhrase()).isEqualTo("OK");
@@ -56,20 +57,20 @@ public class FileHttpClientTest extends InjectingTestCase {
     String body = EntityUtils.toString(entity, StandardCharsets.UTF_8);
     assertThat(body).isEqualTo("foo\nbar");
   }
-  
+
   @Test
   public void testExecuteGetNotFound() throws Exception {
     Path tmpFile = this.createTempDirectory();
-    
+
     replayAll();
 
     HttpClient httpClient = createFileHttpClient();
-    HttpGet method = new HttpGet("file://" + tmpFile + "/foo");
+    HttpGet method = new HttpGet(tmpFile.toUri().toString() + "/foo");
     org.apache.http.HttpResponse response = httpClient.execute(method);
     HttpEntity entity = response.getEntity();
 
     verifyAll();
-    
+
     assertThat(response.getStatusLine().getProtocolVersion().getProtocol()).isEqualTo("FILE");
     assertThat(response.getStatusLine().getStatusCode()).isEqualTo(404);
     assertThat(response.getStatusLine().getReasonPhrase()).isEqualTo("Not Found");
@@ -80,25 +81,29 @@ public class FileHttpClientTest extends InjectingTestCase {
   @Test
   public void testExecuteGetDirectory() throws Exception {
     Path tmpFile = this.createTempDirectory();
-    
+
     replayAll();
 
     HttpClient httpClient = createFileHttpClient();
-    HttpGet method = new HttpGet("file://" + tmpFile);
+    HttpGet method = new HttpGet(tmpFile.toUri());
     org.apache.http.HttpResponse response = httpClient.execute(method);
     HttpEntity entity = response.getEntity();
 
     verifyAll();
-    
+
     assertThat(response.getStatusLine().getProtocolVersion().getProtocol()).isEqualTo("FILE");
     assertThat(response.getStatusLine().getStatusCode()).isEqualTo(400);
     assertThat(response.getStatusLine().getReasonPhrase()).isEqualTo("Bad Request");
 
     assertThat(entity).isNull();
   }
-  
+
   @Test
   public void testExecuteGetInaccessible() throws Exception {
+    //Skip this test on Windows, since it requires some external setup to
+    //make a file not readable
+    Assume.assumeFalse(runOnWindows());
+
     replayAll();
 
     HttpClient httpClient = createFileHttpClient();
@@ -107,28 +112,28 @@ public class FileHttpClientTest extends InjectingTestCase {
     HttpEntity entity = response.getEntity();
 
     verifyAll();
-    
+
     assertThat(response.getStatusLine().getProtocolVersion().getProtocol()).isEqualTo("FILE");
     assertThat(response.getStatusLine().getStatusCode()).isEqualTo(403);
     assertThat(response.getStatusLine().getReasonPhrase()).isEqualTo("Forbidden");
 
     assertThat(entity).isNull();
   }
-  
+
   @Test
   public void testExecutePostFails() throws Exception {
     Path tmpFile = this.createTempFile();
     this.writeFile(tmpFile, "foo\nbar");
-    
+
     replayAll();
 
     HttpClient httpClient = createFileHttpClient();
-    HttpPost method = new HttpPost("file://" + tmpFile);
+    HttpPost method = new HttpPost(tmpFile.toUri());
     org.apache.http.HttpResponse response = httpClient.execute(method);
     HttpEntity entity = response.getEntity();
 
     verifyAll();
-    
+
     assertThat(response.getStatusLine().getProtocolVersion().getProtocol()).isEqualTo("FILE");
     assertThat(response.getStatusLine().getStatusCode()).isEqualTo(400);
     assertThat(response.getStatusLine().getReasonPhrase()).isEqualTo("Bad Request");
@@ -138,5 +143,9 @@ public class FileHttpClientTest extends InjectingTestCase {
 
   private FileHttpClient createFileHttpClient() {
     return new FileHttpClient();
+  }
+
+  private boolean runOnWindows() {
+    return System.getProperty("os.name").toLowerCase().contains("windows");
   }
 }
