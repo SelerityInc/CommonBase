@@ -33,11 +33,11 @@ import javax.inject.Inject;
 
 public class HttpResponse {
   interface Factory {
+
     /**
-     * Create a HttpResponse from a HttpClient response
-     * 
-     * @param response The HttpClient response to create a HttpResponse from.
-     * @throws HttpException if reading the response failed. 
+     * Create HttpResponse from the HttpClient response.
+     *
+     * @param response The HttpClient response object.
      */
     HttpResponse create(org.apache.http.HttpResponse response);
   }
@@ -46,10 +46,10 @@ public class HttpResponse {
   private final String body;
 
   /**
-   * Create a HttpResponse from a HttpClient response
+   * Create HttpResponse from the HttpClient response.
    * 
    * @param response The HttpClient response to create a HttpResponse from.
-   * @throws HttpException if reading the response failed. 
+   * @throws HttpException if reading the response failed.
    */
   @Inject
   public HttpResponse(@Assisted org.apache.http.HttpResponse response) throws HttpException {

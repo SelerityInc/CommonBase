@@ -17,6 +17,7 @@
 package com.seleritycorp.common.base.coreservices;
 
 import com.google.gson.JsonElement;
+import com.google.gson.stream.JsonWriter;
 
 import com.seleritycorp.common.base.config.ApplicationConfig;
 import com.seleritycorp.common.base.config.Config;
@@ -107,5 +108,41 @@ public class RawAuthenticatedCoreServiceClient {
       throw e;
     }
     return ret;
+  }
+
+  /**
+   * Calls the CoreServices API with authentication and custom JSON writer to write
+   * the result to. Generates a new auth token if not present or invalid.
+   *
+   * @param method GET or POST
+   * @param params HTTP Params to be sent
+   * @param timeoutMillis Timeout for connection/socket timeout. Use -1 for the default
+   *     timeout.
+   * @param writer Writer to write the JSON result
+   * @throws HttpException when network or other IO issues occur
+   * @throws CallErrorException when server or semantics errors occur
+   */
+  public void authenticatedCall(String method,
+                                JsonElement params,
+                                int timeoutMillis,
+                                JsonWriter writer)
+          throws HttpException, CallErrorException {
+    if (token == null || tokenTimeoutTimestamp < clock.getSecondsEpoch()) {
+      // Resetting the token, so in case things go wrong from here, we have a well resetted
+      // environment.
+      token = null;
+
+      token = authenticationClient.getAuthThoken();
+      tokenTimeoutTimestamp = clock.getSecondsEpoch() + tokenTimeoutPeriodSeconds;
+    }
+
+    try {
+      client.call(method, params, token, timeoutMillis, writer);
+    } catch (Exception e) {
+      // Some error on the connection. Better reset the token to avoid issues with session
+      // timeouts or server switches.
+      token = null;
+      throw e;
+    }
   }
 }

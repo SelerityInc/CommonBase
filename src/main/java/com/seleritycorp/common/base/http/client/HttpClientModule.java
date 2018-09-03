@@ -29,6 +29,7 @@ public class HttpClientModule extends FactoryModule {
   protected void configure() {
     installFactory(HttpRequest.Factory.class);
     installFactory(HttpResponse.Factory.class);
+    installFactory(HttpResponseStream.Factory.class);
 
     bind(HttpClient.class).toInstance(HttpClients.createSystem());
   }

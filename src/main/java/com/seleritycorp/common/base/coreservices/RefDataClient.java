@@ -18,6 +18,7 @@ package com.seleritycorp.common.base.coreservices;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
+import com.google.gson.stream.JsonWriter;
 
 import com.seleritycorp.common.base.config.ApplicationConfig;
 import com.seleritycorp.common.base.config.Config;
@@ -26,7 +27,6 @@ import com.seleritycorp.common.base.logging.Log;
 import com.seleritycorp.common.base.logging.LogFactory;
 
 import java.util.concurrent.TimeUnit;
-
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
@@ -76,5 +76,27 @@ public class RefDataClient {
     log.debug("Getting identifiers for enum type " + enumType + " done");
     
     return ret;
+  }
+
+  /**
+   * Gets the identifier Json for a given enumType.
+   *
+   * @param enumType The enumType to fetch the identifiers for.
+   * @param writer Writer to write the JSON result
+   * @throws HttpException when network or other IO issues occur
+   * @throws CallErrorException when server or semantics errors occur
+   */
+  public void getIdentifiersForEnumType(String enumType, JsonWriter writer)
+          throws HttpException, CallErrorException {
+    JsonArray params = new JsonArray();
+    params.add(enumType);
+
+    log.debug("Getting identifiers for enum type " + enumType + " (timeout: "
+            + timeoutMillis + "ms)");
+
+    client.authenticatedCall("RefDataHandler.getIdentifiersForEnumType", params,
+            timeoutMillis, writer);
+
+    log.debug("Getting identifiers for enum type " + enumType + " done");
   }
 }

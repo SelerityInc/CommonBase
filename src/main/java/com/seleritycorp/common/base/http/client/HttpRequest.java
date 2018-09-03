@@ -32,7 +32,6 @@ import org.apache.http.protocol.HTTP;
 import java.io.IOException;
 import java.net.URI;
 import java.nio.charset.StandardCharsets;
-
 import javax.inject.Inject;
 
 public class HttpRequest {
@@ -44,6 +43,7 @@ public class HttpRequest {
   private final HttpClient netHttpClient;
   private final HttpClient fileHttpClient;
   private final HttpResponse.Factory responseFactory;
+  private final HttpResponseStream.Factory responseStreamFactory;
   private String method;
   private String userAgent;
   private int readTimeoutMillis;
@@ -53,11 +53,12 @@ public class HttpRequest {
   
   @Inject
   HttpRequest(@Assisted String uri, HttpClient netHttpClient, FileHttpClient fileHttpClient,
-      HttpResponse.Factory responseFactory) {
+      HttpResponse.Factory responseFactory, HttpResponseStream.Factory responseStreamFactory) {
     this.uri = uri;
     this.netHttpClient = netHttpClient;
     this.fileHttpClient = fileHttpClient;
     this.responseFactory = responseFactory;
+    this.responseStreamFactory = responseStreamFactory;
     this.method = "GET";
     this.userAgent = null;
     this.readTimeoutMillis = -1;
@@ -140,14 +141,7 @@ public class HttpRequest {
     return this;
   }
 
-  /**
-   * Executes the configured request.
-   *
-   * @return The server's response to the request.
-   * @throws HttpException if an error occurs.
-   */
-  public HttpResponse execute() throws HttpException {
-    final HttpResponse ret;
+  private org.apache.http.HttpResponse getHttpResponse() throws HttpException {
     final HttpRequestBase request;
 
     switch (method) {
@@ -172,7 +166,11 @@ public class HttpRequest {
     }
 
     if (readTimeoutMillis >= 0) {
-      request.setConfig(RequestConfig.custom().setSocketTimeout(readTimeoutMillis).build());
+      request.setConfig(RequestConfig.custom()
+              .setSocketTimeout(readTimeoutMillis)
+              .setConnectTimeout(readTimeoutMillis)
+              .setConnectionRequestTimeout(readTimeoutMillis)
+              .build());
     }
 
     if (!data.isEmpty()) {
@@ -203,17 +201,47 @@ public class HttpRequest {
     } catch (IOException e) {
       throw new HttpException("Failed to execute request to '" + uri + "'", e);
     }
+    return response;
+  }
 
+  /**
+   * Executes the configured request.
+   *
+   * @return The server's response to the request.
+   * @throws HttpException if an error occurs.
+   */
+  public HttpResponse execute() throws HttpException {
+    final HttpResponse ret;
+    final org.apache.http.HttpResponse response = getHttpResponse();
     ret = responseFactory.create(response);
-
     if (expectedStatusCode >= 0) {
       int statusCode = ret.getStatusCode();
       if (statusCode != expectedStatusCode) {
         throw new HttpException("Expected status code " + expectedStatusCode + " for call to '"
-            + uri + "', but was " + statusCode);
+                + uri + "', but was " + statusCode);
       }
     }
-
     return ret;
   }
+
+  /**
+   * Executes the configured request.
+   *
+   * @return The server's response to the request as stream.
+   * @throws HttpException if an error occurs.
+   */
+  public HttpResponseStream executeAndStream() throws HttpException {
+    final HttpResponseStream ret;
+    final org.apache.http.HttpResponse response = getHttpResponse();
+    ret = responseStreamFactory.create(response);
+    if (expectedStatusCode >= 0) {
+      int statusCode = ret.getStatusCode();
+      if (statusCode != expectedStatusCode) {
+        throw new HttpException("Expected status code " + expectedStatusCode + " for call to '"
+                + uri + "', but was " + statusCode);
+      }
+    }
+    return ret;
+  }
+
 }

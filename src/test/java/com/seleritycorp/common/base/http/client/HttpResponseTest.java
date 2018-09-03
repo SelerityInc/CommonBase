@@ -22,6 +22,7 @@ import static org.assertj.core.api.Assertions.failBecauseExceptionWasNotThrown;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 
+import com.google.gson.stream.JsonReader;
 import org.apache.http.HttpVersion;
 import org.apache.http.StatusLine;
 import org.apache.http.entity.ByteArrayEntity;

@@ -25,7 +25,14 @@ import static org.easymock.EasyMock.expect;
 import static org.easymock.EasyMock.newCapture;
 
 import java.io.IOException;
+import java.io.StringReader;
+import java.io.StringWriter;
 
+import com.google.gson.JsonArray;
+import com.google.gson.stream.JsonReader;
+import com.google.gson.stream.JsonWriter;
+import com.seleritycorp.common.base.http.client.HttpResponseStream;
+import org.apache.commons.io.input.ReaderInputStream;
 import org.easymock.Capture;
 import org.junit.Before;
 import org.junit.Test;
@@ -88,6 +95,283 @@ public class RawCoreServicesClientTest extends InjectingTestCase {
     verifyAll();
 
     assertThat(result.getAsInt()).isEqualTo(23);
+
+    JsonObject json = jsonCapture.getValue();
+    assertThat(json.get("id").getAsString()).isEqualTo("00000000-0000-0000-0000-000000000001");
+    assertThat(json.get("method").getAsString()).isEqualTo("baz");
+    assertThat(json.getAsJsonObject("params").get("bar").getAsInt()).isEqualTo(4711);
+    assertThat(json.getAsJsonObject("header").get("user").getAsString()).isEqualTo("foo");
+    assertThat(json.getAsJsonObject("header").get("client").getAsString()).isEqualTo("quux");
+    assertThat(json.getAsJsonObject("header").get("token")).isNull();
+  }
+
+  @Test
+  public void testCallWriterWithEmptyResponse() throws Exception {
+    HttpResponseStream response = createMock(HttpResponseStream.class);
+    expect(response.getBodyAsStream()).andReturn(null);
+
+    HttpRequest request = createMock(HttpRequest.class);
+    expect(request.setReadTimeoutMillis(5)).andReturn(request);
+    expect(request.executeAndStream()).andReturn(response);
+
+    expect(metaDataFormatter.getUserAgent()).andReturn("quux");
+
+    Capture<JsonObject> jsonCapture = newCapture();
+    expect(requestFactory.createPostJson(eq("bar"), capture(jsonCapture))).andReturn(request);
+
+    replayAll();
+
+    RawCoreServiceClient client = createRawCoreServicesClient();
+
+    JsonObject params = new JsonObject();
+    params.addProperty("bar", 4711);
+    StringWriter stringWriter = new StringWriter();
+    JsonWriter writer = new JsonWriter(stringWriter);
+    client.call("baz", params, null, 5, writer);
+
+    verifyAll();
+
+    assertThat(stringWriter.toString()).isEqualTo("");
+
+    JsonObject json = jsonCapture.getValue();
+    assertThat(json.get("id").getAsString()).isEqualTo("00000000-0000-0000-0000-000000000001");
+    assertThat(json.get("method").getAsString()).isEqualTo("baz");
+    assertThat(json.getAsJsonObject("params").get("bar").getAsInt()).isEqualTo(4711);
+    assertThat(json.getAsJsonObject("header").get("user").getAsString()).isEqualTo("foo");
+    assertThat(json.getAsJsonObject("header").get("client").getAsString()).isEqualTo("quux");
+    assertThat(json.getAsJsonObject("header").get("token")).isNull();
+  }
+
+  @Test
+  public void testCallWriterWithPrimitive() throws Exception {
+
+    HttpResponseStream response = createMock(HttpResponseStream.class);
+    StringReader stringReader = new StringReader("20");
+    ReaderInputStream fakeInputStream = new ReaderInputStream(stringReader);
+    expect(response.getBodyAsStream()).andReturn(fakeInputStream);
+
+    HttpRequest request = createMock(HttpRequest.class);
+    expect(request.setReadTimeoutMillis(5)).andReturn(request);
+    expect(request.executeAndStream()).andReturn(response);
+
+    expect(metaDataFormatter.getUserAgent()).andReturn("quux");
+
+    Capture<JsonObject> jsonCapture = newCapture();
+    expect(requestFactory.createPostJson(eq("bar"), capture(jsonCapture))).andReturn(request);
+
+    replayAll();
+
+    RawCoreServiceClient client = createRawCoreServicesClient();
+
+    JsonObject params = new JsonObject();
+    params.addProperty("bar", 4711);
+    StringWriter stringWriter = new StringWriter();
+    JsonWriter writer = new JsonWriter(stringWriter);
+    client.call("baz", params, null, 5, writer);
+
+    verifyAll();
+
+    assertThat(stringWriter.toString()).isEqualTo("");
+
+    JsonObject json = jsonCapture.getValue();
+    assertThat(json.get("id").getAsString()).isEqualTo("00000000-0000-0000-0000-000000000001");
+    assertThat(json.get("method").getAsString()).isEqualTo("baz");
+    assertThat(json.getAsJsonObject("params").get("bar").getAsInt()).isEqualTo(4711);
+    assertThat(json.getAsJsonObject("header").get("user").getAsString()).isEqualTo("foo");
+    assertThat(json.getAsJsonObject("header").get("client").getAsString()).isEqualTo("quux");
+    assertThat(json.getAsJsonObject("header").get("token")).isNull();
+  }
+
+  @Test
+  public void testCallWriterWithSimpleObject() throws Exception {
+    JsonObject jsonResponse = new JsonObject();
+    JsonObject resultObject = new JsonObject();
+    resultObject.addProperty("foo", 23);
+    jsonResponse.add("result", resultObject);
+
+    HttpResponseStream response = createMock(HttpResponseStream.class);
+    String fakeInput = jsonResponse.toString();
+    StringReader stringReader = new StringReader(fakeInput);
+    ReaderInputStream fakeInputStream = new ReaderInputStream(stringReader);
+    expect(response.getBodyAsStream()).andReturn(fakeInputStream);
+
+    HttpRequest request = createMock(HttpRequest.class);
+    expect(request.setReadTimeoutMillis(5)).andReturn(request);
+    expect(request.executeAndStream()).andReturn(response);
+
+    expect(metaDataFormatter.getUserAgent()).andReturn("quux");
+
+    Capture<JsonObject> jsonCapture = newCapture();
+    expect(requestFactory.createPostJson(eq("bar"), capture(jsonCapture))).andReturn(request);
+
+    replayAll();
+
+    RawCoreServiceClient client = createRawCoreServicesClient();
+
+    JsonObject params = new JsonObject();
+    params.addProperty("bar", 4711);
+    StringWriter stringWriter = new StringWriter();
+    JsonWriter writer = new JsonWriter(stringWriter);
+    client.call("baz", params, null, 5, writer);
+
+    verifyAll();
+
+    assertThat(stringWriter.toString()).isEqualTo("{\"foo\":23}");
+
+    JsonObject json = jsonCapture.getValue();
+    assertThat(json.get("id").getAsString()).isEqualTo("00000000-0000-0000-0000-000000000001");
+    assertThat(json.get("method").getAsString()).isEqualTo("baz");
+    assertThat(json.getAsJsonObject("params").get("bar").getAsInt()).isEqualTo(4711);
+    assertThat(json.getAsJsonObject("header").get("user").getAsString()).isEqualTo("foo");
+    assertThat(json.getAsJsonObject("header").get("client").getAsString()).isEqualTo("quux");
+    assertThat(json.getAsJsonObject("header").get("token")).isNull();
+  }
+
+  @Test
+  public void testCallWriterWithNestedObject() throws Exception {
+    JsonObject jsonResponse = new JsonObject();
+    JsonObject resultObject = new JsonObject();
+    JsonObject fooObject = new JsonObject();
+    JsonObject barObject = new JsonObject();
+    barObject.addProperty("test", 123);
+    fooObject.add("bar", barObject);
+    resultObject.add("foo", fooObject);
+    jsonResponse.add("result", resultObject);
+
+    HttpResponseStream response = createMock(HttpResponseStream.class);
+    String fakeInput = jsonResponse.toString();
+    StringReader stringReader = new StringReader(fakeInput);
+    ReaderInputStream fakeInputStream = new ReaderInputStream(stringReader);
+    expect(response.getBodyAsStream()).andReturn(fakeInputStream);
+
+    HttpRequest request = createMock(HttpRequest.class);
+    expect(request.setReadTimeoutMillis(5)).andReturn(request);
+    expect(request.executeAndStream()).andReturn(response);
+
+    expect(metaDataFormatter.getUserAgent()).andReturn("quux");
+
+    Capture<JsonObject> jsonCapture = newCapture();
+    expect(requestFactory.createPostJson(eq("bar"), capture(jsonCapture))).andReturn(request);
+
+    replayAll();
+
+    RawCoreServiceClient client = createRawCoreServicesClient();
+
+    JsonObject params = new JsonObject();
+    params.addProperty("bar", 4711);
+    StringWriter stringWriter = new StringWriter();
+    JsonWriter writer = new JsonWriter(stringWriter);
+    client.call("baz", params, null, 5, writer);
+
+    verifyAll();
+
+    assertThat(stringWriter.toString()).isEqualTo("{\"foo\":{\"bar\":{\"test\":123}}}");
+
+    JsonObject json = jsonCapture.getValue();
+    assertThat(json.get("id").getAsString()).isEqualTo("00000000-0000-0000-0000-000000000001");
+    assertThat(json.get("method").getAsString()).isEqualTo("baz");
+    assertThat(json.getAsJsonObject("params").get("bar").getAsInt()).isEqualTo(4711);
+    assertThat(json.getAsJsonObject("header").get("user").getAsString()).isEqualTo("foo");
+    assertThat(json.getAsJsonObject("header").get("client").getAsString()).isEqualTo("quux");
+    assertThat(json.getAsJsonObject("header").get("token")).isNull();
+  }
+
+  @Test
+  public void testCallWriterWithArray() throws Exception {
+    JsonObject jsonResponse = new JsonObject();
+    JsonObject resultObject = new JsonObject();
+    JsonArray fooArray = new JsonArray();
+    fooArray.add(123);
+    fooArray.add(456);
+    fooArray.add(789);
+    resultObject.add("foo", fooArray);
+    jsonResponse.add("result", resultObject);
+
+    HttpResponseStream response = createMock(HttpResponseStream.class);
+    String fakeInput = jsonResponse.toString();
+    StringReader stringReader = new StringReader(fakeInput);
+    ReaderInputStream fakeInputStream = new ReaderInputStream(stringReader);
+    expect(response.getBodyAsStream()).andReturn(fakeInputStream);
+
+    HttpRequest request = createMock(HttpRequest.class);
+    expect(request.setReadTimeoutMillis(5)).andReturn(request);
+    expect(request.executeAndStream()).andReturn(response);
+
+    expect(metaDataFormatter.getUserAgent()).andReturn("quux");
+
+    Capture<JsonObject> jsonCapture = newCapture();
+    expect(requestFactory.createPostJson(eq("bar"), capture(jsonCapture))).andReturn(request);
+
+    replayAll();
+
+    RawCoreServiceClient client = createRawCoreServicesClient();
+
+    JsonObject params = new JsonObject();
+    params.addProperty("bar", 4711);
+    StringWriter stringWriter = new StringWriter();
+    JsonWriter writer = new JsonWriter(stringWriter);
+    client.call("baz", params, null, 5, writer);
+
+    verifyAll();
+
+    assertThat(stringWriter.toString()).isEqualTo("{\"foo\":[123,456,789]}");
+
+    JsonObject json = jsonCapture.getValue();
+    assertThat(json.get("id").getAsString()).isEqualTo("00000000-0000-0000-0000-000000000001");
+    assertThat(json.get("method").getAsString()).isEqualTo("baz");
+    assertThat(json.getAsJsonObject("params").get("bar").getAsInt()).isEqualTo(4711);
+    assertThat(json.getAsJsonObject("header").get("user").getAsString()).isEqualTo("foo");
+    assertThat(json.getAsJsonObject("header").get("client").getAsString()).isEqualTo("quux");
+    assertThat(json.getAsJsonObject("header").get("token")).isNull();
+  }
+
+  @Test
+  public void testCallWriterWithNestedObjectAndArray() throws Exception {
+    JsonObject jsonResponse = new JsonObject();
+    JsonObject resultObject = new JsonObject();
+    JsonObject barObject = new JsonObject();
+    JsonArray fooArray = new JsonArray();
+    JsonObject objectOne = new JsonObject();
+    objectOne.addProperty("one", 1);
+    JsonObject objectTwo = new JsonObject();
+    objectTwo.addProperty("two", 2);
+    JsonObject objectThree = new JsonObject();
+    objectThree.addProperty("three", 3);
+    fooArray.add(objectOne);
+    fooArray.add(objectTwo);
+    fooArray.add(objectThree);
+    barObject.add("foo", fooArray);
+    resultObject.add("bar", barObject);
+    jsonResponse.add("result", resultObject);
+
+    HttpResponseStream response = createMock(HttpResponseStream.class);
+    String fakeInput = jsonResponse.toString();
+    StringReader stringReader = new StringReader(fakeInput);
+    ReaderInputStream fakeInputStream = new ReaderInputStream(stringReader);
+    expect(response.getBodyAsStream()).andReturn(fakeInputStream);
+
+    HttpRequest request = createMock(HttpRequest.class);
+    expect(request.setReadTimeoutMillis(5)).andReturn(request);
+    expect(request.executeAndStream()).andReturn(response);
+
+    expect(metaDataFormatter.getUserAgent()).andReturn("quux");
+
+    Capture<JsonObject> jsonCapture = newCapture();
+    expect(requestFactory.createPostJson(eq("bar"), capture(jsonCapture))).andReturn(request);
+
+    replayAll();
+
+    RawCoreServiceClient client = createRawCoreServicesClient();
+
+    JsonObject params = new JsonObject();
+    params.addProperty("bar", 4711);
+    StringWriter stringWriter = new StringWriter();
+    JsonWriter writer = new JsonWriter(stringWriter);
+    client.call("baz", params, null, 5, writer);
+
+    verifyAll();
+
+    assertThat(stringWriter.toString()).isEqualTo("{\"bar\":{\"foo\":[{\"one\":1},{\"two\":2},{\"three\":3}]}}");
 
     JsonObject json = jsonCapture.getValue();
     assertThat(json.get("id").getAsString()).isEqualTo("00000000-0000-0000-0000-000000000001");

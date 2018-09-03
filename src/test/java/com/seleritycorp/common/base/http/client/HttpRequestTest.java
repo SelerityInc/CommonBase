@@ -24,9 +24,14 @@ import static org.easymock.EasyMock.newCapture;
 import static org.easymock.EasyMock.reset;
 
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.StringReader;
 import java.nio.charset.StandardCharsets;
 
+import com.google.gson.JsonObject;
+import com.google.gson.stream.JsonReader;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.io.input.ReaderInputStream;
 import org.apache.http.HttpEntity;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.CloseableHttpResponse;
@@ -43,7 +48,9 @@ public class HttpRequestTest extends EasyMockSupport {
   private HttpClient netHttpClient;
   private FileHttpClient fileHttpClient;
   private HttpResponse.Factory responseFactory;
+  private HttpResponseStream.Factory responseStreamFactory;
   private HttpResponse httpResponse;
+  private HttpResponseStream httpResponseStream;
   private CloseableHttpResponse backendResponse;
   private Capture<HttpUriRequest> backendRequestCapture;
 
@@ -52,8 +59,10 @@ public class HttpRequestTest extends EasyMockSupport {
     netHttpClient = createMock(HttpClient.class);
     fileHttpClient = createMock(FileHttpClient.class);
     responseFactory = createMock(HttpResponse.Factory.class);
+    responseStreamFactory = createMock(HttpResponseStream.Factory.class);
 
     httpResponse = createMock(HttpResponse.class);
+    httpResponseStream = createMock(HttpResponseStream.class);
     backendResponse = createMock(CloseableHttpResponse.class);
 
     backendRequestCapture = newCapture();
@@ -64,26 +73,26 @@ public class HttpRequestTest extends EasyMockSupport {
   @Test
   public void testExecuteOk() throws Exception {
     replayAll();
-    
+
     HttpRequest request = createHttpRequest("foo");
     HttpResponse response = request.execute();
-    
+
     verifyAll();
-    
+
     assertThat(response).isEqualTo(httpResponse);
 
     HttpUriRequest backendRequest = backendRequestCapture.getValue();
     assertThat(backendRequest.getMethod()).isEqualTo("GET");
     assertThat(backendRequest.getURI().toString()).isEqualTo("foo");
   }
-  
+
   @Test
   public void testExecuteMalformedUri() throws Exception {
     reset(netHttpClient);
     reset(responseFactory);
 
     replayAll();
-    
+
     HttpRequest request = createHttpRequest("http://");
     try {
       request.execute();
@@ -91,21 +100,20 @@ public class HttpRequestTest extends EasyMockSupport {
     } catch (HttpException e) {
       assertThat(e.getCause()).isInstanceOf(IllegalArgumentException.class);
     }
-    
+
     verifyAll();
   }
-    
+
   @Test
   public void testPerformPerformingFails() throws Exception {
     reset(netHttpClient);
     reset(responseFactory);
 
     IOException expected = new IOException("catch me");
-
     expect(netHttpClient.execute(capture(backendRequestCapture))).andThrow(expected);
-    
+
     replayAll();
-    
+
     HttpRequest request = createHttpRequest("foo");
     try {
       request.execute();
@@ -113,7 +121,7 @@ public class HttpRequestTest extends EasyMockSupport {
     } catch (HttpException e) {
       assertThat(e.getCause()).isEqualTo(expected);
     }
-    
+
     verifyAll();
   }
 
@@ -123,16 +131,15 @@ public class HttpRequestTest extends EasyMockSupport {
     reset(responseFactory);
 
     replayAll();
-    
-    HttpRequest request = createHttpRequest("foo").addData("bar");
 
+    HttpRequest request = createHttpRequest("foo").addData("bar");
     try {
       request.execute();
       failBecauseExceptionWasNotThrown(HttpException.class);
     } catch (HttpException e) {
       assertThat(e.getMessage()).contains("data");
     }
-    
+
     verifyAll();
   }
 
@@ -141,13 +148,12 @@ public class HttpRequestTest extends EasyMockSupport {
     expect(httpResponse.getStatusCode()).andReturn(123);
 
     replayAll();
-    
-    HttpRequest request = createHttpRequest("foo").setExpectedStatusCode(123);
 
+    HttpRequest request = createHttpRequest("foo").setExpectedStatusCode(123);
     HttpResponse response = request.execute();
 
     verifyAll();
-    
+
     assertThat(response).isEqualTo(httpResponse);
 
     HttpUriRequest backendRequest = backendRequestCapture.getValue();
@@ -161,9 +167,8 @@ public class HttpRequestTest extends EasyMockSupport {
     expect(httpResponse.getStatusCode()).andReturn(200);
 
     replayAll();
-    
-    HttpRequest request = createHttpRequest("foo").setExpectedStatusCode(123);
 
+    HttpRequest request = createHttpRequest("foo").setExpectedStatusCode(123);
     try {
       request.execute();
       failBecauseExceptionWasNotThrown(HttpException.class);
@@ -171,41 +176,41 @@ public class HttpRequestTest extends EasyMockSupport {
       assertThat(e.getMessage()).contains("123");
       assertThat(e.getMessage()).contains("200");
     }
-    
+
     verifyAll();
   }
 
   @Test
   public void testSetUserAgentPlain() throws Exception {
     replayAll();
-    
+
     HttpRequest request = createHttpRequest("foo");
     HttpRequest requestAfterSetting = request.setUserAgent("foo");
     HttpResponse response = request.execute();
-    
+
     verifyAll();
-    
+
     assertThat(request).isSameAs(requestAfterSetting);
     assertThat(response).isEqualTo(httpResponse);
 
     HttpUriRequest backendRequest = backendRequestCapture.getValue();
     assertThat(backendRequest.getMethod()).isEqualTo("GET");
     assertThat(backendRequest.getURI().toString()).isEqualTo("foo");
-    assertThat(backendRequest.getHeaders("User-Agent")).hasSize(1);    
-    assertThat(backendRequest.getFirstHeader("User-Agent").getValue()).isEqualTo("foo");    
+    assertThat(backendRequest.getHeaders("User-Agent")).hasSize(1);
+    assertThat(backendRequest.getFirstHeader("User-Agent").getValue()).isEqualTo("foo");
   }
 
   @Test
   public void testSetUserAgentOverwrite() throws Exception {
     replayAll();
-    
+
     HttpRequest request = createHttpRequest("foo");
     HttpRequest requestAfterSetting1 = request.setUserAgent("foo1");
     HttpRequest requestAfterSetting2 = request.setUserAgent("foo2");
     HttpResponse response = request.execute();
-    
+
     verifyAll();
-    
+
     assertThat(request).isSameAs(requestAfterSetting1);
     assertThat(request).isSameAs(requestAfterSetting2);
     assertThat(response).isEqualTo(httpResponse);
@@ -213,21 +218,21 @@ public class HttpRequestTest extends EasyMockSupport {
     HttpUriRequest backendRequest = backendRequestCapture.getValue();
     assertThat(backendRequest.getMethod()).isEqualTo("GET");
     assertThat(backendRequest.getURI().toString()).isEqualTo("foo");
-    assertThat(backendRequest.getHeaders("User-Agent")).hasSize(1);    
-    assertThat(backendRequest.getFirstHeader("User-Agent").getValue()).isEqualTo("foo2");    
+    assertThat(backendRequest.getHeaders("User-Agent")).hasSize(1);
+    assertThat(backendRequest.getFirstHeader("User-Agent").getValue()).isEqualTo("foo2");
   }
 
   @Test
   public void testSetUserAgentReset() throws Exception {
     replayAll();
-    
+
     HttpRequest request = createHttpRequest("foo");
     HttpRequest requestAfterSetting1 = request.setUserAgent("foo1");
     HttpRequest requestAfterSetting2 = request.setUserAgent(null);
     HttpResponse response = request.execute();
-    
+
     verifyAll();
-    
+
     assertThat(request).isSameAs(requestAfterSetting1);
     assertThat(request).isSameAs(requestAfterSetting2);
     assertThat(response).isEqualTo(httpResponse);
@@ -235,19 +240,19 @@ public class HttpRequestTest extends EasyMockSupport {
     HttpUriRequest backendRequest = backendRequestCapture.getValue();
     assertThat(backendRequest.getMethod()).isEqualTo("GET");
     assertThat(backendRequest.getURI().toString()).isEqualTo("foo");
-    assertThat(backendRequest.getHeaders("User-Agent")).hasSize(0);    
+    assertThat(backendRequest.getHeaders("User-Agent")).hasSize(0);
   }
 
   @Test
   public void testSetReadTimeout() throws Exception {
     replayAll();
-    
+
     HttpRequest request = createHttpRequest("foo");
     HttpRequest requestAfterSetting = request.setReadTimeoutMillis(4711);
     HttpResponse response = request.execute();
-    
+
     verifyAll();
-    
+
     assertThat(request).isSameAs(requestAfterSetting);
     assertThat(response).isEqualTo(httpResponse);
 
@@ -256,19 +261,19 @@ public class HttpRequestTest extends EasyMockSupport {
     HttpRequestBase backendRequest = (HttpRequestBase) backendRequestRaw;
     assertThat(backendRequest.getMethod()).isEqualTo("GET");
     assertThat(backendRequest.getURI().toString()).isEqualTo("foo");
-    assertThat(backendRequest.getConfig().getSocketTimeout()).isEqualTo(4711);    
+    assertThat(backendRequest.getConfig().getSocketTimeout()).isEqualTo(4711);
   }
 
   @Test
   public void testSetMethodPost() throws Exception {
     replayAll();
-    
+
     HttpRequest request = createHttpRequest("foo");
     HttpRequest requestAfterSetting = request.setMethodPost();
     HttpResponse response = request.execute();
-    
+
     verifyAll();
-    
+
     assertThat(request).isSameAs(requestAfterSetting);
     assertThat(response).isEqualTo(httpResponse);
 
@@ -280,14 +285,14 @@ public class HttpRequestTest extends EasyMockSupport {
   @Test
   public void testAddDataSingle() throws Exception {
     replayAll();
-    
+
     HttpRequest request = createHttpRequest("foo");
     HttpRequest requestAfterSetting1 = request.setMethodPost();
     HttpRequest requestAfterSetting2 = request.addData("foo=bar%");
     HttpResponse response = request.execute();
-    
+
     verifyAll();
-    
+
     assertThat(request).isSameAs(requestAfterSetting1);
     assertThat(request).isSameAs(requestAfterSetting2);
     assertThat(response).isEqualTo(httpResponse);
@@ -306,15 +311,15 @@ public class HttpRequestTest extends EasyMockSupport {
   @Test
   public void testAddDataSingleWithContentType() throws Exception {
     replayAll();
-    
+
     HttpRequest request = createHttpRequest("foo");
     HttpRequest requestAfterSetting1 = request.setMethodPost();
     HttpRequest requestAfterSetting2 = request.setContentType(ContentType.APPLICATION_JSON);
     HttpRequest requestAfterSetting3 = request.addData("foo=bar%");
     HttpResponse response = request.execute();
-    
+
     verifyAll();
-    
+
     assertThat(request).isSameAs(requestAfterSetting1);
     assertThat(request).isSameAs(requestAfterSetting2);
     assertThat(request).isSameAs(requestAfterSetting3);
@@ -334,15 +339,15 @@ public class HttpRequestTest extends EasyMockSupport {
   @Test
   public void testAddDataAppending() throws Exception {
     replayAll();
-    
+
     HttpRequest request = createHttpRequest("foo");
     HttpRequest requestAfterSetting1 = request.setMethodPost();
     HttpRequest requestAfterSetting2 = request.addData("foo=bar%");
     HttpRequest requestAfterSetting3 = request.addData("baz&quux");
     HttpResponse response = request.execute();
-    
+
     verifyAll();
-    
+
     assertThat(request).isSameAs(requestAfterSetting1);
     assertThat(request).isSameAs(requestAfterSetting2);
     assertThat(request).isSameAs(requestAfterSetting3);
@@ -362,16 +367,16 @@ public class HttpRequestTest extends EasyMockSupport {
   @Test
   public void testAddDataAppendingWithContentType() throws Exception {
     replayAll();
-    
+
     HttpRequest request = createHttpRequest("foo");
     HttpRequest requestAfterSetting1 = request.setMethodPost();
     HttpRequest requestAfterSetting2 = request.addData("foo=bar%");
     HttpRequest requestAfterSetting3 = request.setContentType(ContentType.APPLICATION_JSON);
     HttpRequest requestAfterSetting4 = request.addData("baz&quux");
     HttpResponse response = request.execute();
-    
+
     verifyAll();
-    
+
     assertThat(request).isSameAs(requestAfterSetting1);
     assertThat(request).isSameAs(requestAfterSetting2);
     assertThat(request).isSameAs(requestAfterSetting3);
@@ -395,12 +400,12 @@ public class HttpRequestTest extends EasyMockSupport {
     expect(fileHttpClient.execute(capture(backendRequestCapture))).andReturn(backendResponse);
 
     replayAll();
-    
+
     HttpRequest request = createHttpRequest("file:///foo");
     HttpResponse response = request.execute();
-    
+
     verifyAll();
-    
+
     assertThat(response).isEqualTo(httpResponse);
 
     HttpUriRequest backendRequest = backendRequestCapture.getValue();
@@ -408,7 +413,31 @@ public class HttpRequestTest extends EasyMockSupport {
     assertThat(backendRequest.getURI().toString()).isEqualTo("file:///foo");
   }
 
+  @Test
+  public void testExecuteAndStreamOk() throws Exception {
+    reset(responseFactory);
+
+    StringReader stringReader = new StringReader("response");
+    ReaderInputStream readerInputStream = new ReaderInputStream(stringReader);
+    expect(responseStreamFactory.create(backendResponse)).andReturn(httpResponseStream);
+    expect(httpResponseStream.getBodyAsStream()).andReturn(readerInputStream);
+
+    replayAll();
+
+    HttpRequest request = createHttpRequest("foo");
+    HttpResponseStream response = request.executeAndStream();
+    String result = IOUtils.toString(response.getBodyAsStream());
+
+    verifyAll();
+
+    assertThat(result).isEqualTo("response");
+
+    HttpUriRequest backendRequest = backendRequestCapture.getValue();
+    assertThat(backendRequest.getMethod()).isEqualTo("GET");
+    assertThat(backendRequest.getURI().toString()).isEqualTo("foo");
+  }
+
   private HttpRequest createHttpRequest(String url) throws HttpException {
-    return new HttpRequest(url, netHttpClient, fileHttpClient, responseFactory);
+    return new HttpRequest(url, netHttpClient, fileHttpClient, responseFactory, responseStreamFactory);
   }
 }

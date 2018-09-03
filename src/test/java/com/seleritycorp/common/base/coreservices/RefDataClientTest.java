@@ -17,16 +17,17 @@
 package com.seleritycorp.common.base.coreservices;
 
 import static org.assertj.core.api.Assertions.assertThat;
-
-import static org.easymock.EasyMock.capture;
-import static org.easymock.EasyMock.expect;
-import static org.easymock.EasyMock.eq;
-import static org.easymock.EasyMock.newCapture;
+import static org.easymock.EasyMock.*;
 
 import java.io.IOException;
+import java.io.StringWriter;
 
+import com.google.gson.JsonParser;
+import com.google.gson.stream.JsonWriter;
 import org.easymock.Capture;
+import org.easymock.EasyMock;
 import org.easymock.EasyMockSupport;
+import org.easymock.IAnswer;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -66,6 +67,43 @@ public class RefDataClientTest extends EasyMockSupport {
 
     verifyAll();
 
+    assertThat(methodCapture.getValue()).isEqualTo("RefDataHandler.getIdentifiersForEnumType");
+    JsonArray expectedParams = new JsonArray();
+    expectedParams.add("foo");
+    assertThat(paramCapture.getValue()).isEqualTo(expectedParams);
+
+    assertThat(actual).isEqualTo(expected);
+  }
+
+  @Test
+  public void testGetAuthTokenOkWithWriter() throws Exception {
+    StringWriter output = new StringWriter();
+    JsonWriter writer = new JsonWriter(output);
+    Capture<String> methodCapture = newCapture();
+    Capture<JsonElement> paramCapture = newCapture();
+    Capture<JsonWriter> writerCapture = newCapture();
+
+    JsonObject expected = new JsonObject();
+    expected.addProperty("bar", "baz");
+
+    rawClient.authenticatedCall(capture(methodCapture), capture(paramCapture), eq(42000), capture(writerCapture));
+    expectLastCall().andAnswer(new IAnswer<Object>() {
+      @Override
+      public Object answer() throws Throwable {
+        ((JsonWriter) EasyMock.getCurrentArguments()[3]).beginObject().name("bar").value("baz").endObject();
+        return null;
+      }
+    });
+
+    replayAll();
+
+    RefDataClient client = createClient();
+
+    client.getIdentifiersForEnumType("foo", writer);
+
+    verifyAll();
+
+    JsonElement actual = new JsonParser().parse(output.toString()).getAsJsonObject();
     assertThat(methodCapture.getValue()).isEqualTo("RefDataHandler.getIdentifiersForEnumType");
     JsonArray expectedParams = new JsonArray();
     expectedParams.add("foo");
