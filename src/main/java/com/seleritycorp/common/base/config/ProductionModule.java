@@ -23,7 +23,7 @@ import java.nio.file.Paths;
  * Sets up the basic application environment to bootstrap an application.
  */
 public class ProductionModule extends AbstractBaseModule {
-  private static String APPLICATION_PATH = ".";
+  private static final String APPLICATION_PATH = ".";
 
   @Override
   protected void configure() {

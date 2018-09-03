@@ -35,12 +35,23 @@ public class ConfigModule extends AbstractModule {
         .toProvider(EnvironmentConfigProvider.class).in(SINGLETON);
   }
 
+  /**
+   * To use a config file in a custom location, then the app must inject a
+   * {@link ConfigFile} path, before using any {@link ApplicationConfig}, otherwise the
+   * configuration is read from the enforced default dirs.
+   *
+   * @return a {@link Config} for the application
+   */
   @Provides
   @Singleton
   @ApplicationConfig
   Config provideApplicationConfig() {
     Injector injector = InjectorFactory.getInjector();
 
+    //this logic allows to support the new single file configuration (useful
+    //when the user wants to pass the configuration file location on the command
+    //line instead of using the enforced conf dirs), and at the same time is backward compatible,
+    //and does not requires any change for existing installations.
     if (injector.getExistingBinding(Key.get(Path.class, ConfigFile.class)) == null) {
       return injector.getInstance(ApplicationConfigProvider.class).get();
     } else {
