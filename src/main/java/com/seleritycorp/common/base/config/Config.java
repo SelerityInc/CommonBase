@@ -23,8 +23,15 @@ import java.util.concurrent.TimeUnit;
  */
 public interface Config extends ConfigBase {
   /**
-   * Gets the value ot the given key as String with default
-   * 
+   * @return An empty config.
+   */
+  public static Config newEmptyConfig() {
+    return new ConfigImpl();
+  }
+
+  /**
+   * Gets the value of the given key as String with default
+   *
    * @param key key to get value for
    * @param defaultValue default value to use if there is no value at key
    * @return the value at the given key. If there is no value for the given key, defaultValue is
@@ -34,7 +41,7 @@ public interface Config extends ConfigBase {
 
   /**
    * Gets the value ot the given key as int
-   * 
+   *
    * @param key key to get value for
    * @return the value at the given key. If there is no value for the given key, 0 is returned.
    */
@@ -42,7 +49,7 @@ public interface Config extends ConfigBase {
 
   /**
    * Gets the value ot the given key as int with default
-   * 
+   *
    * @param key key to get value for
    * @param defaultValue default value to use if there is no value at key
    * @return the value at the given key. If there is no value for the given key, defaultValue is
@@ -52,7 +59,7 @@ public interface Config extends ConfigBase {
 
   /**
    * Gets the value ot the given key as long
-   * 
+   *
    * @param key key to get value for
    * @return the value at the given key. If there is no value for the given key, 0 is returned.
    */
@@ -60,7 +67,7 @@ public interface Config extends ConfigBase {
 
   /**
    * Gets the value of the given key as long with default
-   * 
+   *
    * @param key key to get value for
    * @param defaultValue default value to use if there is no value at key
    * @return the value at the given key. If there is no value for the given key, defaultValue is
@@ -70,7 +77,7 @@ public interface Config extends ConfigBase {
 
   /**
    * Gets the value ot the given key as float
-   * 
+   *
    * @param key key to get value for
    * @return the value at the given key. If there is no value for the given key, Nan is returned.
    */
@@ -78,7 +85,7 @@ public interface Config extends ConfigBase {
 
   /**
    * Gets the value ot the given key as float with default
-   * 
+   *
    * @param key key to get value for
    * @param defaultValue default value to use if there is no value at key
    * @return the value at the given key. If there is no value for the given key, defaultValue is
@@ -88,7 +95,7 @@ public interface Config extends ConfigBase {
 
   /**
    * Gets the value ot the given key as double
-   * 
+   *
    * @param key key to get value for
    * @return the value at the given key. If there is no value for the given key, NaN is returned.
    */
@@ -96,7 +103,7 @@ public interface Config extends ConfigBase {
 
   /**
    * Gets the value ot the given key as double with default
-   * 
+   *
    * @param key key to get value for
    * @param defaultValue default value to use if there is no value at key
    * @return the value at the given key. If there is no value for the given key, defaultValue is
@@ -106,7 +113,7 @@ public interface Config extends ConfigBase {
 
   /**
    * Gets the value ot the given key as boolean
-   * 
+   *
    * @param key key to get value for
    * @return the value at the given key. If there is no value for the given key, false is returned.
    */
@@ -114,7 +121,7 @@ public interface Config extends ConfigBase {
 
   /**
    * Gets the value ot the given key as boolean with default
-   * 
+   *
    * @param key key to get value for
    * @param defaultValue default value to use if there is no value at key
    * @return the value at the given key. If there is no value for the given key, defaultValue is
@@ -124,7 +131,7 @@ public interface Config extends ConfigBase {
 
   /**
    * Gets the value ot the given key as enum.
-   * 
+   *
    * @param <T> enum to parse.
    * @param clazz class of the enum to parse.
    * @param key key to get the value for
@@ -135,7 +142,7 @@ public interface Config extends ConfigBase {
 
   /**
    * Gets the value ot the given key as enum with default.
-   * 
+   *
    * @param <T> enum to parse.
    * @param clazz class of the enum to parse.
    * @param key key to get the value for
@@ -148,13 +155,13 @@ public interface Config extends ConfigBase {
 
   /**
    * Gets the a duration as milliseconds.
-   * 
+   *
    * <p>If there is no value at key, it is assumed to be 0.
    *
    * <p>If there is a value at (key + "Unit), it automatically will get picked up and interpreted
    * as time unit for the value at key. If there is no value at (key + "Unit"), it is assumed to
    * be MILLISECONDS.
-   * 
+   *
    * @param key key to get the value for
    * @return the duration converted to milliseconds
    */
@@ -162,11 +169,11 @@ public interface Config extends ConfigBase {
 
   /**
    * Gets the a duration as milliseconds.
-   * 
+   *
    * <p>If there is a value at (key + "Unit), it automatically will get picked up and interpreted
    * as time unit for the value at key. If there is no value at (key + "Unit"), it is assumed to
    * be MILLISECONDS.
-   * 
+   *
    * @param key key to get the value for
    * @param defaultDuration default value to use if there is no value at key.
    * @return the duration converted to milliseconds
@@ -175,10 +182,10 @@ public interface Config extends ConfigBase {
 
   /**
    * Gets the a duration as milliseconds.
-   * 
+   *
    * <p>If there is a value at (key + "Unit), it automatically will get picked up and interpreted
    * as time unit for the value at key.
-   * 
+   *
    * @param key key to get the value for
    * @param defaultDuration default value to use if there is no value at key.
    * @param defaultUnit Default time unit to interpret the value at key (or defaultDuration) as.
@@ -188,13 +195,13 @@ public interface Config extends ConfigBase {
 
   /**
    * Gets the a duration as seconds.
-   * 
+   *
    * <p>If there is no value at key, it is assumed to be 0.
    *
    * <p>If there is a value at (key + "Unit), it automatically will get picked up and interpreted
    * as time unit for the value at key. If there is no value at (key + "Unit"), it is assumed to
    * be SECONDS.
-   * 
+   *
    * @param key key to get the value for
    * @return the duration converted to seconds
    */
@@ -202,11 +209,11 @@ public interface Config extends ConfigBase {
 
   /**
    * Gets the a duration as seconds.
-   * 
+   *
    * <p>If there is a value at (key + "Unit), it automatically will get picked up and interpreted
    * as time unit for the value at key. If there is no value at (key + "Unit"), it is assumed to
    * be SECONDS.
-   * 
+   *
    * @param key key to get the value for
    * @param defaultDuration default value to use if there is no value at key.
    * @return the duration converted to seconds
@@ -215,10 +222,10 @@ public interface Config extends ConfigBase {
 
   /**
    * Gets the a duration as seconds.
-   * 
+   *
    * <p>If there is a value at (key + "Unit), it automatically will get picked up and interpreted
    * as time unit for the value at key.
-   * 
+   *
    * @param key key to get the value for
    * @param defaultDuration default value to use if there is no value at key.
    * @param defaultUnit Default time unit to interpret the value at key (or defaultDuration) as.

@@ -16,30 +16,21 @@
 
 package com.seleritycorp.common.base.config;
 
-import java.nio.file.Path;
-import javax.inject.Inject;
+import static java.lang.annotation.ElementType.FIELD;
+import static java.lang.annotation.ElementType.METHOD;
+import static java.lang.annotation.ElementType.PARAMETER;
+import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
+import com.google.inject.BindingAnnotation;
+
+import java.lang.annotation.Retention;
+import java.lang.annotation.Target;
 
 /**
- * Provider for an application's main Config.
+ * Marks a {@code Config} instance as the application defaults.
  */
-public class SingleFileConfig extends ConfigImpl {
-
-  @Inject
-  SingleFileConfig(@ConfigFile Path configFile, @ApplicationDefaults Config appDefaults) {
-    ConfigImpl configProps = ConfigUtils.load(configFile);
-
-    Path configDir = configFile.getParent();
-
-    if (configDir != null) {
-      Path absConfigDir = configDir.toAbsolutePath();
-
-      set("paths.conf", absConfigDir.toString());
-      set("paths.confAnsiblized", absConfigDir.toString());
-    }
-
-    configProps.setParent(appDefaults);
-
-    setParent(configProps);
-  }
+@BindingAnnotation
+@Target({FIELD, PARAMETER, METHOD})
+@Retention(RUNTIME)
+public @interface ApplicationDefaults {
 }

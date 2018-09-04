@@ -43,13 +43,7 @@ public class ConfigModuleIntegrationTest  extends FileTestCase {
     Path confFile = createTempFile();
     writeFile(confFile, "foo=bar");
 
-    InjectorFactory.register(new AbstractBaseModule() {
-      @Override
-      protected void configure() {
-        bind(Path.class).annotatedWith(ConfigFile.class)
-                      .toInstance(confFile.toAbsolutePath());
-      }
-    });
+    InjectorFactory.register(new CustomConfigModule(confFile));
 
     ApplicationConfigHolder ach = InjectorFactory.getInjector().getInstance(ApplicationConfigHolder.class);
 

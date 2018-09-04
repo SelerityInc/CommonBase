@@ -30,7 +30,7 @@ public class SingleFileConfigTest extends FileTestCase {
     Path path = createTempFile();
     writeFile(path, "foo=bar");
 
-    Config config = new SingleFileConfig(path);
+    Config config = new SingleFileConfig(path, Config.newEmptyConfig());
     assertThat(config).isNotNull();
     assertThat(config.get("foo")).isEqualTo("bar");
     assertThat(config.get("paths.conf")).isEqualTo(path.getParent().toString());
@@ -41,9 +41,28 @@ public class SingleFileConfigTest extends FileTestCase {
     Path path = createTempFile();
     writeFile(path, "{\"foo\":\"bar\"}");
 
-    Config config = new SingleFileConfig(path);
+    Config config = new SingleFileConfig(path, Config.newEmptyConfig());
     assertThat(config).isNotNull();
     assertThat(config.get("foo")).isEqualTo("bar");
     assertThat(config.get("paths.conf")).isEqualTo(path.getParent().toString());
+  }
+
+  @Test
+  public void testApplicationDefaultsAndOverrides() throws IOException {
+    Path path = createTempFile();
+    writeFile(path, "foo=bar");
+
+    Config appDefaults = new ConfigImpl() {
+      {
+        set("foo", "default");
+        set("pippo", "pluto");
+      }
+    };
+
+    Config config = new SingleFileConfig(path, appDefaults);
+    assertThat(config).isNotNull();
+    assertThat(config.get("foo")).isNotEqualTo("default");
+    assertThat(config.get("foo")).isEqualTo("bar");
+    assertThat(config.get("pippo")).isEqualTo("pluto");
   }
 }
