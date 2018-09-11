@@ -27,7 +27,7 @@
 
   <groupId>com.seleritycorp.common.base</groupId>
   <artifactId>CommonBase</artifactId>
-  <version>1.0.8</version>
+  <version>1.0.9-SNAPSHOT</version>
   <packaging>jar</packaging>
 
   <name>Common Base</name>
@@ -46,7 +46,7 @@
     -->
     <connection>scm:git:github.com:SelerityInc/${project.artifactId}.git</connection>
     <developerConnection>scm:git:git@github.com:SelerityInc/${project.artifactId}.git</developerConnection>
-    <tag>v1.0.8</tag>
+    <tag>HEAD</tag>
     <url>https://github.com/SelerityInc/${project.artifactId}</url>
   </scm>
 
